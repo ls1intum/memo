@@ -1,0 +1,14 @@
+name: Build and Push Docker Image
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  build-and-push-workflow:
+    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@main
+    with:
+      image-name: ls1intum/memo/memo-app # Using your repository structure
+      docker-file: Dockerfile # Using the root Dockerfile we created
+    secrets: inherit

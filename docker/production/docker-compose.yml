@@ -17,13 +17,12 @@ services:
     restart: unless-stopped
 
   app:
-    build:
-      context: ../..
-      dockerfile: Dockerfile
-      target: production
+    image: "ghcr.io/ls1intum/memo/memo-app:${IMAGE_TAG:-latest}"
     environment:
       - NODE_ENV=production
-      - DATABASE_URL=postgresql://memo_user:memo_password@db:5432/memo_prod
+      - DATABASE_URL=${DATABASE_URL:-postgresql://memo_user:memo_password@db:5432/memo_prod}
+      - NEXT_PUBLIC_APP_ENV=${NEXT_PUBLIC_APP_ENV:-production}
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-https://memo.aet.cit.tum.de/api}
     expose:
       - "3000"
     depends_on:
