@@ -5,22 +5,26 @@ A Next.js application for memo management with Docker-based development and depl
 ## 🚀 Quick Start for Development
 
 ### Prerequisites
-- [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/)
+
+- [Docker](https://docs.docker.com/get-docker/) and
+  [Docker Compose](https://docs.docker.com/compose/install/)
 - [Git](https://git-scm.com/)
 
 ### Local Development Setup
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/ls1intum/memo.git
    cd memo
    ```
 
 2. **Start the development environment**
+
    ```bash
    ./docker-manage.sh up development
    ```
-   
+
    This will:
    - Build the Next.js application with hot reload
    - Start a PostgreSQL database
@@ -47,6 +51,7 @@ A Next.js application for memo management with Docker-based development and depl
 ### Using npm/yarn directly (without Docker)
 
 1. **Install dependencies**
+
    ```bash
    npm install
    # or
@@ -54,12 +59,14 @@ A Next.js application for memo management with Docker-based development and depl
    ```
 
 2. **Set up environment variables**
+
    ```bash
    cp docker/development/.env .env.local
    # Edit .env.local to use localhost database connection
    ```
 
 3. **Start a PostgreSQL database** (using Docker)
+
    ```bash
    docker run -d \
      --name memo-postgres \
@@ -122,14 +129,44 @@ memo/
 ## 🔧 Development Configuration
 
 The development environment is configured with:
+
 - **Hot Reload**: Automatic code updates
-- **Volume Mounting**: Source code changes reflected immediately  
+- **Volume Mounting**: Source code changes reflected immediately
 - **Database**: PostgreSQL with persistent data
 - **Port Mapping**: Direct access to app (3000) and database (5432)
+
+### Code Quality Tools
+
+The project includes automated code quality checks:
+
+```bash
+# Run all quality checks
+npm run quality
+
+# Fix linting and formatting issues
+npm run quality:fix
+
+# Individual commands
+npm run type-check    # TypeScript type checking
+npm run lint         # ESLint linting
+npm run lint:fix     # Fix linting issues
+npm run format       # Format code with Prettier
+npm run format:check # Check code formatting
+```
+
+### Pre-commit Checklist
+
+Before submitting a PR, ensure:
+
+- [ ] `npm run quality` passes without errors
+- [ ] `npm run build` completes successfully
+- [ ] All tests pass (when implemented)
+- [ ] No TODO/FIXME comments in production code
 
 ### Environment Variables (Development)
 
 Located in `docker/development/.env`:
+
 - `NODE_ENV=development`
 - `DATABASE_URL=postgresql://memo_user:memo_password@localhost:5432/memo_dev`
 - `NEXT_PUBLIC_API_URL=http://localhost:3000/api`
@@ -141,8 +178,8 @@ This project uses automated deployment via GitHub Actions:
 - **Staging**: For testing features
 - **Production**: Live environment
 
-See [DOCKER.md](DOCKER.md) for detailed Docker setup information.
-See [GITHUB_ACTIONS.md](GITHUB_ACTIONS.md) for CI/CD setup information.
+See [DOCKER.md](DOCKER.md) for detailed Docker setup information. See
+[GITHUB_ACTIONS.md](GITHUB_ACTIONS.md) for CI/CD setup information.
 
 ## 🤝 Contributing
 
@@ -168,22 +205,26 @@ To learn more about the technologies used:
 ### Common Issues
 
 **Port already in use**:
+
 ```bash
 ./docker-manage.sh down development  # Stop any running containers
 ```
 
 **Permission issues with docker-manage.sh**:
+
 ```bash
 chmod +x docker-manage.sh
 ```
 
 **Database connection issues**:
+
 ```bash
 ./docker-manage.sh logs development  # Check if database is running
 ./docker-manage.sh restart development  # Restart all services
 ```
 
 **Fresh start**:
+
 ```bash
 ./docker-manage.sh clean development  # Remove all containers and volumes
 ./docker-manage.sh up development     # Start fresh

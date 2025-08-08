@@ -1,0 +1,96 @@
+name: Code Quality Check
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '**/*.ts'
+      - '**/*.tsx'
+      - '**/*.js'
+      - '**/*.jsx'
+      - '**/*.json'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'tsconfig.json'
+      - 'next.config.ts'
+      - 'tailwind.config.js'
+      - 'eslint.config.mjs'
+
+jobs:
+  code-quality:
+    name: Code Quality Checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          npm ci --legacy-peer-deps
+
+      - name: Type checking
+        run: |
+          npm run build --dry-run || npx tsc --noEmit
+        continue-on-error: false
+
+      - name: Lint check
+        run: |
+          npm run lint
+        continue-on-error: false
+
+      - name: Format check (Prettier)
+        run: |
+          npx prettier --check "**/*.{ts,tsx,js,jsx,json,css,md}" || {
+            echo "❌ Code formatting issues found!"
+            echo "Run 'npx prettier --write .' to fix formatting issues"
+            exit 1
+          }
+        continue-on-error: false
+
+      - name: Build check
+        run: |
+          npm run build
+        env:
+          NODE_ENV: production
+        continue-on-error: false
+
+      - name: Security audit
+        run: |
+          npm audit --audit-level=moderate
+        continue-on-error: false
+
+      - name: Check for TODO/FIXME comments
+        run: |
+          if grep -r --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" -n "TODO\|FIXME" app/ lib/ components/ 2>/dev/null; then
+            echo "⚠️  Found TODO/FIXME comments in the code. Please address them before merging."
+            echo "This is just a warning - the check will continue."
+          else
+            echo "✅ No TODO/FIXME comments found."
+          fi
+        continue-on-error: true
+
+      - name: Check bundle size impact
+        run: |
+          echo "📦 Bundle size analysis:"
+          npm run build 2>&1 | grep -E "(First Load JS|├|└)" || echo "Bundle size info not available"
+        continue-on-error: true
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## 🎯 Code Quality Check Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Check | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Type checking | ${{ steps.type-check.outcome == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Linting | ${{ steps.lint.outcome == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Formatting | ${{ steps.format.outcome == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Build | ${{ steps.build.outcome == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Security audit | ${{ steps.audit.outcome == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY

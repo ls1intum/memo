@@ -1,0 +1,36 @@
+# Prettier ignore file
+node_modules/
+.next/
+out/
+dist/
+build/
+
+# Generated files
+*.min.js
+*.min.css
+
+# Lock files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Docker
+Dockerfile*
+.dockerignore
+
+# Logs
+*.log
+
+# Environment files
+.env*
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git/

@@ -1,33 +1,38 @@
 # Memo Docker Setup
 
-This document describes the Docker setup for the Memo Next.js application across three environments: development, staging, and production.
+This document describes the Docker setup for the Memo Next.js application across three environments:
+development, staging, and production.
 
 ## Architecture Overview
 
 ### Development Environment
+
 - **App**: Next.js application running in development mode with hot reload
 - **Database**: PostgreSQL database
-- **Ports**: 
+- **Ports**:
   - App: 3000 (direct access)
   - Database: 5432 (exposed for debugging)
 
 ### Staging Environment
+
 - **Nginx**: Reverse proxy handling external requests
 - **App**: Next.js application in production mode
 - **Database**: PostgreSQL database (internal network only)
-- **Ports**: 
+- **Ports**:
   - Nginx: 80 (external access)
 
 ### Production Environment
+
 - **Nginx**: Reverse proxy with enhanced security and SSL support
 - **App**: Next.js application in production mode
 - **Database**: PostgreSQL database (internal network only)
-- **Ports**: 
+- **Ports**:
   - Nginx: 80, 443 (external access)
 
 ## Quick Start
 
 ### Prerequisites
+
 - Docker and Docker Compose installed
 - Git repository cloned
 
@@ -84,7 +89,7 @@ docker-compose up -d
 Each environment has its own configuration:
 
 - `docker/development/.env` - Development environment variables
-- `docker/staging/.env` - Staging environment variables  
+- `docker/staging/.env` - Staging environment variables
 - `docker/production/.env` - Production environment variables
 
 ### Important Environment Variables
@@ -105,13 +110,15 @@ NEXT_PUBLIC_API_URL=http://localhost:3000/api
 ### Initial Database Setup
 
 The PostgreSQL databases are automatically created with:
+
 - Database names: `memo_dev`, `memo_staging`, `memo_prod`
 - User: `memo_user`
 - Password: `memo_password` (change this in production!)
 
 ### Database Initialization
 
-Custom initialization scripts can be added to `scripts/init-db.sql`. This script runs when the database container starts for the first time.
+Custom initialization scripts can be added to `scripts/init-db.sql`. This script runs when the
+database container starts for the first time.
 
 ### Connecting to Database
 
@@ -128,6 +135,7 @@ docker-compose exec db psql -U memo_user -d memo_dev
 ### Staging and Production
 
 Nginx is configured as a reverse proxy with:
+
 - Security headers
 - Gzip compression
 - Rate limiting (production only)
@@ -144,6 +152,7 @@ To enable SSL in production:
 ## Development Workflow
 
 ### Development Mode
+
 ```bash
 ./docker-manage.sh up development
 # App available at http://localhost:3000
@@ -151,30 +160,35 @@ To enable SSL in production:
 ```
 
 Features:
+
 - Hot reload enabled
 - Source code mounted as volume
 - Direct access to application
 - Database port exposed for debugging
 
 ### Staging Mode
+
 ```bash
 ./docker-manage.sh up staging
 # App available at http://localhost:80
 ```
 
 Features:
+
 - Production build
 - Nginx proxy
 - Internal database communication
 - Staging environment variables
 
 ### Production Mode
+
 ```bash
 ./docker-manage.sh up production
 # App available at http://localhost:80
 ```
 
 Features:
+
 - Production build
 - Nginx with security features
 - Rate limiting
@@ -190,6 +204,7 @@ Features:
 3. **Database connection**: Check that the database is fully started before the app tries to connect
 
 ### Viewing Logs
+
 ```bash
 # All services
 ./docker-manage.sh logs development
@@ -200,6 +215,7 @@ cd docker/development && docker-compose logs db
 ```
 
 ### Rebuilding Images
+
 ```bash
 # Rebuild everything
 ./docker-manage.sh build development
@@ -209,6 +225,7 @@ cd docker/development && docker-compose build app
 ```
 
 ### Cleaning Up
+
 ```bash
 # Remove containers and volumes
 ./docker-manage.sh clean development
@@ -220,17 +237,20 @@ cd docker/development && docker-compose down -v --rmi all
 ## Security Considerations
 
 ### Development
+
 - Database password is visible in docker-compose files
 - Database port is exposed externally
 - No rate limiting or security headers
 
 ### Staging/Production
+
 - Database is only accessible internally
 - Nginx provides security headers
 - Rate limiting enabled (production)
 - SSL support ready
 
 ### Recommendations
+
 1. Change default database passwords
 2. Use Docker secrets for sensitive data in production
 3. Configure SSL certificates for production

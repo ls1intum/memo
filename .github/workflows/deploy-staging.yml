@@ -5,14 +5,14 @@ on:
     inputs:
       image-tag:
         type: string
-        description: "Image tag to deploy (default: pr-<number> if PR exists, latest for default branch)"
+        description: 'Image tag to deploy (default: pr-<number> if PR exists, latest for default branch)'
 
 jobs:
   deploy:
     uses: ls1intum/.github/.github/workflows/deploy-docker-compose.yml@main
     with:
       environment: Staging
-      docker-compose-file: "./docker/staging/docker-compose.yml" # Use existing staging compose
+      docker-compose-file: './docker/staging/docker-compose.yml' # Use existing staging compose
       main-image-name: ls1intum/memo/memo-app
       image-tag: ${{ inputs.image-tag }}
       env-file-name: ./docker/staging/.env
