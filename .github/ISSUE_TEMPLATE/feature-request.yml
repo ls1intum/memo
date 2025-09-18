@@ -1,7 +1,7 @@
 name: ✨ Feature Request
 description: Suggest an idea for the memo application
-title: "[Feature]: "
-labels: ["enhancement", "triage"]
+title: '[Feature]: '
+labels: ['enhancement', 'triage']
 assignees: []
 
 body:
@@ -37,7 +37,7 @@ body:
       description: Describe this feature from a user's perspective
       placeholder: |
         As a [type of user], I want [some goal] so that [some reason].
-        
+
         Example: As a student, I want to organize my memos by subject so that I can quickly find relevant information for each class.
     validations:
       required: true

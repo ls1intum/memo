@@ -11,5 +11,5 @@ jobs:
       - name: Label Issue
         uses: MaximilianAnzinger/issue-labeler@1.0.2
         with:
-          repo-token: "${{ secrets.GITHUB_TOKEN }}"
+          repo-token: '${{ secrets.GITHUB_TOKEN }}'
           configuration-path: .github/issue-labeler.yml
