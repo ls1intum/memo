@@ -28,13 +28,15 @@ jobs:
             revert
           # Configure scopes (optional)
           scopes: |
-            ui
-            api
-            db
+            client-application
+            server
+            database
             docker
             ci
             docs
-            deps
+            dependencies
+            configuration
+            testing
           # Require a scope
           requireScope: false
           # Disallow use of uppercase in subject
@@ -43,10 +45,3 @@ jobs:
             The subject "{subject}" found in the pull request title "{title}"
             didn't match the configured pattern. Please ensure that the subject
             doesn't start with an uppercase character.
-          # GitHub base URL for enterprise
-          githubBaseUrl: https://github.com
-          # Only validate the PR title, not individual commits
-          validateSingleCommit: false
-          # Ignore merge commits
-          ignoreLabels: |
-            ignore-semantic-pull-request
