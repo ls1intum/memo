@@ -6,110 +6,101 @@
 # All PRs get triage label for initial review
 'triage':
   - changed-files:
-    - any-glob-to-any-file: ['**/*']
+      - any-glob-to-any-file: ['**/*']
 
 # === TECHNICAL AREA LABELS ===
 
 # Client Application/UI changes
 'client-application':
   - changed-files:
-    - any-glob-to-any-file: [
-      'app/**/*',
-      'components/**/*', 
-      'lib/**/*',
-      '**/*.css',
-      '**/*.scss',
-      '**/*.sass',
-      'public/**/*'
-    ]
+      - any-glob-to-any-file:
+          - 'app/**/*'
+          - 'components/**/*'
+          - 'lib/**/*'
+          - '**/*.css'
+          - '**/*.scss'
+          - '**/*.sass'
+          - 'public/**/*'
 
-# Server/API changes  
+# Server/API changes
 'server':
   - changed-files:
-    - any-glob-to-any-file: [
-      'app/api/**/*',
-      '**/*api*',
-      '**/*server*',
-      '**/*auth*',
-      '**/*middleware*'
-    ]
+      - any-glob-to-any-file:
+          - 'app/api/**/*'
+          - '**/*api*'
+          - '**/*server*'
+          - '**/*auth*'
+          - '**/*middleware*'
 
 # Database changes
 'database':
   - changed-files:
-    - any-glob-to-any-file: [
-      'scripts/**/*.sql',
-      'migrations/**/*',
-      '**/*migration*',
-      '**/*schema*',
-      '**/*database*',
-      '**/*db*'
-    ]
+      - any-glob-to-any-file:
+          - 'scripts/**/*.sql'
+          - 'migrations/**/*'
+          - '**/*migration*'
+          - '**/*schema*'
+          - '**/*database*'
+          - '**/*db*'
 
 # Docker/DevOps changes
 'docker':
   - changed-files:
-    - any-glob-to-any-file: [
-      'Dockerfile*',
-      'docker/**/*',
-      'docker-compose*.yml',
-      'docker-manage.sh',
-      'nginx/**/*'
-    ]
+      - any-glob-to-any-file:
+          - 'Dockerfile*'
+          - 'docker/**/*'
+          - 'docker-compose*.yml'
+          - 'docker-manage.sh'
+          - 'nginx/**/*'
 
 # CI/CD changes
 'ci':
   - changed-files:
-    - any-glob-to-any-file: [
-      '.github/workflows/**/*',
-      '.github/actions/**/*'
-    ]
+      - any-glob-to-any-file:
+          - '.github/workflows/**/*'
+          - '.github/actions/**/*'
 
 # Documentation changes
 'documentation':
   - changed-files:
-    - any-glob-to-any-file: [
-      '**/*.md',
-      'docs/**/*',
-      '**/*.rst',
-      '**/*.txt'
-    ]
+      - any-glob-to-any-file:
+          - '**/*.md'
+          - 'docs/**/*'
+          - '**/*.rst'
+          - '**/*.txt'
 
 # Configuration changes
 'configuration':
   - changed-files:
-    - any-glob-to-any-file: [
-      'package.json',
-      'tsconfig.json',
-      'next.config.ts',
-      'tailwind.config.js',
-      'eslint.config.mjs',
-      '.prettierrc*',
-      'components.json',
-      'postcss.config.mjs'
-    ]
+      - any-glob-to-any-file:
+          - 'package.json'
+          - 'tsconfig.json'
+          - 'next.config.ts'
+          - 'tailwind.config.js'
+          - 'eslint.config.mjs'
+          - '.prettierrc*'
+          - 'components.json'
+          - 'postcss.config.mjs'
 
 # Dependencies
 'dependencies':
   - changed-files:
-    - any-glob-to-any-file: [
-      'package.json',
-      'package-lock.json',
-      'yarn.lock',
-      'pnpm-lock.yaml'
-    ]
+      - any-glob-to-any-file:
+          - 'package.json'
+          - 'package-lock.json'
+          - 'yarn.lock'
+          - 'pnpm-lock.yaml'
 
 # Testing changes
 'testing':
   - changed-files:
-    - any-glob-to-any-file: [
-      '**/*.test.*',
-      '**/*.spec.*',
-      '__tests__/**/*',
-      'tests/**/*',
-      'cypress/**/*',
-      'jest.config.*'
-    ]
+      - any-glob-to-any-file:
+          - '**/*.test.*'
+          - '**/*.spec.*'
+          - '__tests__/**/*'
+          - 'tests/**/*'
+          - 'cypress/**/*'
+          - 'jest.config.*'
 
 # === TYPE LABELS (based on branch name or PR title) ===
 
@@ -119,7 +110,7 @@
   - title: ['^fix:', '^Fix:', 'fix(', 'Fix(', 'bugfix:', 'hotfix:']
 
 # New features/enhancements
-'enhancement':  
+'enhancement':
   - head-branch: ['^feat/', '^feature/']
   - title: ['^feat:', '^Feat:', 'feat(', 'Feat(', 'feature:', 'Feature:']
 
@@ -147,12 +138,21 @@
 # Security related
 'security':
   - changed-files:
-    - any-glob-to-any-file: ['**/*security*', '**/*auth*', '**/*login*', '**/*permission*']
+      - any-glob-to-any-file:
+          ['**/*security*', '**/*auth*', '**/*login*', '**/*permission*']
   - title: ['security:', 'Security:', 'sec:', 'Sec:']
 
 # Performance improvements
 'performance':
-  - title: ['perf:', 'Perf:', 'performance:', 'Performance:', 'optimize:', 'Optimize:']
+  - title:
+      [
+        'perf:',
+        'Perf:',
+        'performance:',
+        'Performance:',
+        'optimize:',
+        'Optimize:',
+      ]
 
 # Good first issue (for community contributions)
 'good-first-issue':
