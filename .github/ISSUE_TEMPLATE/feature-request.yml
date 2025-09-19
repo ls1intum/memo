@@ -1,0 +1,108 @@
+name: ✨ Feature Request
+description: Suggest an idea for the memo application
+title: '[Feature]: '
+labels: ['enhancement', 'triage']
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting a new feature! Please provide as much detail as possible to help us understand your request.
+
+  - type: textarea
+    id: feature-description
+    attributes:
+      label: Feature Description
+      description: A clear and concise description of the feature you'd like to see added.
+      placeholder: Describe the feature...
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem-solution
+    attributes:
+      label: Problem and Solution
+      description: What problem does this feature solve? How would it improve the memo application?
+      placeholder: |
+        **Problem:** What specific problem or pain point does this address?
+        **Solution:** How would this feature solve the problem?
+    validations:
+      required: true
+
+  - type: textarea
+    id: user-story
+    attributes:
+      label: User Story
+      description: Describe this feature from a user's perspective
+      placeholder: |
+        As a [type of user], I want [some goal] so that [some reason].
+
+        Example: As a student, I want to organize my memos by subject so that I can quickly find relevant information for each class.
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance Criteria
+      description: What specific criteria must be met for this feature to be considered complete?
+      placeholder: |
+        - [ ] Criterion 1
+        - [ ] Criterion 2
+        - [ ] Criterion 3
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How important is this feature to you?
+      options:
+        - Low - Nice to have
+        - Medium - Would significantly improve my experience
+        - High - Critical for my use case
+      default: 1
+    validations:
+      required: true
+
+  - type: dropdown
+    id: complexity
+    attributes:
+      label: Estimated Complexity
+      description: How complex do you think this feature would be to implement?
+      options:
+        - Simple - Minor UI changes or simple logic
+        - Medium - New components or moderate server changes
+        - Complex - Major architectural changes or new systems
+        - Not sure
+      default: 3
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Have you considered any alternative solutions or workarounds?
+      placeholder: Describe any alternative solutions you've thought about...
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Add any other context, mockups, or examples about the feature request here.
+      placeholder: Any additional information, mockups, or examples...
+
+  - type: checkboxes
+    id: feature-type
+    attributes:
+      label: Feature Type
+      description: What type of feature is this?
+      options:
+        - label: User Interface (UI/UX improvement)
+        - label: Server/Database functionality
+        - label: Integration with external services
+        - label: Performance improvement
+        - label: Security enhancement
+        - label: Developer experience improvement
+        - label: Documentation improvement

@@ -1,0 +1,141 @@
+# Configuration for automatic labeling of pull requests
+# See https://github.com/actions/labeler for syntax
+
+# === WORKFLOW LABELS ===
+
+# All PRs get triage label for initial review
+'triage':
+  - changed-files:
+      - any-glob-to-any-file: ['**/*']
+
+# === TECHNICAL AREA LABELS ===
+
+# Client Application/UI changes
+'client-application':
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'app/**/*'
+          - 'components/**/*'
+          - 'lib/**/*'
+          - '**/*.css'
+          - '**/*.scss'
+          - '**/*.sass'
+          - 'public/**/*'
+
+# Server/API changes
+'server':
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'app/api/**/*'
+          - '**/*api*'
+          - '**/*server*'
+          - '**/*auth*'
+          - '**/*middleware*'
+
+# Database changes
+'database':
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'scripts/**/*.sql'
+          - 'migrations/**/*'
+          - '**/*migration*'
+          - '**/*schema*'
+          - '**/*database*'
+          - '**/*db*'
+
+# Docker/DevOps changes
+'docker':
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'Dockerfile*'
+          - 'docker/**/*'
+          - 'docker-compose*.yml'
+          - 'docker-manage.sh'
+          - 'nginx/**/*'
+
+# CI/CD changes
+'ci':
+  - changed-files:
+      - any-glob-to-any-file:
+          - '.github/workflows/**/*'
+          - '.github/actions/**/*'
+
+# Documentation changes
+'documentation':
+  - changed-files:
+      - any-glob-to-any-file:
+          - '**/*.md'
+          - 'docs/**/*'
+          - '**/*.rst'
+          - '**/*.txt'
+
+# Configuration changes
+'configuration':
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'package.json'
+          - 'tsconfig.json'
+          - 'next.config.ts'
+          - 'tailwind.config.js'
+          - 'eslint.config.mjs'
+          - '.prettierrc*'
+          - 'components.json'
+          - 'postcss.config.mjs'
+
+# Dependencies
+'dependencies':
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'package.json'
+          - 'package-lock.json'
+          - 'yarn.lock'
+          - 'pnpm-lock.yaml'
+
+# Testing changes
+'testing':
+  - changed-files:
+      - any-glob-to-any-file:
+          - '**/*.test.*'
+          - '**/*.spec.*'
+          - '__tests__/**/*'
+          - 'tests/**/*'
+          - 'cypress/**/*'
+          - 'jest.config.*'
+
+# === TYPE LABELS (based on branch name or PR title) ===
+
+# Bug fixes
+'bug':
+  - head-branch: ['^fix/', '^hotfix/', '^bugfix/']
+
+# New features/enhancements
+'enhancement':
+  - head-branch: ['^feat/', '^feature/']
+
+# Technical proposals
+'proposal':
+  - head-branch: ['^proposal/', '^rfc/']
+
+# Chores/maintenance
+'chore':
+  - head-branch: ['^chore/']
+
+# Refactoring
+'refactor':
+  - head-branch: ['^refactor/']
+
+# === SPECIAL LABELS ===
+
+# Breaking changes (Note: This would need to be detected through file changes or branch naming)
+# 'breaking-change':
+
+# Security related
+'security':
+  - changed-files:
+      - any-glob-to-any-file:
+          ['**/*security*', '**/*auth*', '**/*login*', '**/*permission*']
+# Performance improvements (Note: This would need to be detected through file changes or branch naming)
+# 'performance':
+
+# Good first issue (Note: This label would typically be applied manually)
+# 'good-first-issue':
