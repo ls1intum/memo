@@ -1,7 +1,10 @@
 version: '3.8'
 
+name: memo-prod
+
 services:
   nginx:
+    container_name: memo-prod-nginx
     image: nginx:alpine
     ports:
       - '80:80'
@@ -17,6 +20,7 @@ services:
     restart: unless-stopped
 
   app:
+    container_name: memo-prod-app
     image: 'ghcr.io/ls1intum/memo/memo-app:${IMAGE_TAG:-latest}'
     environment:
       - NODE_ENV=production
@@ -32,6 +36,7 @@ services:
     restart: unless-stopped
 
   db:
+    container_name: memo-prod-db
     image: postgres:16-alpine
     environment:
       - POSTGRES_DB=memo_prod

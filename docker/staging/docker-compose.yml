@@ -1,7 +1,10 @@
 version: '3.8'
 
+name: memo-staging
+
 services:
   nginx:
+    container_name: memo-staging-nginx
     image: nginx:alpine
     ports:
       - '80:80'
@@ -13,6 +16,7 @@ services:
       - memo-staging-network
 
   app:
+    container_name: memo-staging-app
     image: 'ghcr.io/ls1intum/memo/memo-app:${IMAGE_TAG:-latest}'
     environment:
       - NODE_ENV=staging
@@ -27,6 +31,7 @@ services:
       - memo-staging-network
 
   db:
+    container_name: memo-staging-db
     image: postgres:16-alpine
     environment:
       - POSTGRES_DB=memo_staging
