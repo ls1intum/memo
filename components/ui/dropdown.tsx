@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import { useState, useRef, useEffect } from 'react';
 import { cn } from '../../lib/utils';
 
@@ -26,7 +26,7 @@ export const Dropdown = ({
   return (
     <div ref={ref} className={cn('relative inline-block', className)}>
       <button
-        onClick={() => setOpen((s) => !s)}
+        onClick={() => setOpen(s => !s)}
         className="px-3 py-1 rounded-md bg-muted/10 text-sm"
         aria-expanded={open}
       >
@@ -35,7 +35,7 @@ export const Dropdown = ({
       {open && (
         <div className="absolute right-0 mt-2 w-40 rounded-md border border-border bg-card shadow-sm z-50">
           <ul className="p-2">
-            {items.map((it) => (
+            {items.map(it => (
               <li key={it.id}>
                 <button
                   onClick={() => {

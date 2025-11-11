@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import { useState } from 'react';
 import { cn } from '../../lib/utils';
 
@@ -14,7 +14,7 @@ export function Tabs({
   return (
     <div className={cn('w-full', className)}>
       <nav className="flex gap-2 mb-6 justify-center">
-        {items.map((it) => (
+        {items.map(it => (
           <button
             key={it.id}
             onClick={() => setActive(it.id)}
@@ -30,7 +30,7 @@ export function Tabs({
         ))}
       </nav>
       <div>
-        {items.map((it) => (
+        {items.map(it => (
           <div key={it.id} hidden={active !== it.id}>
             {it.content}
           </div>

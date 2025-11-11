@@ -30,9 +30,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       );
     }
 
-    return (
-      <button ref={ref} className={classes} {...props} />
-    );
+    return <button ref={ref} className={classes} {...props} />;
   }
 );
 

@@ -25,9 +25,7 @@ export const CardHeader = ({
 }: {
   children?: React.ReactNode;
   className?: string;
-}) => (
-  <div className={cn('mb-4', className)}>{children}</div>
-);
+}) => <div className={cn('mb-4', className)}>{children}</div>;
 
 export const CardTitle = ({
   className,
@@ -53,5 +51,7 @@ export const CardContent = ({
   children?: React.ReactNode;
   className?: string;
 }) => (
-  <div className={cn('text-sm text-muted-foreground', className)}>{children}</div>
+  <div className={cn('text-sm text-muted-foreground', className)}>
+    {children}
+  </div>
 );

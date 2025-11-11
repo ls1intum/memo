@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import { useState } from 'react';
 import { cn } from '../../lib/utils';
 
@@ -13,7 +13,7 @@ export const AccordionItem = ({
   return (
     <div className="border-b border-air-superiority-blue/30 dark:border-air-superiority-blue/30 last:border-b-0 py-5 hover:bg-uranian-blue/30 dark:hover:bg-yinmn-blue/20 transition-colors rounded-lg px-2">
       <button
-        onClick={() => setOpen((s) => !s)}
+        onClick={() => setOpen(s => !s)}
         className="w-full text-left flex justify-between items-center gap-4 font-semibold text-foreground hover:text-yinmn-blue dark:hover:text-air-superiority-blue transition-colors"
       >
         <span className="text-lg">{title}</span>

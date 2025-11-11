@@ -1,4 +1,9 @@
-import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '../../components/ui/card';
 import { Badge } from '../../components/ui/badge';
 import { Accordion, AccordionItem } from '../../components/ui/accordion';
 import { Tabs } from '../../components/ui/tabs';
@@ -37,11 +42,12 @@ export default function About() {
             </h1>
             <p className="text-xl text-muted-foreground">Memo Demo Platform</p>
             <p className="text-base text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              The Applied Education Technologies (AET) group develops educational technologies
-              and course formats to make hands-on computing education more accessible, project-based,
-              and impactful. We collaborate with industry and academic partners to design practical
-              learning experiences, real client projects, and AI-powered tools that support teaching
-              and learning.
+              The Applied Education Technologies (AET) group develops
+              educational technologies and course formats to make hands-on
+              computing education more accessible, project-based, and impactful.
+              We collaborate with industry and academic partners to design
+              practical learning experiences, real client projects, and
+              AI-powered tools that support teaching and learning.
             </p>
           </div>
         </header>
@@ -69,9 +75,10 @@ export default function About() {
               <CardTitle>Mission</CardTitle>
             </CardHeader>
             <CardContent>
-              We address complex problems with agile methods and continuous software engineering.
-              Our work focuses on AI-powered educational technologies, project-based learning, and
-              practical courses that prepare students for real-world challenges.
+              We address complex problems with agile methods and continuous
+              software engineering. Our work focuses on AI-powered educational
+              technologies, project-based learning, and practical courses that
+              prepare students for real-world challenges.
             </CardContent>
           </Card>
 
@@ -96,9 +103,10 @@ export default function About() {
               <CardTitle>iPraktikum</CardTitle>
             </CardHeader>
             <CardContent>
-              iPraktikum pairs students with industry partners to build production-ready applications.
-              Students gain hands-on skills including CI/CD, usability testing, and full-stack
-              development while delivering value to real clients.
+              iPraktikum pairs students with industry partners to build
+              production-ready applications. Students gain hands-on skills
+              including CI/CD, usability testing, and full-stack development
+              while delivering value to real clients.
             </CardContent>
           </Card>
 
@@ -123,8 +131,9 @@ export default function About() {
               <CardTitle>Partners</CardTitle>
             </CardHeader>
             <CardContent>
-              AET works with universities and industry partners (BMW, Bosch, Capgemini, ETH, and more)
-              to scale projects and bring real-world contexts into teaching.
+              AET works with universities and industry partners (BMW, Bosch,
+              Capgemini, ETH, and more) to scale projects and bring real-world
+              contexts into teaching.
             </CardContent>
           </Card>
         </section>
@@ -162,8 +171,9 @@ export default function About() {
               </CardHeader>
               <CardContent className="space-y-3">
                 <p>
-                  A modular teaching kit for hands-on CS workshops that supports inclusive, practical
-                  learning experiences for classrooms and outreach.
+                  A modular teaching kit for hands-on CS workshops that supports
+                  inclusive, practical learning experiences for classrooms and
+                  outreach.
                 </p>
                 <div className="flex flex-wrap gap-2">
                   <Badge className="px-3 py-1 rounded-full bg-uranian-blue/50 text-yinmn-blue dark:bg-air-superiority-blue/30 dark:text-air-superiority-blue">
@@ -200,8 +210,9 @@ export default function About() {
               </CardHeader>
               <CardContent className="space-y-3">
                 <p>
-                  Recent work includes peer assessment studies, dynamic GUI testing for auto-graders,
-                  and virtual prototyping for industrial design reviews.
+                  Recent work includes peer assessment studies, dynamic GUI
+                  testing for auto-graders, and virtual prototyping for
+                  industrial design reviews.
                 </p>
                 <div className="flex flex-wrap gap-2">
                   <Badge className="px-3 py-1 rounded-full bg-uranian-blue/50 text-yinmn-blue dark:bg-air-superiority-blue/30 dark:text-air-superiority-blue">
@@ -219,19 +230,27 @@ export default function About() {
         {/* Stats Section */}
         <section className="grid grid-cols-2 md:grid-cols-4 gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-400">
           <div className="text-center p-6 rounded-xl bg-gradient-to-br from-uranian-blue/50 to-air-superiority-blue/30 dark:from-yinmn-blue/20 dark:to-air-superiority-blue/20 border border-air-superiority-blue/30 dark:border-air-superiority-blue/40 hover:scale-105 transition-transform duration-300 shadow-md">
-            <div className="text-3xl font-bold text-yinmn-blue dark:text-air-superiority-blue mb-1">500+</div>
+            <div className="text-3xl font-bold text-yinmn-blue dark:text-air-superiority-blue mb-1">
+              500+
+            </div>
             <div className="text-sm text-muted-foreground">Students</div>
           </div>
           <div className="text-center p-6 rounded-xl bg-gradient-to-br from-uranian-blue/50 to-air-superiority-blue/30 dark:from-yinmn-blue/20 dark:to-air-superiority-blue/20 border border-air-superiority-blue/30 dark:border-air-superiority-blue/40 hover:scale-105 transition-transform duration-300 shadow-md">
-            <div className="text-3xl font-bold text-yinmn-blue dark:text-air-superiority-blue mb-1">50+</div>
+            <div className="text-3xl font-bold text-yinmn-blue dark:text-air-superiority-blue mb-1">
+              50+
+            </div>
             <div className="text-sm text-muted-foreground">Projects</div>
           </div>
           <div className="text-center p-6 rounded-xl bg-gradient-to-br from-uranian-blue/50 to-air-superiority-blue/30 dark:from-yinmn-blue/20 dark:to-air-superiority-blue/20 border border-air-superiority-blue/30 dark:border-air-superiority-blue/40 hover:scale-105 transition-transform duration-300 shadow-md">
-            <div className="text-3xl font-bold text-yinmn-blue dark:text-air-superiority-blue mb-1">20+</div>
+            <div className="text-3xl font-bold text-yinmn-blue dark:text-air-superiority-blue mb-1">
+              20+
+            </div>
             <div className="text-sm text-muted-foreground">Partners</div>
           </div>
           <div className="text-center p-6 rounded-xl bg-gradient-to-br from-uranian-blue/50 to-air-superiority-blue/30 dark:from-yinmn-blue/20 dark:to-air-superiority-blue/20 border border-air-superiority-blue/30 dark:border-air-superiority-blue/40 hover:scale-105 transition-transform duration-300 shadow-md">
-            <div className="text-3xl font-bold text-yinmn-blue dark:text-air-superiority-blue mb-1">10+</div>
+            <div className="text-3xl font-bold text-yinmn-blue dark:text-air-superiority-blue mb-1">
+              10+
+            </div>
             <div className="text-sm text-muted-foreground">Years</div>
           </div>
         </section>
@@ -256,7 +275,9 @@ export default function About() {
                 />
               </div>
               <div className="text-center">
-                <div className="font-semibold text-sm">Prof. Dr. Stephan Krusche</div>
+                <div className="font-semibold text-sm">
+                  Prof. Dr. Stephan Krusche
+                </div>
                 <div className="text-xs text-muted-foreground">Group Lead</div>
               </div>
             </div>
@@ -272,7 +293,9 @@ export default function About() {
               </div>
               <div className="text-center">
                 <div className="font-semibold text-sm">Dr. Research Lead</div>
-                <div className="text-xs text-muted-foreground">Senior Researcher</div>
+                <div className="text-xs text-muted-foreground">
+                  Senior Researcher
+                </div>
               </div>
             </div>
             <div className="flex flex-col items-center gap-3 group">
@@ -287,7 +310,9 @@ export default function About() {
               </div>
               <div className="text-center">
                 <div className="font-semibold text-sm">Tech Lead</div>
-                <div className="text-xs text-muted-foreground">Software Architect</div>
+                <div className="text-xs text-muted-foreground">
+                  Software Architect
+                </div>
               </div>
             </div>
             <div className="flex flex-col items-center gap-3 group">
@@ -301,8 +326,12 @@ export default function About() {
                 />
               </div>
               <div className="text-center">
-                <div className="font-semibold text-sm">Education Specialist</div>
-                <div className="text-xs text-muted-foreground">Pedagogy Expert</div>
+                <div className="font-semibold text-sm">
+                  Education Specialist
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  Pedagogy Expert
+                </div>
               </div>
             </div>
           </div>
@@ -325,11 +354,14 @@ export default function About() {
                   <div className="grid gap-4 md:grid-cols-2">
                     <Card>
                       <CardHeader>
-                        <CardTitle className="text-lg">Introduction to Software Engineering</CardTitle>
+                        <CardTitle className="text-lg">
+                          Introduction to Software Engineering
+                        </CardTitle>
                       </CardHeader>
                       <CardContent>
                         <p className="text-sm text-muted-foreground mb-3">
-                          Learn the fundamentals of software development, version control, testing, and agile methodologies.
+                          Learn the fundamentals of software development,
+                          version control, testing, and agile methodologies.
                         </p>
                         <div className="flex flex-wrap gap-2">
                           <Badge className="bg-air-superiority-blue/30 text-yinmn-blue dark:bg-air-superiority-blue/40 dark:text-white">
@@ -343,11 +375,14 @@ export default function About() {
                     </Card>
                     <Card>
                       <CardHeader>
-                        <CardTitle className="text-lg">Web Development Fundamentals</CardTitle>
+                        <CardTitle className="text-lg">
+                          Web Development Fundamentals
+                        </CardTitle>
                       </CardHeader>
                       <CardContent>
                         <p className="text-sm text-muted-foreground mb-3">
-                          Build modern web applications using HTML, CSS, JavaScript, and popular frameworks.
+                          Build modern web applications using HTML, CSS,
+                          JavaScript, and popular frameworks.
                         </p>
                         <div className="flex flex-wrap gap-2">
                           <Badge className="bg-air-superiority-blue/30 text-yinmn-blue dark:bg-air-superiority-blue/40 dark:text-white">
@@ -369,11 +404,15 @@ export default function About() {
                   <div className="grid gap-4 md:grid-cols-2">
                     <Card>
                       <CardHeader>
-                        <CardTitle className="text-lg">iPraktikum - Industry Project</CardTitle>
+                        <CardTitle className="text-lg">
+                          iPraktikum - Industry Project
+                        </CardTitle>
                       </CardHeader>
                       <CardContent>
                         <p className="text-sm text-muted-foreground mb-3">
-                          Work with real industry partners on production applications, gaining professional development experience.
+                          Work with real industry partners on production
+                          applications, gaining professional development
+                          experience.
                         </p>
                         <div className="flex flex-wrap gap-2">
                           <Badge className="bg-yinmn-blue/80 text-white dark:bg-yinmn-blue/90 dark:text-white">
@@ -387,11 +426,14 @@ export default function About() {
                     </Card>
                     <Card>
                       <CardHeader>
-                        <CardTitle className="text-lg">AI in Education Technologies</CardTitle>
+                        <CardTitle className="text-lg">
+                          AI in Education Technologies
+                        </CardTitle>
                       </CardHeader>
                       <CardContent>
                         <p className="text-sm text-muted-foreground mb-3">
-                          Explore how artificial intelligence can enhance teaching and learning experiences.
+                          Explore how artificial intelligence can enhance
+                          teaching and learning experiences.
                         </p>
                         <div className="flex flex-wrap gap-2">
                           <Badge className="bg-yinmn-blue/80 text-white dark:bg-yinmn-blue/90 dark:text-white">
@@ -413,11 +455,14 @@ export default function About() {
                   <div className="grid gap-4 md:grid-cols-2">
                     <Card>
                       <CardHeader>
-                        <CardTitle className="text-lg">Git & Version Control Workshop</CardTitle>
+                        <CardTitle className="text-lg">
+                          Git & Version Control Workshop
+                        </CardTitle>
                       </CardHeader>
                       <CardContent>
                         <p className="text-sm text-muted-foreground mb-3">
-                          Master Git workflows, branching strategies, and collaborative development practices.
+                          Master Git workflows, branching strategies, and
+                          collaborative development practices.
                         </p>
                         <div className="flex flex-wrap gap-2">
                           <Badge className="bg-air-superiority-blue/30 text-yinmn-blue dark:bg-air-superiority-blue/40 dark:text-white">
@@ -431,11 +476,14 @@ export default function About() {
                     </Card>
                     <Card>
                       <CardHeader>
-                        <CardTitle className="text-lg">CI/CD & DevOps Essentials</CardTitle>
+                        <CardTitle className="text-lg">
+                          CI/CD & DevOps Essentials
+                        </CardTitle>
                       </CardHeader>
                       <CardContent>
                         <p className="text-sm text-muted-foreground mb-3">
-                          Learn continuous integration, deployment pipelines, and modern DevOps practices.
+                          Learn continuous integration, deployment pipelines,
+                          and modern DevOps practices.
                         </p>
                         <div className="flex flex-wrap gap-2">
                           <Badge className="bg-air-superiority-blue/30 text-yinmn-blue dark:bg-air-superiority-blue/40 dark:text-white">
@@ -465,30 +513,38 @@ export default function About() {
           <div className="max-w-3xl mx-auto">
             <Accordion>
               <AccordionItem title="What is iPraktikum?">
-                iPraktikum is our flagship project-based course where students work in teams with
-                industry partners to develop real-world software applications. Students gain hands-on
-                experience with modern development practices, agile methodologies, and professional
-                software engineering workflows.
+                iPraktikum is our flagship project-based course where students
+                work in teams with industry partners to develop real-world
+                software applications. Students gain hands-on experience with
+                modern development practices, agile methodologies, and
+                professional software engineering workflows.
               </AccordionItem>
               <AccordionItem title="How can I participate in AET courses?">
-                AET courses are available to TUM students through the regular course registration system.
-                Check the course catalog for prerequisites, available slots, and registration deadlines.
-                Some courses may require prior programming experience or specific technical knowledge.
+                AET courses are available to TUM students through the regular
+                course registration system. Check the course catalog for
+                prerequisites, available slots, and registration deadlines. Some
+                courses may require prior programming experience or specific
+                technical knowledge.
               </AccordionItem>
               <AccordionItem title="Do you offer courses for beginners?">
-                Yes! We offer several beginner-friendly courses including Introduction to Software
-                Engineering and Web Development Fundamentals. These courses assume no prior programming
-                experience and provide a solid foundation in software development.
+                Yes! We offer several beginner-friendly courses including
+                Introduction to Software Engineering and Web Development
+                Fundamentals. These courses assume no prior programming
+                experience and provide a solid foundation in software
+                development.
               </AccordionItem>
               <AccordionItem title="Can industry partners collaborate with AET?">
-                Absolutely! We actively seek partnerships with industry organizations for student
-                projects, research collaborations, and course development. Contact us to discuss
-                potential collaboration opportunities.
+                Absolutely! We actively seek partnerships with industry
+                organizations for student projects, research collaborations, and
+                course development. Contact us to discuss potential
+                collaboration opportunities.
               </AccordionItem>
               <AccordionItem title="What technologies and tools do students learn?">
-                Students work with modern technologies including Git, CI/CD pipelines, cloud platforms,
-                popular programming languages and frameworks, testing tools, and agile project management
-                systems. The specific tech stack varies by course and project requirements.
+                Students work with modern technologies including Git, CI/CD
+                pipelines, cloud platforms, popular programming languages and
+                frameworks, testing tools, and agile project management systems.
+                The specific tech stack varies by course and project
+                requirements.
               </AccordionItem>
             </Accordion>
           </div>
