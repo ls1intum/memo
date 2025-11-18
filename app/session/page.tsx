@@ -149,7 +149,7 @@ export default function SessionPage() {
         </div>
       </header>
 
-      <main className="relative z-10 mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-12 px-6 pb-24 lg:px-0">
+      <main className="relative z-10 mx-auto mt-8 flex min-h-screen w-full max-w-6xl flex-col gap-12 px-6 pb-24 lg:mt-12 lg:px-0">
         <section className="space-y-8 rounded-[32px] border border-white/70 bg-white/85 p-8 shadow-[0_26px_90px_-55px_rgba(7,30,84,0.5)] backdrop-blur-xl">
           <div className="flex flex-wrap items-center gap-3 text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">
             <span>Mapping Session</span>

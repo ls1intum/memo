@@ -35,7 +35,7 @@ export default function OnboardingPage() {
         </div>
       </header>
 
-      <main className="relative z-10 mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-12 px-6 pb-20 lg:px-0">
+      <main className="relative z-10 mx-auto mt-8 flex min-h-screen w-full max-w-6xl flex-col gap-12 px-6 pb-20 lg:mt-12 lg:px-0">
         <section className="space-y-3 rounded-[32px] border border-white/70 bg-white/85 p-8 shadow-[0_26px_90px_-55px_rgba(7,30,84,0.5)] backdrop-blur-xl">
           <Badge className="w-fit rounded-full border border-[#0a4da2]/30 bg-[#0a4da2]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-[#0a4da2]">
             Onboarding
