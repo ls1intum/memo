@@ -53,7 +53,7 @@ export default function Page() {
             className="hidden h-12 rounded-full border border-white/70 bg-white/80 px-7 text-sm font-semibold text-slate-900 shadow-[0_14px_38px_-30px_rgba(7,30,84,0.55)] transition hover:border-slate-200 hover:bg-white md:inline-flex"
             asChild
           >
-            <a href="#approach">Current Challenges</a>
+            <a href="#challenges">Current Challenges</a>
           </Button>
           <Button className="h-12 rounded-full bg-[#0a4da2] px-7 text-sm font-semibold text-white shadow-[0_18px_45px_-26px_rgba(7,30,84,0.75)] transition hover:bg-[#0d56b5]">
             Start Mapping
@@ -101,7 +101,7 @@ export default function Page() {
           </div> */}
         </section>
 
-        <section id="approach" className="space-y-10">
+        <section id="challenges" className="space-y-10">
           <div className="space-y-3">
             <Badge className="w-fit rounded-full border border-white/70 bg-white/75 px-3 py-1 text-xs font-semibold uppercase tracking-[0.35em] text-[#0a4da2]">
               Current Challenges
@@ -158,29 +158,20 @@ export default function Page() {
       </main>
 
       <footer className="relative z-20 border-t border-slate-200/70 bg-white/80 text-sm text-slate-500 shadow-[0_-15px_60px_-45px_rgba(7,30,84,0.35)] backdrop-blur-xl">
-        <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-6 py-8 lg:flex-row lg:items-center lg:justify-between lg:px-0">
-          <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/70 bg-white/85 text-[11px] font-semibold uppercase tracking-[0.3em] text-[#0a4da2] shadow-[0_12px_45px_-30px_rgba(7,30,84,0.4)]">
-              TUM
-            </div>
-            <span>Memo Benchmark Platform</span>
+        <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-6 py-8 lg:flex-row lg:items-center lg:justify-between lg:px-0">
+          <div className="flex items-center gap-2 text-slate-700">
+            <span className="text-sm font-semibold">Memo Benchmark Platform</span>
           </div>
-          <div className="flex flex-wrap gap-4">
+          <div className="flex flex-wrap gap-4 text-sm font-semibold text-slate-700">
             <a className="transition hover:text-slate-900" href="#overview">
               Overview
             </a>
-            <a className="transition hover:text-slate-900" href="#approach">
+            <a className="transition hover:text-slate-900" href="#challenges">
               Challenges
-            </a>
-            <a className="transition hover:text-slate-900" href="#approach">
-              Our Approach
-            </a>
-            <a className="transition hover:text-slate-900" href="#cta">
-              Get Involved
             </a>
           </div>
           <div className="text-slate-400">
-            © {new Date().getFullYear()} Technical University of Munich
+            © {new Date().getFullYear()} Memo
           </div>
         </div>
       </footer>
