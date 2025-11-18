@@ -110,8 +110,9 @@ export default function Page() {
               Why competency-aware recommenders stall
             </h2>
             <p className="max-w-2xl text-base leading-relaxed text-slate-600">
-              Personalization is only as strong as the competency data beneath it. Incompatible graphs
-              and opaque recommendations keep research and practice from compounding.
+              Personalization is only as strong as the competency data beneath
+              it. Incompatible graphs and opaque recommendations keep research
+              and practice from compounding.
             </p>
           </div>
           <div className="grid gap-8 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
@@ -154,13 +155,14 @@ export default function Page() {
             </div>
           </div>
         </section>
-
       </main>
 
       <footer className="relative z-20 border-t border-slate-200/70 bg-white/80 text-sm text-slate-500 shadow-[0_-15px_60px_-45px_rgba(7,30,84,0.35)] backdrop-blur-xl">
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-6 py-8 lg:flex-row lg:items-center lg:justify-between lg:px-0">
           <div className="flex items-center gap-2 text-slate-700">
-            <span className="text-sm font-semibold">Memo Benchmark Platform</span>
+            <span className="text-sm font-semibold">
+              Memo Benchmark Platform
+            </span>
           </div>
           <div className="flex flex-wrap gap-4 text-sm font-semibold text-slate-700">
             <a className="transition hover:text-slate-900" href="#overview">
