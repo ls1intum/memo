@@ -110,7 +110,7 @@ export default function OnboardingPage() {
 
         <div className="flex justify-end">
           <Button className="rounded-full bg-[#0a4da2] px-6 text-sm font-semibold text-white shadow-[0_18px_45px_-26px_rgba(7,30,84,0.75)] hover:bg-[#0d56b5]">
-            <Link href="/session">Continue to session</Link>
+            <Link href="/session">Start Session</Link>
           </Button>
         </div>
       </main>

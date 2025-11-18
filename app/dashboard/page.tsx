@@ -75,13 +75,13 @@ export default function DashboardPage() {
             className="rounded-full border-white/70 bg-white/80 text-slate-800 hover:border-slate-200"
             asChild
           >
-            <Link href="/session">Start new session</Link>
+            <Link href="/session">Start New Session</Link>
           </Button>
           <Button
             className="rounded-full bg-[#0a4da2] px-6 text-sm font-semibold text-white shadow-[0_18px_45px_-26px_rgba(7,30,84,0.75)] hover:bg-[#0d56b5]"
             asChild
           >
-            <Link href="/">Back to landing</Link>
+            <Link href="/">Back to Landing</Link>
           </Button>
         </div>
       </main>

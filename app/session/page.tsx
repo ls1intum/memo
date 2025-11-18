@@ -14,8 +14,6 @@ import {
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
-type SessionStep = 'intro' | 'task';
-
 type SessionStats = {
   completed: number;
   skipped: number;
@@ -95,7 +93,6 @@ function CompetencyCard({ title, description, tags, outcomes }: Competency) {
 }
 
 export default function SessionPage() {
-  const [step, setStep] = useState<SessionStep>('intro');
   const [relation, setRelation] = useState<string>(defaultRelationType);
   const [stats, setStats] = useState<SessionStats>({
     completed: 0,
@@ -153,121 +150,86 @@ export default function SessionPage() {
       </header>
 
       <main className="relative z-10 mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-12 px-6 pb-24 lg:px-0">
-        {step === 'intro' && (
-          <section className="space-y-4 rounded-[32px] border border-white/70 bg-white/85 p-8 text-slate-800 shadow-[0_26px_90px_-55px_rgba(7,30,84,0.5)] backdrop-blur-xl">
-            <Badge className="w-fit rounded-full border border-[#0a4da2]/30 bg-[#0a4da2]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-[#0a4da2]">
-              kickoff
-            </Badge>
-            <h1 className="text-3xl font-semibold text-slate-900">
-              Start a mapping session
-            </h1>
-            <p className="max-w-3xl text-base leading-relaxed text-slate-700">
-              We queue focused mapping tasks so you can add prerequisite,
-              similarity, or alignment relations quickly. Nothing is persisted
-              yet—this is a contributor flow skeleton aligned with the landing
-              and dashboard styles.
-            </p>
-            <div className="flex flex-wrap items-center gap-3">
-              <Button
-                className="rounded-full bg-[#0a4da2] px-6 text-sm font-semibold text-white shadow-[0_18px_45px_-26px_rgba(7,30,84,0.75)] hover:bg-[#0d56b5]"
-                onClick={() => setStep('task')}
-              >
-                Start session
-              </Button>
-              <Link
-                href="/dashboard"
-                className="flex items-center text-sm font-semibold text-[#0a4da2] hover:underline"
-              >
-                Skip to dashboard
-              </Link>
-            </div>
-          </section>
-        )}
+        <section className="space-y-8 rounded-[32px] border border-white/70 bg-white/85 p-8 shadow-[0_26px_90px_-55px_rgba(7,30,84,0.5)] backdrop-blur-xl">
+          <div className="flex flex-wrap items-center gap-3 text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">
+            <span>Mapping Session</span>
+            <span className="text-slate-300">•</span>
+            <span>Completed: {stats.completed}</span>
+            <span className="text-slate-300">•</span>
+            <span>Skipped: {stats.skipped}</span>
+          </div>
 
-        {step === 'task' && (
-          <section className="space-y-8 rounded-[32px] border border-white/70 bg-white/85 p-8 shadow-[0_26px_90px_-55px_rgba(7,30,84,0.5)] backdrop-blur-xl">
-            <div className="flex flex-wrap items-center gap-3 text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">
-              <span>Mapping Session</span>
-              <span className="text-slate-300">•</span>
-              <span>Completed: {stats.completed}</span>
-              <span className="text-slate-300">•</span>
-              <span>Skipped: {stats.skipped}</span>
+          <h2 className="text-2xl font-semibold text-slate-900">
+            How does Competency A relate to Competency B?
+          </h2>
+
+          <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-3">
+            <div className="col-span-1">
+              <CompetencyCard {...competencies[0]} />
             </div>
 
-            <h2 className="text-2xl font-semibold text-slate-900">
-              How does Competency A relate to Competency B?
-            </h2>
-
-            <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-3">
-              <div className="col-span-1">
-                <CompetencyCard {...competencies[0]} />
-              </div>
-
-              <div className="col-span-1 flex flex-col items-center justify-center gap-4">
-                <div className="text-sm text-slate-600">
-                  Select Relation Type
-                </div>
-                <Card className="w-full border border-white/80 bg-white/80 shadow-sm md:w-[220px]">
-                  <CardContent className="p-4">
-                    <RadioGroup
-                      value={relation}
-                      onValueChange={setRelation}
-                      className="gap-3"
-                    >
-                      {relationTypes.map(({ value, label }) => (
-                        <div key={value} className="flex items-center gap-3">
-                          <RadioGroupItem
-                            value={value}
-                            id={value}
-                            className="h-4 w-4"
-                          />
-                          <Label
-                            htmlFor={value}
-                            className="text-sm font-normal text-slate-800"
-                          >
-                            {label}
-                          </Label>
-                        </div>
-                      ))}
-                    </RadioGroup>
-                  </CardContent>
-                </Card>
-              </div>
-
-              <div className="col-span-1">
-                <CompetencyCard {...competencies[1]} />
-              </div>
+            <div className="col-span-1 flex flex-col items-center justify-center gap-4">
+              <div className="text-sm text-slate-600">Select Relation Type</div>
+              <Card className="w-full border border-white/80 bg-white/80 shadow-sm md:w-[220px]">
+                <CardContent className="p-4">
+                  <RadioGroup
+                    value={relation}
+                    onValueChange={setRelation}
+                    className="gap-3"
+                  >
+                    {relationTypes.map(({ value, label }) => (
+                      <div key={value} className="flex items-center gap-3">
+                        <RadioGroupItem
+                          value={value}
+                          id={value}
+                          className="h-4 w-4"
+                        />
+                        <Label
+                          htmlFor={value}
+                          className="text-sm font-normal text-slate-800"
+                        >
+                          {label}
+                        </Label>
+                      </div>
+                    ))}
+                  </RadioGroup>
+                </CardContent>
+              </Card>
             </div>
 
-            <div className="mt-2 flex flex-wrap items-center gap-3">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-slate-700"
-                onClick={handleUndo}
-              >
-                Undo ⌘+Z
-              </Button>
-              <div className="flex-1" />
-              <Button
-                variant="outline"
-                size="sm"
-                className="border-white/70 bg-white/80 text-slate-800 hover:border-slate-200"
-                onClick={() => handleAction('skipped')}
-              >
-                Skip
-              </Button>
-              <Button
-                variant="default"
-                size="sm"
-                className="bg-[#0a4da2] text-white shadow-[0_18px_45px_-26px_rgba(7,30,84,0.75)] hover:bg-[#0d56b5]"
-                onClick={() => handleAction('completed')}
-              >
-                Add Relation
-              </Button>
+            <div className="col-span-1">
+              <CompetencyCard {...competencies[1]} />
             </div>
-          </section>
-        )}
+          </div>
+
+          <div className="mt-2 flex flex-wrap items-center gap-3">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-slate-700"
+              onClick={handleUndo}
+            >
+              Undo ⌘+Z
+            </Button>
+            <div className="flex-1" />
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-white/70 bg-white/80 text-slate-800 hover:border-slate-200"
+              onClick={() => handleAction('skipped')}
+            >
+              Skip
+            </Button>
+            <Button
+              variant="default"
+              size="sm"
+              className="bg-[#0a4da2] text-white shadow-[0_18px_45px_-26px_rgba(7,30,84,0.75)] hover:bg-[#0d56b5]"
+              onClick={() => handleAction('completed')}
+            >
+              Add Relation
+            </Button>
+          </div>
+        </section>
       </main>
 
       <footer className="relative z-10 border-t border-slate-200/70 bg-white/80 text-sm text-slate-500 shadow-[0_-15px_60px_-45px_rgba(7,30,84,0.35)] backdrop-blur-xl">
