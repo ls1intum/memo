@@ -1,13 +1,6 @@
 # Configuration for automatic labeling of pull requests
 # See https://github.com/actions/labeler for syntax
 
-# === WORKFLOW LABELS ===
-
-# All PRs get triage label for initial review
-'triage':
-  - changed-files:
-      - any-glob-to-any-file: ['**/*']
-
 # === TECHNICAL AREA LABELS ===
 
 # Client Application/UI changes
