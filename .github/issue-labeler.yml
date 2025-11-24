@@ -1,0 +1,157 @@
+# Configuration for automatic labeling of issues
+# Keywords in issue titles or bodies will trigger the corresponding labels
+
+# === TYPE LABELS ===
+
+# Bug related keywords
+bug:
+  - bug
+  - error
+  - crash
+  - broken
+  - fail
+  - issue
+  - problem
+  - not working
+  - doesn't work
+  - exception
+  - fix
+
+# Enhancement/Feature related keywords
+enhancement:
+  - feature
+  - enhancement
+  - improve
+  - add
+  - new
+  - request
+  - suggest
+
+# Technical proposal keywords
+proposal:
+  - proposal
+  - rfc
+  - design
+  - architecture
+  - technical
+  - spec
+  - specification
+
+# Question related keywords
+question:
+  - question
+  - help
+  - how to
+  - how do i
+  - support
+  - clarification
+  - explain
+
+# === TECHNICAL AREA LABELS ===
+
+# Client application related keywords
+client-application:
+  - ui
+  - ux
+  - frontend
+  - client
+  - component
+  - styling
+  - interface
+  - layout
+  - theme
+  - design
+  - user interface
+  - user experience
+  - css
+  - html
+  - react
+  - next.js
+
+# Server related keywords
+server:
+  - api
+  - server
+  - backend
+  - endpoint
+  - route
+  - controller
+  - service
+  - middleware
+  - auth
+  - authentication
+  - authorization
+
+# Database related keywords
+database:
+  - database
+  - sql
+  - migration
+  - schema
+  - postgres
+  - postgresql
+  - query
+  - table
+  - data
+  - orm
+
+# Docker/DevOps related keywords
+docker:
+  - docker
+  - container
+  - dockerfile
+  - compose
+  - deployment
+  - devops
+  - nginx
+  - deploy
+
+# CI/CD related keywords
+ci:
+  - ci
+  - cd
+  - github actions
+  - workflow
+  - build
+  - test
+  - pipeline
+  - automation
+
+# Documentation related keywords
+documentation:
+  - docs
+  - documentation
+  - readme
+  - guide
+  - tutorial
+  - comment
+  - docstring
+
+# === WORKFLOW LABELS ===
+
+# Good first issue keywords
+good-first-issue:
+  - beginner
+  - easy
+  - starter
+  - first-time
+  - newcomer
+  - simple
+
+# Help wanted keywords
+help-wanted:
+  - help wanted
+  - community
+  - contribution
+  - volunteer
+
+# Dependencies related keywords
+dependencies:
+  - dependency
+  - dependencies
+  - package
+  - npm
+  - update
+  - upgrade
+  - version
+  - security update
