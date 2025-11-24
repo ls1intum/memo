@@ -1,0 +1,21 @@
+# Global ownership - all files require review from maintainers
+* @maximiliananzinger
+
+# GitHub workflows and templates
+/.github/ @maximiliananzinger
+
+# Docker and deployment configurations  
+/docker/ @maximiliananzinger
+/Dockerfile @maximiliananzinger
+/docker-manage.sh @maximiliananzinger
+
+# Core application code
+/app/ @maximiliananzinger
+/lib/ @maximiliananzinger
+/components/ @maximiliananzinger
+
+# Configuration files
+/package.json @maximiliananzinger
+/next.config.ts @maximiliananzinger
+/tsconfig.json @maximiliananzinger
+/eslint.config.mjs @maximiliananzinger
