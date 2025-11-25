@@ -1,0 +1,102 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Contributor {
+  id                          String                       @id @default(cuid())
+  name                        String
+  email                       String                       @unique
+  role                        ContributorRole              @default(CONTRIBUTOR)
+  institution                 String?
+  isVerified                  Boolean                      @default(false)
+  createdAt                   DateTime                     @default(now())
+  updatedAt                   DateTime                     @updatedAt
+  createdRelationships        CompetencyRelationship[]     @relation("RelationshipCreator")
+  createdResourceLinks        CompetencyResourceLink[]     @relation("ResourceLinkCreator")
+
+  @@map("contributors")
+}
+
+model Competency {
+  id                    String                   @id @default(cuid())
+  title                 String
+  description           String?
+  knowledgeArea         String?
+  createdAt             DateTime                 @default(now())
+  updatedAt             DateTime                 @updatedAt
+  originRelationships   CompetencyRelationship[] @relation("OriginCompetency")
+  destinationRelationships CompetencyRelationship[] @relation("DestinationCompetency")
+  resourceLinks         CompetencyResourceLink[]
+
+  @@map("competencies")
+}
+
+model CompetencyRelationship {
+  id               String         @id @default(cuid())
+  relationshipType RelationshipType
+  originId         String
+  destinationId    String
+  creatorId        String
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  origin           Competency     @relation("OriginCompetency", fields: [originId], references: [id], onDelete: Cascade)
+  destination      Competency     @relation("DestinationCompetency", fields: [destinationId], references: [id], onDelete: Cascade)
+  creator          Contributor    @relation("RelationshipCreator", fields: [creatorId], references: [id])
+
+  @@map("competency_relationships")
+}
+
+model LearningResource {
+  id          String                   @id @default(cuid())
+  title       String
+  description String?
+  url         String?
+  type        ResourceType
+  author      String?
+  abstract    String?
+  isbn        String?
+  createdAt   DateTime                 @default(now())
+  updatedAt   DateTime                 @updatedAt
+  competencyLinks CompetencyResourceLink[]
+
+  @@map("learning_resources")
+}
+
+model CompetencyResourceLink {
+  id            String          @id @default(cuid())
+  alignmentType String?
+  competencyId  String
+  resourceId    String
+  creatorId     String
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  competency    Competency      @relation(fields: [competencyId], references: [id], onDelete: Cascade)
+  resource      LearningResource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  creator       Contributor     @relation("ResourceLinkCreator", fields: [creatorId], references: [id])
+
+  @@map("competency_resource_links")
+}
+
+enum ContributorRole {
+  CONTRIBUTOR
+  MAINTAINER
+  ADMIN
+}
+
+enum RelationshipType {
+  PREREQUISITE
+  HIERARCHICAL
+  RELATED
+}
+
+enum ResourceType {
+  LECTURE_MATERIAL
+  RESEARCH_PAPER
+  BOOK
+  OTHER
+}

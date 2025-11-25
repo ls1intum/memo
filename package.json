@@ -12,13 +12,21 @@
     "format:check": "prettier --check .",
     "type-check": "tsc --noEmit",
     "quality": "npm run type-check && npm run lint && npm run format:check",
-    "quality:fix": "npm run type-check && npm run lint:fix && npm run format"
+    "quality:fix": "npm run type-check && npm run lint:fix && npm run format",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:migrate:prod": "prisma migrate deploy",
+    "db:push": "prisma db push",
+    "db:studio": "prisma studio",
+    "db:reset": "prisma migrate reset"
   },
   "dependencies": {
+    "@prisma/client": "^6.19.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.525.0",
     "next": "^15.5.3",
+    "prisma": "^6.19.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "tailwind-merge": "^3.3.1"
