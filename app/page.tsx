@@ -78,7 +78,6 @@ export default function Page() {
               </Button>
             </div>
           </div>
-
         </section>
 
         <section id="challenges" className="space-y-10">
