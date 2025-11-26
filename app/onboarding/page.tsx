@@ -62,7 +62,7 @@ export default function OnboardingPage() {
 
             <label className="block space-y-2 text-sm font-medium text-slate-800">
               Experience level (optional)
-              <select className="w-full rounded-xl border border-slate-200 bg-white/80 px-3 py-2 text-sm text-slate-800 shadow-sm focus:border-[#0a4da2] focus:outline-none">
+              <select className="w-full rounded-xl border border-slate-200 bg-white/80 px-3 py-2 text-sm text-slate-800 shadow-sm focus:border-[#0a4da2] focus:outline-none font-sans">
                 <option value="">Select level</option>
                 {experienceOptions.map(option => (
                   <option key={option} value={option}>
