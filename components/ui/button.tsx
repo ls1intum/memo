@@ -5,13 +5,26 @@ import { cn } from '../../lib/utils';
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'default' | 'outline' | 'ghost';
+  size?: 'default' | 'sm' | 'lg' | 'icon';
   href?: string;
+  asChild?: boolean;
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant = 'default', href, ...props }, ref) => {
+  (
+    {
+      className,
+      variant = 'default',
+      size = 'default',
+      href,
+      asChild,
+      children,
+      ...props
+    },
+    ref
+  ) => {
     const base =
-      'inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none h-10 px-4';
+      'inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none';
 
     const variants: Record<string, string> = {
       default: 'bg-primary text-primary-foreground hover:brightness-90',
@@ -20,17 +33,36 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       ghost: 'bg-transparent hover:bg-muted/5 text-foreground',
     };
 
-    const classes = cn(base, variants[variant], className);
+    const sizes: Record<string, string> = {
+      default: 'h-10 px-4',
+      sm: 'h-8 px-3 text-xs',
+      lg: 'h-12 px-6',
+      icon: 'h-10 w-10',
+    };
 
-    if (href) {
+    const classes = cn(base, variants[variant], sizes[size], className);
+
+    if (asChild && href) {
       return (
         <Link href={href} className={classes}>
-          {props.children}
+          {children}
         </Link>
       );
     }
 
-    return <button ref={ref} className={classes} {...props} />;
+    if (href) {
+      return (
+        <Link href={href} className={classes}>
+          {children}
+        </Link>
+      );
+    }
+
+    return (
+      <button ref={ref} className={classes} {...props}>
+        {children}
+      </button>
+    );
   }
 );
 

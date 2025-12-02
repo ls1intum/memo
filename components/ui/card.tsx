@@ -55,3 +55,13 @@ export const CardContent = ({
     {children}
   </div>
 );
+
+export const CardDescription = ({
+  className,
+  children,
+}: {
+  children?: React.ReactNode;
+  className?: string;
+}) => (
+  <p className={cn('text-sm text-muted-foreground', className)}>{children}</p>
+);
