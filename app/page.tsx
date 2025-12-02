@@ -49,8 +49,11 @@ export default function Page() {
           >
             <a href="#challenges">Current Challenges</a>
           </Button>
-          <Button className="h-12 rounded-full bg-[#0a4da2] px-7 text-sm font-semibold text-white shadow-[0_18px_45px_-26px_rgba(7,30,84,0.75)] transition hover:bg-[#0d56b5]">
-            Start Mapping
+          <Button
+            className="h-12 rounded-full bg-[#0a4da2] px-7 text-sm font-semibold text-white shadow-[0_18px_45px_-26px_rgba(7,30,84,0.75)] transition hover:bg-[#0d56b5]"
+            asChild
+          >
+            <a href="/onboarding">Start Mapping</a>
           </Button>
         </div>
       </header>
