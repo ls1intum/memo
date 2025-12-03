@@ -192,13 +192,20 @@ See [DOCKER.md](DOCKER.md) for detailed Docker setup information. See
 7. Push to the branch: `git push origin feature/amazing-feature`
 8. Open a Pull Request
 
-## 📚 Learn More
+## 📚 Documentation
 
-To learn more about the technologies used:
+### Project Documentation
+
+- [Database Setup & Migrations](DATABASE.md) - Database management, migrations, and Prisma scripts
+- [Docker Setup](DOCKER.md) - Detailed Docker configuration and deployment
+- [Claude Code Guide](CLAUDE.md) - Project conventions and AI assistant usage
+
+### External Resources
 
 - [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API
 - [Docker Documentation](https://docs.docker.com/) - containerization platform
 - [PostgreSQL Documentation](https://www.postgresql.org/docs/) - database system
+- [Prisma Documentation](https://www.prisma.io/docs) - ORM and database toolkit
 
 ## 🆘 Troubleshooting
 
