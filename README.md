@@ -196,8 +196,7 @@ See [DOCKER.md](DOCKER.md) for detailed Docker setup information. See
 
 ### Project Documentation
 
-- [Database Setup & Migrations](DATABASE.md) - Database management, migrations, and Prisma
-  scripts
+- [Database Setup & Migrations](DATABASE.md) - Database management, migrations, and Prisma scripts
 - [Docker Setup](DOCKER.md) - Detailed Docker configuration and deployment
 - [Claude Code Guide](CLAUDE.md) - Project conventions and AI assistant usage
 

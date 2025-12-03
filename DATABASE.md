@@ -18,10 +18,12 @@ PostgreSQL 16 with Prisma ORM. **Migrations auto-apply on server startup** in al
 ## How Migrations Work
 
 **Automatic on startup:**
+
 - **Production/Staging**: Crashes if migration fails (safe)
 - **Development**: Continues if migration fails (non-blocking)
 
 **Creating migrations:**
+
 ```bash
 # 1. Edit prisma/schema.prisma
 # 2. Create migration file
@@ -33,16 +35,17 @@ npm run db:migrate
 
 ## Database Scripts
 
-| Script         | Purpose                             |
-| -------------- | ----------------------------------- |
-| `db:migrate`   | Create new migration file           |
-| `db:studio`    | Open Prisma Studio GUI              |
-| `db:reset`     | Reset database (⚠️ destroys data)   |
-| `db:generate`  | Regenerate Prisma Client            |
+| Script        | Purpose                           |
+| ------------- | --------------------------------- |
+| `db:migrate`  | Create new migration file         |
+| `db:studio`   | Open Prisma Studio GUI            |
+| `db:reset`    | Reset database (⚠️ destroys data) |
+| `db:generate` | Regenerate Prisma Client          |
 
 ## Common Tasks
 
 **View database:**
+
 ```bash
 npm run db:studio
 # or
@@ -50,11 +53,13 @@ npm run db:studio
 ```
 
 **Check migration status:**
+
 ```bash
 npx prisma migrate status
 ```
 
 **Reset database (dev only):**
+
 ```bash
 npm run db:reset
 ```
@@ -68,15 +73,18 @@ Models: User, Competency, CompetencyRelationship, LearningResource, CompetencyRe
 ## Troubleshooting
 
 **"Database schema is not in sync"**
+
 ```bash
 npm run db:migrate
 ```
 
 **"Prisma Client out of sync"**
+
 ```bash
 npm run db:generate
 ```
 
 **Production migration failed**
+
 - Check `DATABASE_URL` environment variable
 - View logs: `./docker-manage.sh logs production`
