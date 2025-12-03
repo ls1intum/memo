@@ -10,7 +10,8 @@ export async function runMigrations() {
 
   try {
     await execAsync('npx prisma migrate deploy');
-  } catch {
+  } catch (error) {
+    console.error('[Migrations] Error:', error);
     if (isProduction) {
       throw new Error('Database migration failed');
     }

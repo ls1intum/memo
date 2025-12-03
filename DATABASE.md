@@ -61,7 +61,7 @@ npm run db:reset
 
 ## Schema
 
-See [prisma/schema.prisma](../prisma/schema.prisma) for the complete schema.
+See [prisma/schema.prisma](prisma/schema.prisma) for the complete schema.
 
 Models: User, Competency, CompetencyRelationship, LearningResource, CompetencyResourceLink
 
