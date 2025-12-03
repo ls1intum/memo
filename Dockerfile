@@ -16,7 +16,8 @@ CMD ["npm", "run", "dev"]
 # Dependencies stage (for production)
 FROM base AS deps
 COPY package.json package-lock.json ./
-RUN npm ci --only=production --legacy-peer-deps
+RUN npm ci --only=production --legacy-peer-deps && \
+    npm install prisma --legacy-peer-deps
 
 # Builder stage
 FROM base AS builder
@@ -36,6 +37,9 @@ COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/next.config.ts ./next.config.ts
+
+# Copy Prisma schema and migrations for runtime migration execution
+COPY --from=builder /app/prisma ./prisma
 
 EXPOSE 3000
 CMD ["npm", "start"]

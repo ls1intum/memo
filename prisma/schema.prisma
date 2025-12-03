@@ -7,16 +7,16 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Contributor {
+model User {
   id                          String                       @id @default(cuid())
   name                        String
   email                       String                       @unique
-  role                        ContributorRole              @default(CONTRIBUTOR)
+  role                        UserRole                     @default(USER)
   createdAt                   DateTime                     @default(now())
   createdRelationships        CompetencyRelationship[]     @relation("RelationshipCreator")
   createdResourceLinks        CompetencyResourceLink[]     @relation("ResourceLinkCreator")
 
-  @@map("contributors")
+  @@map("users")
 }
 
 model Competency {
@@ -36,11 +36,11 @@ model CompetencyRelationship {
   relationshipType RelationshipType
   originId         String
   destinationId    String
-  creatorId        String
+  userId           String
   createdAt        DateTime       @default(now())
   origin           Competency     @relation("OriginCompetency", fields: [originId], references: [id], onDelete: Cascade)
   destination      Competency     @relation("DestinationCompetency", fields: [destinationId], references: [id], onDelete: Cascade)
-  creator          Contributor    @relation("RelationshipCreator", fields: [creatorId], references: [id])
+  user             User           @relation("RelationshipCreator", fields: [userId], references: [id])
 
   @@map("competency_relationships")
 }
@@ -59,18 +59,17 @@ model CompetencyResourceLink {
   id            String          @id @default(cuid())
   competencyId  String
   resourceId    String
-  creatorId     String
+  userId        String
   createdAt     DateTime        @default(now())
   competency    Competency      @relation(fields: [competencyId], references: [id], onDelete: Cascade)
   resource      LearningResource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
-  creator       Contributor     @relation("ResourceLinkCreator", fields: [creatorId], references: [id])
+  user          User            @relation("ResourceLinkCreator", fields: [userId], references: [id])
 
   @@map("competency_resource_links")
 }
 
-enum ContributorRole {
-  CONTRIBUTOR
-  MAINTAINER
+enum UserRole {
+  USER
   ADMIN
 }
 

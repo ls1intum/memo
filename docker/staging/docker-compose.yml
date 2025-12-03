@@ -19,7 +19,8 @@ services:
     container_name: memo-staging-app
     image: 'ghcr.io/ls1intum/memo/memo-app:${IMAGE_TAG:-latest}'
     environment:
-      - NODE_ENV=staging
+      - NODE_ENV=production
+      - APP_ENV=staging
       - DATABASE_URL=${DATABASE_URL:-postgresql://memo_user:memo_password@db:5432/memo_staging}
       - NEXT_PUBLIC_APP_ENV=${NEXT_PUBLIC_APP_ENV:-staging}
       - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-https://staging.memo.aet.cit.tum.de/api}
