@@ -9,12 +9,6 @@ type ProblemStatement = {
   detail: string;
 };
 
-// const heroStats = [
-//   { value: 'Computer Science', label: 'Pilot Domain' },
-//   { value: 'Nov 2025', label: 'Target Start' },
-//   { value: 'Jan 2026', label: 'Benchmark Release' },
-// ]
-
 const problemStatements: ProblemStatement[] = [
   {
     headline: 'No standardized benchmark',
@@ -44,7 +38,7 @@ export default function Page() {
 
       <header className="relative z-20 mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-10 lg:px-0">
         <div className="flex items-center gap-3">
-          <span className="text-sm font-bold tracking-[0.08em] text-slate-900">
+          <span className="text-sm font-bold tracking-[0.05em] text-slate-900">
             Competency Benchmark Mapping Platform
           </span>
         </div>
@@ -86,27 +80,12 @@ export default function Page() {
                 Discover Platform
               </Button>
             </div>
-            {/* <div className="grid gap-5 pt-10 sm:grid-cols-3">
-              {heroStats.map((stat) => (
-                <div
-                  key={stat.label}
-                  className="rounded-[28px] border border-white/70 bg-white/80 px-6 py-6 text-left text-slate-600 shadow-[0_22px_70px_-38px_rgba(7,30,84,0.55)] backdrop-blur-xl"
-                >
-                  <div className="text-3xl font-semibold tracking-tight text-slate-900">{stat.value}</div>
-                  <p className="mt-2 text-sm leading-relaxed">{stat.label}</p>
-                </div>
-              ))}
-            </div> */}
           </div>
-
-          {/* <div className="flex flex-col justify-center gap-6">
-            <HeroSlideCard slide={heroHighlight} progress={100} />
-          </div> */}
         </section>
 
         <section id="challenges" className="space-y-10">
           <div className="space-y-3">
-            <Badge className="w-fit rounded-full border border-white/70 bg-white/75 px-3 py-1 text-xs font-semibold uppercase tracking-[0.35em] text-[#0a4da2]">
+            <Badge className="w-fit rounded-full border border-white/70 bg-white/75 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-[#0a4da2]">
               Current Challenges
             </Badge>
             <h2 className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
@@ -124,7 +103,7 @@ export default function Page() {
               <div className="absolute right-[-8rem] bottom-[-10rem] h-[24rem] w-[24rem] rounded-full bg-[#ffe8ff]/30 blur-[150px]" />
               <div className="relative flex h-full flex-col justify-between gap-8 rounded-[38px] bg-gradient-to-br from-white/15 via-white/10 to-white/5 p-10 text-white backdrop-blur-2xl transition hover:bg-white/12">
                 <div className="space-y-4">
-                  <Badge className="w-fit rounded-full border border-white/30 bg-white/20 px-3 py-1 text-xs font-semibold uppercase tracking-[0.35em] text-white/90">
+                  <Badge className="w-fit rounded-full border border-white/30 bg-white/20 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-white/90">
                     {leadProblem.insight}
                   </Badge>
                   <h3 className="text-3xl font-semibold leading-snug sm:text-4xl">
@@ -146,7 +125,7 @@ export default function Page() {
                     <h3 className="text-xl font-semibold text-slate-900">
                       {problem.headline}
                     </h3>
-                    <div className="text-xs font-semibold uppercase tracking-[0.28em] text-[#0a4da2]">
+                    <div className="text-xs font-semibold uppercase tracking-[0.16em] text-[#0a4da2]">
                       {problem.insight}
                     </div>
                     <p className="text-base leading-relaxed text-slate-600">
