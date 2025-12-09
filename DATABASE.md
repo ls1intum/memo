@@ -69,10 +69,11 @@ npm run db:migrate
 # Prisma Studio (GUI) - requires .env file with DATABASE_URL
 npm run db:studio
 # Opens at http://localhost:5555
-
-# Or connect to PostgreSQL directly
-./docker-manage.sh db-shell development
 ```
+
+Alternatively, use VS Code PostgreSQL extensions with connection:
+- Host: `localhost`, Port: `5432`, Database: `memo_dev`
+- Username: `memo_user`, Password: `memo_password`
 
 **Check migration status:**
 
