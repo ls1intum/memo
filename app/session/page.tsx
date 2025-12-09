@@ -1,8 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
-import { Badge } from '@/components/ui/badge';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -13,42 +12,37 @@ import {
 } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import type { Competency } from '@prisma/client';
 
 type SessionStats = {
   completed: number;
   skipped: number;
 };
 
-type Competency = {
-  title: string;
-  description: string;
-  tags: string[];
-  outcomes: string[];
-};
+async function loadRandomCompetencies(
+  signal?: AbortSignal,
+): Promise<{
+  competency1: Competency;
+  competency2: Competency;
+}> {
+  const response = await fetch('/api/competencies/random', { signal });
 
-const competencies: Competency[] = [
-  {
-    title: 'Competency A',
-    description:
-      'Short description about competency A. What students should be able to do.',
-    tags: ['Taxonomy', 'Knowledge Area'],
-    outcomes: [
-      'Key learning outcome 1',
-      'Key learning outcome 2',
-      'Key learning outcome 3',
-    ],
-  },
-  {
-    title: 'Competency B',
-    description: "Short description about competency B and why it's relevant.",
-    tags: ['Taxonomy', 'Knowledge Area'],
-    outcomes: [
-      'Learning outcome A',
-      'Learning outcome B',
-      'Learning outcome C',
-    ],
-  },
-];
+  if (!response.ok) {
+    let message = `Failed to fetch competencies: ${response.statusText}`;
+    try {
+      const body = (await response.json()) as { error?: string };
+      if (body?.error) {
+        message = body.error;
+      }
+    } catch (error) {
+      // If the response body is not JSON or is empty, the above will fail
+      console.error('Could not parse error response body:', error);
+    }
+    throw new Error(message);
+  }
+
+  return response.json();
+}
 
 const relationTypes = [
   { value: 'isPrerequisiteOf', label: 'isPrerequisiteOf' },
@@ -59,35 +53,19 @@ const relationTypes = [
 
 const defaultRelationType = relationTypes[0]!.value;
 
-function CompetencyCard({ title, description, tags, outcomes }: Competency) {
+function CompetencyCard({ title, description }: Competency) {
   return (
     <Card className="border border-white/70 bg-white/85 shadow-[0_22px_70px_-38px_rgba(7,30,84,0.35)] backdrop-blur-lg">
       <CardHeader className="space-y-4 pb-4">
-        <div className="flex flex-wrap gap-2">
-          {tags.map(tag => (
-            <Badge
-              key={tag}
-              variant="secondary"
-              className="rounded-md bg-slate-100 text-slate-700"
-            >
-              {tag}
-            </Badge>
-          ))}
-        </div>
         <div className="space-y-2">
           <CardTitle className="text-lg text-slate-900">{title}</CardTitle>
-          <CardDescription className="text-sm text-slate-600">
-            {description}
-          </CardDescription>
+          {description && (
+            <CardDescription className="text-sm text-slate-600">
+              {description}
+            </CardDescription>
+          )}
         </div>
       </CardHeader>
-      <CardContent className="pt-0">
-        <ul className="list-inside list-disc space-y-2 text-sm text-slate-700">
-          {outcomes.map(outcome => (
-            <li key={outcome}>{outcome}</li>
-          ))}
-        </ul>
-      </CardContent>
     </Card>
   );
 }
@@ -99,10 +77,30 @@ export default function SessionPage() {
     skipped: 0,
   });
   const [, setHistory] = useState<Array<'completed' | 'skipped'>>([]);
+  const [competency1, setCompetency1] = useState<Competency | null>(null);
+  const [competency2, setCompetency2] = useState<Competency | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Load initial competencies
+  useEffect(() => {
+    loadCompetencies();
+  }, []);
+
+  async function loadCompetencies() {
+    setLoading(true);
+    const data = await loadRandomCompetencies();
+    if (data) {
+      setCompetency1(data.competency1);
+      setCompetency2(data.competency2);
+    }
+    setLoading(false);
+  }
 
   function handleAction(type: 'completed' | 'skipped') {
     setStats(prev => ({ ...prev, [type]: prev[type] + 1 }));
     setHistory(prev => [...prev, type]);
+    // Load new competencies after action
+    loadCompetencies();
   }
 
   function handleUndo() {
@@ -163,72 +161,84 @@ export default function SessionPage() {
             How does Competency A relate to Competency B?
           </h2>
 
-          <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-3">
-            <div className="col-span-1">
-              <CompetencyCard {...competencies[0]} />
+          {loading ? (
+            <div className="py-8 text-center text-slate-600">
+              Loading competencies...
             </div>
-
-            <div className="col-span-1 flex flex-col items-center justify-center gap-4">
-              <div className="text-sm text-slate-600">Select Relation Type</div>
-              <Card className="w-full border border-white/80 bg-white/80 shadow-sm md:w-[220px]">
-                <CardContent className="p-4">
-                  <RadioGroup
-                    value={relation}
-                    onValueChange={setRelation}
-                    className="gap-3"
-                  >
-                    {relationTypes.map(({ value, label }) => (
-                      <div key={value} className="flex items-center gap-3">
-                        <RadioGroupItem
-                          value={value}
-                          id={value}
-                          className="h-4 w-4"
-                        />
-                        <Label
-                          htmlFor={value}
-                          className="text-sm font-normal text-slate-800"
-                        >
-                          {label}
-                        </Label>
-                      </div>
-                    ))}
-                  </RadioGroup>
-                </CardContent>
-              </Card>
+          ) : !competency1 || !competency2 ? (
+            <div className="py-8 text-center text-slate-600">
+              Failed to load competencies. Please try refreshing the page.
             </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-3">
+                <div className="col-span-1">
+                  <CompetencyCard {...competency1} />
+                </div>
 
-            <div className="col-span-1">
-              <CompetencyCard {...competencies[1]} />
-            </div>
-          </div>
+                <div className="col-span-1 flex flex-col items-center justify-center gap-4">
+                  <div className="text-sm text-slate-600">Select Relation Type</div>
+                  <Card className="w-full border border-white/80 bg-white/80 shadow-sm md:w-[220px]">
+                    <CardContent className="p-4">
+                      <RadioGroup
+                        value={relation}
+                        onValueChange={setRelation}
+                        className="gap-3"
+                      >
+                        {relationTypes.map(({ value, label }) => (
+                          <div key={value} className="flex items-center gap-3">
+                            <RadioGroupItem
+                              value={value}
+                              id={value}
+                              className="h-4 w-4"
+                            />
+                            <Label
+                              htmlFor={value}
+                              className="text-sm font-normal text-slate-800"
+                            >
+                              {label}
+                            </Label>
+                          </div>
+                        ))}
+                      </RadioGroup>
+                    </CardContent>
+                  </Card>
+                </div>
 
-          <div className="mt-2 flex flex-wrap items-center gap-3">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-slate-700"
-              onClick={handleUndo}
-            >
-              Undo ⌘+Z
-            </Button>
-            <div className="flex-1" />
-            <Button
-              variant="outline"
-              size="sm"
-              className="border-white/70 bg-white/80 text-slate-800 hover:border-slate-200"
-              onClick={() => handleAction('skipped')}
-            >
-              Skip
-            </Button>
-            <Button
-              variant="default"
-              size="sm"
-              className="bg-[#0a4da2] text-white shadow-[0_18px_45px_-26px_rgba(7,30,84,0.75)] hover:bg-[#0d56b5]"
-              onClick={() => handleAction('completed')}
-            >
-              Add Relation
-            </Button>
-          </div>
+                <div className="col-span-1">
+                  <CompetencyCard {...competency2} />
+                </div>
+              </div>
+
+              <div className="mt-2 flex flex-wrap items-center gap-3">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-slate-700"
+                  onClick={handleUndo}
+                >
+                  Undo ⌘+Z
+                </Button>
+                <div className="flex-1" />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-white/70 bg-white/80 text-slate-800 hover:border-slate-200"
+                  onClick={() => handleAction('skipped')}
+                >
+                  Skip
+                </Button>
+                <Button
+                  variant="default"
+                  size="sm"
+                  className="bg-[#0a4da2] text-white shadow-[0_18px_45px_-26px_rgba(7,30,84,0.75)] hover:bg-[#0d56b5]"
+                  onClick={() => handleAction('completed')}
+                >
+                  Add Relation
+                </Button>
+              </div>
+            </>
+          )}
         </section>
       </main>
 
