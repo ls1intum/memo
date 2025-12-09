@@ -47,8 +47,11 @@ npm run db:migrate
 **View database:**
 
 ```bash
+# Prisma Studio (GUI) - requires .env file with DATABASE_URL
 npm run db:studio
-# or
+# Opens at http://localhost:5555
+
+# Or connect to PostgreSQL directly
 ./docker-manage.sh db-shell development
 ```
 
@@ -88,3 +91,7 @@ npm run db:generate
 
 - Check `DATABASE_URL` environment variable
 - View logs: `./docker-manage.sh logs production`
+
+**"Environment variable not found: DATABASE_URL"**
+
+- Run `npm run db:studio`
