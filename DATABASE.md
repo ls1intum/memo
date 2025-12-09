@@ -110,7 +110,3 @@ npm run db:generate
 
 - Check `DATABASE_URL` environment variable
 - View logs: `./docker-manage.sh logs production`
-
-**"Environment variable not found: DATABASE_URL"**
-
-- Run `npm run db:studio`
