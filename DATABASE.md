@@ -72,6 +72,7 @@ npm run db:studio
 ```
 
 Alternatively, use VS Code PostgreSQL extensions with connection:
+
 - Host: `localhost`, Port: `5432`, Database: `memo_dev`
 - Username: `memo_user`, Password: `memo_password`
 
