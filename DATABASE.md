@@ -4,6 +4,25 @@
 
 PostgreSQL 16 with Prisma ORM. **Migrations auto-apply on server startup** in all environments.
 
+## Setup
+
+**Using Docker (recommended):**
+
+```bash
+./docker-manage.sh up development
+```
+
+- Database runs automatically in Docker
+- No `.env` file needed - `DATABASE_URL` is set in `docker-compose.yml`
+- Migrations run on startup
+
+**Using Prisma Studio GUI:**
+
+1. Ensure Docker database is running: `./docker-manage.sh up development`
+2. Create `.env` file in project root with `DATABASE_URL` from
+   `docker/development/docker-compose.yml`
+3. Run: `npm run db:studio`
+
 ## Quick Start
 
 ```bash
