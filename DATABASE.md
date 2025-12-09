@@ -41,6 +41,7 @@ npm run db:migrate
 | `db:studio`   | Open Prisma Studio GUI            |
 | `db:reset`    | Reset database (⚠️ destroys data) |
 | `db:generate` | Regenerate Prisma Client          |
+| `db:seed`     | Seed demo user + competencies     |
 
 ## Common Tasks
 
@@ -63,6 +64,14 @@ npx prisma migrate status
 ```bash
 npm run db:reset
 ```
+
+**Seed demo content (user + 5 competencies):**
+
+```bash
+npm run db:seed
+```
+
+Creates a demo user (`demo@memo.local`) and 5 sample competencies. Idempotent, safe to run multiple times.
 
 ## Schema
 
