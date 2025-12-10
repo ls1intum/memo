@@ -78,8 +78,8 @@ enum UserRole {
 }
 
 enum RelationshipType {
-  PREREQUISITE
-  HIERARCHICAL
-  RELATED
+  ASSUMES
+  EXTENDS
+  MATCHES
 }
 
