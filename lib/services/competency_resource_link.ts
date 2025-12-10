@@ -1,0 +1,40 @@
+import { CompetencyResourceLinkRepository } from '@/lib/repositories/dc_interface';
+import { competencyResourceLinkRepository } from '@/lib/repositories/dc_repo';
+import { CreateCompetencyResourceLinkInput } from '@/lib/domain/domain_core';
+
+export class CompetencyResourceLinkService {
+  constructor(private readonly repository: CompetencyResourceLinkRepository) {}
+
+  async createLink(data: CreateCompetencyResourceLinkInput) {
+    return await this.repository.create(data);
+  }
+
+  async getLinkById(id: string) {
+    const link = await this.repository.findById(id);
+    if (!link) {
+      throw new Error('Competency resource link not found');
+    }
+    return link;
+  }
+
+  async getLinksByCompetencyId(competencyId: string) {
+    return await this.repository.findByCompetencyId(competencyId);
+  }
+
+  async getLinksByResourceId(resourceId: string) {
+    return await this.repository.findByResourceId(resourceId);
+  }
+
+  async getAllLinks() {
+    return await this.repository.findAll();
+  }
+
+  async deleteLink(id: string) {
+    await this.getLinkById(id);
+    await this.repository.delete(id);
+  }
+}
+
+export const competencyResourceLinkService = new CompetencyResourceLinkService(
+  competencyResourceLinkRepository
+);

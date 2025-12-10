@@ -1,6 +1,6 @@
 import { forwardRef } from 'react';
 import Link from 'next/link';
-import { cn } from '../../lib/utils';
+import { cn } from '../../lib/client/utils';
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
