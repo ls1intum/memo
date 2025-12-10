@@ -31,7 +31,11 @@ export async function getUserAction(id: string) {
   }
 }
 
-export async function updateUserAction(id: string, name: string, role: UserRole) {
+export async function updateUserAction(
+  id: string,
+  name: string,
+  role: UserRole
+) {
   try {
     const user = await userService.updateUser(id, { name, role });
     return { success: true, user };

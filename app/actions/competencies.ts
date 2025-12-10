@@ -16,7 +16,8 @@ export async function createCompetencyAction(formData: FormData) {
   } catch (error) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to create competency',
+      error:
+        error instanceof Error ? error.message : 'Failed to create competency',
     };
   }
 }
@@ -40,7 +41,8 @@ export async function getAllCompetenciesAction() {
   } catch (error) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to fetch competencies',
+      error:
+        error instanceof Error ? error.message : 'Failed to fetch competencies',
     };
   }
 }
@@ -59,7 +61,8 @@ export async function updateCompetencyAction(
   } catch (error) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to update competency',
+      error:
+        error instanceof Error ? error.message : 'Failed to update competency',
     };
   }
 }
@@ -71,7 +74,8 @@ export async function deleteCompetencyAction(id: string) {
   } catch (error) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to delete competency',
+      error:
+        error instanceof Error ? error.message : 'Failed to delete competency',
     };
   }
 }

@@ -16,7 +16,10 @@ export async function createLearningResourceAction(formData: FormData) {
   } catch (error) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to create learning resource',
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to create learning resource',
     };
   }
 }
@@ -28,7 +31,8 @@ export async function getLearningResourceAction(id: string) {
   } catch (error) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Learning resource not found',
+      error:
+        error instanceof Error ? error.message : 'Learning resource not found',
     };
   }
 }
@@ -40,12 +44,19 @@ export async function getAllLearningResourcesAction() {
   } catch (error) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to fetch learning resources',
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to fetch learning resources',
     };
   }
 }
 
-export async function updateLearningResourceAction(id: string, title?: string, url?: string) {
+export async function updateLearningResourceAction(
+  id: string,
+  title?: string,
+  url?: string
+) {
   try {
     const resource = await learningResourceService.updateLearningResource(id, {
       title,
@@ -55,7 +66,10 @@ export async function updateLearningResourceAction(id: string, title?: string, u
   } catch (error) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to update learning resource',
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to update learning resource',
     };
   }
 }
@@ -67,7 +81,10 @@ export async function deleteLearningResourceAction(id: string) {
   } catch (error) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to delete learning resource',
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to delete learning resource',
     };
   }
 }

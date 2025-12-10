@@ -43,4 +43,6 @@ export class LearningResourceService {
   }
 }
 
-export const learningResourceService = new LearningResourceService(learningResourceRepository);
+export const learningResourceService = new LearningResourceService(
+  learningResourceRepository
+);

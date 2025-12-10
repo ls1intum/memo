@@ -117,7 +117,7 @@ export default async function CompetenciesPage() {
 
   return (
     <div>
-      {competencies?.map((comp) => (
+      {competencies?.map(comp => (
         <div key={comp.id}>
           <h2>{comp.title}</h2>
           <p>{comp.description}</p>
@@ -169,10 +169,7 @@ export async function GET() {
     const competencies = await competencyService.getAllCompetencies();
     return NextResponse.json({ success: true, competencies });
   } catch (error) {
-    return NextResponse.json(
-      { success: false, error: error.message },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
 
@@ -182,10 +179,7 @@ export async function POST(request: Request) {
     const competency = await competencyService.createCompetency(body);
     return NextResponse.json({ success: true, competency });
   } catch (error) {
-    return NextResponse.json(
-      { success: false, error: error.message },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
 ```
@@ -213,6 +207,7 @@ Full CRUD implementations available:
 - **User** - [actions/users.ts](app/actions/users.ts)
 - **Competency** - [actions/competencies.ts](app/actions/competencies.ts)
 - **LearningResource** - [actions/learning-resources.ts](app/actions/learning-resources.ts)
-- **CompetencyRelationship** - [actions/competency-relationships.ts](app/actions/competency-relationships.ts)
+- **CompetencyRelationship** -
+  [actions/competency-relationships.ts](app/actions/competency-relationships.ts)
 - **CompetencyResourceLink** -
   [actions/competency-resource-links.ts](app/actions/competency-resource-links.ts)

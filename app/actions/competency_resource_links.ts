@@ -37,7 +37,8 @@ export async function getCompetencyResourceLinkAction(id: string) {
 
 export async function getLinksByCompetencyIdAction(competencyId: string) {
   try {
-    const links = await competencyResourceLinkService.getLinksByCompetencyId(competencyId);
+    const links =
+      await competencyResourceLinkService.getLinksByCompetencyId(competencyId);
     return { success: true, links };
   } catch (error) {
     return {
@@ -49,7 +50,8 @@ export async function getLinksByCompetencyIdAction(competencyId: string) {
 
 export async function getLinksByResourceIdAction(resourceId: string) {
   try {
-    const links = await competencyResourceLinkService.getLinksByResourceId(resourceId);
+    const links =
+      await competencyResourceLinkService.getLinksByResourceId(resourceId);
     return { success: true, links };
   } catch (error) {
     return {

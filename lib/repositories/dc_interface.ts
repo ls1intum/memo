@@ -36,12 +36,17 @@ export interface LearningResourceRepository {
   findById(id: string): Promise<LearningResource | null>;
   findByUrl(url: string): Promise<LearningResource | null>;
   findAll(): Promise<LearningResource[]>;
-  update(id: string, data: UpdateLearningResourceInput): Promise<LearningResource>;
+  update(
+    id: string,
+    data: UpdateLearningResourceInput
+  ): Promise<LearningResource>;
   delete(id: string): Promise<void>;
 }
 
 export interface CompetencyRelationshipRepository {
-  create(data: CreateCompetencyRelationshipInput): Promise<CompetencyRelationship>;
+  create(
+    data: CreateCompetencyRelationshipInput
+  ): Promise<CompetencyRelationship>;
   findById(id: string): Promise<CompetencyRelationship | null>;
   findByOriginId(originId: string): Promise<CompetencyRelationship[]>;
   findByDestinationId(destinationId: string): Promise<CompetencyRelationship[]>;
@@ -50,7 +55,9 @@ export interface CompetencyRelationshipRepository {
 }
 
 export interface CompetencyResourceLinkRepository {
-  create(data: CreateCompetencyResourceLinkInput): Promise<CompetencyResourceLink>;
+  create(
+    data: CreateCompetencyResourceLinkInput
+  ): Promise<CompetencyResourceLink>;
   findById(id: string): Promise<CompetencyResourceLink | null>;
   findByCompetencyId(competencyId: string): Promise<CompetencyResourceLink[]>;
   findByResourceId(resourceId: string): Promise<CompetencyResourceLink[]>;
