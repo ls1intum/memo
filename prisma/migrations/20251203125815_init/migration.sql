@@ -2,7 +2,7 @@
 CREATE TYPE "UserRole" AS ENUM ('USER', 'ADMIN');
 
 -- CreateEnum
-CREATE TYPE "RelationshipType" AS ENUM ('PREREQUISITE', 'HIERARCHICAL', 'RELATED');
+CREATE TYPE "RelationshipType" AS ENUM ('ASSUMES', 'EXTENDS', 'MATCHES');
 
 -- CreateTable
 CREATE TABLE "users" (
