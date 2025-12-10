@@ -24,6 +24,7 @@ FROM base AS builder
 COPY package.json package-lock.json ./
 RUN npm install --legacy-peer-deps
 COPY . .
+RUN npx prisma generate
 RUN npm run build
 
 # Production stage
