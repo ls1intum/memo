@@ -1,5 +1,8 @@
 import { UserRole, RelationshipType } from '@prisma/client';
 
+// Re-export Prisma enums for use in other layers
+export { UserRole, RelationshipType };
+
 export interface User {
   id: string;
   name: string;

@@ -1,7 +1,7 @@
 'use server';
 
 import { competencyRelationshipService } from '@/lib/services/competency_relationship';
-import { RelationshipType } from '@prisma/client';
+import { RelationshipType } from '@/lib/domain/domain_core';
 
 export async function createCompetencyRelationshipAction(formData: FormData) {
   try {
