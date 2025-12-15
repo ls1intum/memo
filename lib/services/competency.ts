@@ -9,7 +9,7 @@ export class CompetencyService {
   constructor(private readonly repository: CompetencyRepository) {}
 
   async createCompetency(data: CreateCompetencyInput) {
-    return await this.repository.create(data);
+    return this.repository.create(data);
   }
 
   async getCompetencyById(id: string) {
@@ -21,12 +21,12 @@ export class CompetencyService {
   }
 
   async getAllCompetencies() {
-    return await this.repository.findAll();
+    return this.repository.findAll();
   }
 
   async updateCompetency(id: string, data: UpdateCompetencyInput) {
     await this.getCompetencyById(id);
-    return await this.repository.update(id, data);
+    return this.repository.update(id, data);
   }
 
   async deleteCompetency(id: string) {

@@ -1,7 +1,7 @@
 # Domain Core Architecture
 
-This project uses a layered architecture where **only the domain core communicates with the
-database**.
+This project uses a layered architecture. The "domain core" includes the service and repository
+layers, and **only the repository implementation layer communicates with the database**.
 
 ## Architecture Flow
 
@@ -14,7 +14,7 @@ Service Layer (lib/services/)
     ↓
 Repository Interface (lib/repositories/dc_interface.ts)
     ↓
-Repository Implementation (lib/repositories/dc_user_repo.ts) ← ONLY layer that touches DB
+Repository Implementation (lib/repositories/dc_repo.ts) ← ONLY layer that touches DB
     ↓
 Prisma Client (lib/prisma.ts)
     ↓
@@ -23,7 +23,7 @@ PostgreSQL Database
 
 ## How It Works
 
-### 1. Domain Layer (`lib/domain/domain_core.ts`)
+### 1. Shared Domain Model (`lib/domain/domain_core.ts`)
 
 Pure entities and input types. No database dependencies.
 
@@ -53,7 +53,7 @@ export interface CompetencyRepository {
 }
 ```
 
-### 3. Repository Implementation (`lib/repositories/dc_user_repo.ts`)
+### 3. Repository Implementation (`lib/repositories/dc_repo.ts`)
 
 Prisma implementation. **ONLY this layer touches the database.**
 
@@ -90,7 +90,7 @@ Exposes operations to Client Side.
 ```typescript
 'use server';
 
-import { competencyService } from '@/lib/services/competency-service';
+import { competencyService } from '@/lib/services/competency';
 
 export async function createCompetencyAction(formData: FormData) {
   try {
@@ -161,7 +161,7 @@ To expose data through an API endpoint:
 
 ```typescript
 // app/api/competencies/route.ts
-import { competencyService } from '@/lib/services/competency-service';
+import { competencyService } from '@/lib/services/competency';
 import { NextResponse } from 'next/server';
 
 export async function GET() {
@@ -206,8 +206,8 @@ Full CRUD implementations available:
 
 - **User** - [actions/users.ts](app/actions/users.ts)
 - **Competency** - [actions/competencies.ts](app/actions/competencies.ts)
-- **LearningResource** - [actions/learning-resources.ts](app/actions/learning-resources.ts)
+- **LearningResource** - [actions/learning_resources.ts](app/actions/learning_resources.ts)
 - **CompetencyRelationship** -
-  [actions/competency-relationships.ts](app/actions/competency-relationships.ts)
+  [actions/competency_relationships.ts](app/actions/competency_relationships.ts)
 - **CompetencyResourceLink** -
-  [actions/competency-resource-links.ts](app/actions/competency-resource-links.ts)
+  [actions/competency_resource_links.ts](app/actions/competency_resource_links.ts)

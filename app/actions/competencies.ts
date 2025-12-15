@@ -4,8 +4,12 @@ import { competencyService } from '@/lib/services/competency';
 
 export async function createCompetencyAction(formData: FormData) {
   try {
-    const title = formData.get('title') as string;
+    const title = formData.get('title');
     const description = formData.get('description') as string | undefined;
+
+    if (!title || typeof title !== 'string' || title.trim() === '') {
+      return { success: false, error: 'Title is required' };
+    }
 
     const competency = await competencyService.createCompetency({
       title,

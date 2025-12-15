@@ -9,7 +9,7 @@ export class CompetencyRelationshipService {
     if (data.originId === data.destinationId) {
       throw new Error('Cannot create relationship to itself');
     }
-    return await this.repository.create(data);
+    return this.repository.create(data);
   }
 
   async getRelationshipById(id: string) {
@@ -21,15 +21,15 @@ export class CompetencyRelationshipService {
   }
 
   async getRelationshipsByOriginId(originId: string) {
-    return await this.repository.findByOriginId(originId);
+    return this.repository.findByOriginId(originId);
   }
 
   async getRelationshipsByDestinationId(destinationId: string) {
-    return await this.repository.findByDestinationId(destinationId);
+    return this.repository.findByDestinationId(destinationId);
   }
 
   async getAllRelationships() {
-    return await this.repository.findAll();
+    return this.repository.findAll();
   }
 
   async deleteRelationship(id: string) {

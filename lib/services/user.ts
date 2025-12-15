@@ -1,6 +1,10 @@
 import { UserRepository } from '@/lib/repositories/dc_interface';
 import { userRepository } from '@/lib/repositories/dc_repo';
-import { CreateUserInput, UpdateUserInput } from '@/lib/domain/domain_core';
+import {
+  CreateUserInput,
+  UpdateUserInput,
+  UserRole,
+} from '@/lib/domain/domain_core';
 
 // Service layer - business logic, uses repository interface
 export class UserService {
@@ -12,7 +16,13 @@ export class UserService {
       throw new Error('User with this email already exists');
     }
 
-    return await this.repository.create(data);
+    // Apply default role if not provided (business logic)
+    const userData = {
+      ...data,
+      role: data.role || UserRole.USER,
+    };
+
+    return this.repository.create(userData);
   }
 
   async getUserById(id: string) {
@@ -24,16 +34,16 @@ export class UserService {
   }
 
   async getUserByEmail(email: string) {
-    return await this.repository.findByEmail(email);
+    return this.repository.findByEmail(email);
   }
 
   async getAllUsers() {
-    return await this.repository.findAll();
+    return this.repository.findAll();
   }
 
   async updateUser(id: string, data: UpdateUserInput) {
     await this.getUserById(id);
-    return await this.repository.update(id, data);
+    return this.repository.update(id, data);
   }
 
   async deleteUser(id: string) {

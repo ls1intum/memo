@@ -21,41 +21,40 @@ import {
   CompetencyResourceLink,
   CreateCompetencyResourceLinkInput,
 } from '@/lib/domain/domain_core';
-import { UserRole } from '@prisma/client';
 
 // Prisma implementation of repositories - ONLY these touch the database
 
 export class PrismaUserRepository implements UserRepository {
   async create(data: CreateUserInput): Promise<User> {
-    return await prisma.user.create({
+    return prisma.user.create({
       data: {
         name: data.name,
         email: data.email,
-        role: data.role || UserRole.USER,
+        role: data.role!,
       },
     });
   }
 
   async findById(id: string): Promise<User | null> {
-    return await prisma.user.findUnique({
+    return prisma.user.findUnique({
       where: { id },
     });
   }
 
   async findByEmail(email: string): Promise<User | null> {
-    return await prisma.user.findUnique({
+    return prisma.user.findUnique({
       where: { email },
     });
   }
 
   async findAll(): Promise<User[]> {
-    return await prisma.user.findMany({
+    return prisma.user.findMany({
       orderBy: { createdAt: 'desc' },
     });
   }
 
   async update(id: string, data: UpdateUserInput): Promise<User> {
-    return await prisma.user.update({
+    return prisma.user.update({
       where: { id },
       data,
     });
@@ -70,7 +69,7 @@ export class PrismaUserRepository implements UserRepository {
 
 export class PrismaCompetencyRepository implements CompetencyRepository {
   async create(data: CreateCompetencyInput): Promise<Competency> {
-    return await prisma.competency.create({
+    return prisma.competency.create({
       data: {
         title: data.title,
         description: data.description || null,
@@ -79,19 +78,19 @@ export class PrismaCompetencyRepository implements CompetencyRepository {
   }
 
   async findById(id: string): Promise<Competency | null> {
-    return await prisma.competency.findUnique({
+    return prisma.competency.findUnique({
       where: { id },
     });
   }
 
   async findAll(): Promise<Competency[]> {
-    return await prisma.competency.findMany({
+    return prisma.competency.findMany({
       orderBy: { createdAt: 'desc' },
     });
   }
 
   async update(id: string, data: UpdateCompetencyInput): Promise<Competency> {
-    return await prisma.competency.update({
+    return prisma.competency.update({
       where: { id },
       data,
     });
@@ -108,7 +107,7 @@ export class PrismaLearningResourceRepository
   implements LearningResourceRepository
 {
   async create(data: CreateLearningResourceInput): Promise<LearningResource> {
-    return await prisma.learningResource.create({
+    return prisma.learningResource.create({
       data: {
         title: data.title,
         url: data.url,
@@ -117,19 +116,19 @@ export class PrismaLearningResourceRepository
   }
 
   async findById(id: string): Promise<LearningResource | null> {
-    return await prisma.learningResource.findUnique({
+    return prisma.learningResource.findUnique({
       where: { id },
     });
   }
 
   async findByUrl(url: string): Promise<LearningResource | null> {
-    return await prisma.learningResource.findFirst({
+    return prisma.learningResource.findFirst({
       where: { url },
     });
   }
 
   async findAll(): Promise<LearningResource[]> {
-    return await prisma.learningResource.findMany({
+    return prisma.learningResource.findMany({
       orderBy: { createdAt: 'desc' },
     });
   }
@@ -138,7 +137,7 @@ export class PrismaLearningResourceRepository
     id: string,
     data: UpdateLearningResourceInput
   ): Promise<LearningResource> {
-    return await prisma.learningResource.update({
+    return prisma.learningResource.update({
       where: { id },
       data,
     });
@@ -157,7 +156,7 @@ export class PrismaCompetencyRelationshipRepository
   async create(
     data: CreateCompetencyRelationshipInput
   ): Promise<CompetencyRelationship> {
-    return await prisma.competencyRelationship.create({
+    return prisma.competencyRelationship.create({
       data: {
         relationshipType: data.relationshipType,
         originId: data.originId,
@@ -168,13 +167,13 @@ export class PrismaCompetencyRelationshipRepository
   }
 
   async findById(id: string): Promise<CompetencyRelationship | null> {
-    return await prisma.competencyRelationship.findUnique({
+    return prisma.competencyRelationship.findUnique({
       where: { id },
     });
   }
 
   async findByOriginId(originId: string): Promise<CompetencyRelationship[]> {
-    return await prisma.competencyRelationship.findMany({
+    return prisma.competencyRelationship.findMany({
       where: { originId },
       orderBy: { createdAt: 'desc' },
     });
@@ -183,14 +182,14 @@ export class PrismaCompetencyRelationshipRepository
   async findByDestinationId(
     destinationId: string
   ): Promise<CompetencyRelationship[]> {
-    return await prisma.competencyRelationship.findMany({
+    return prisma.competencyRelationship.findMany({
       where: { destinationId },
       orderBy: { createdAt: 'desc' },
     });
   }
 
   async findAll(): Promise<CompetencyRelationship[]> {
-    return await prisma.competencyRelationship.findMany({
+    return prisma.competencyRelationship.findMany({
       orderBy: { createdAt: 'desc' },
     });
   }
@@ -208,7 +207,7 @@ export class PrismaCompetencyResourceLinkRepository
   async create(
     data: CreateCompetencyResourceLinkInput
   ): Promise<CompetencyResourceLink> {
-    return await prisma.competencyResourceLink.create({
+    return prisma.competencyResourceLink.create({
       data: {
         competencyId: data.competencyId,
         resourceId: data.resourceId,
@@ -218,7 +217,7 @@ export class PrismaCompetencyResourceLinkRepository
   }
 
   async findById(id: string): Promise<CompetencyResourceLink | null> {
-    return await prisma.competencyResourceLink.findUnique({
+    return prisma.competencyResourceLink.findUnique({
       where: { id },
     });
   }
@@ -226,7 +225,7 @@ export class PrismaCompetencyResourceLinkRepository
   async findByCompetencyId(
     competencyId: string
   ): Promise<CompetencyResourceLink[]> {
-    return await prisma.competencyResourceLink.findMany({
+    return prisma.competencyResourceLink.findMany({
       where: { competencyId },
       orderBy: { createdAt: 'desc' },
     });
@@ -235,14 +234,14 @@ export class PrismaCompetencyResourceLinkRepository
   async findByResourceId(
     resourceId: string
   ): Promise<CompetencyResourceLink[]> {
-    return await prisma.competencyResourceLink.findMany({
+    return prisma.competencyResourceLink.findMany({
       where: { resourceId },
       orderBy: { createdAt: 'desc' },
     });
   }
 
   async findAll(): Promise<CompetencyResourceLink[]> {
-    return await prisma.competencyResourceLink.findMany({
+    return prisma.competencyResourceLink.findMany({
       orderBy: { createdAt: 'desc' },
     });
   }

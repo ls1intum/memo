@@ -4,9 +4,13 @@ import { competencyResourceLinkService } from '@/lib/services/competency_resourc
 
 export async function createCompetencyResourceLinkAction(formData: FormData) {
   try {
-    const competencyId = formData.get('competencyId') as string;
-    const resourceId = formData.get('resourceId') as string;
-    const userId = formData.get('userId') as string;
+    const competencyId = formData.get('competencyId') as string | null;
+    const resourceId = formData.get('resourceId') as string | null;
+    const userId = formData.get('userId') as string | null;
+
+    if (!competencyId || !resourceId || !userId) {
+      return { success: false, error: 'All fields are required' };
+    }
 
     const link = await competencyResourceLinkService.createLink({
       competencyId,

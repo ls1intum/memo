@@ -6,7 +6,7 @@ export class CompetencyResourceLinkService {
   constructor(private readonly repository: CompetencyResourceLinkRepository) {}
 
   async createLink(data: CreateCompetencyResourceLinkInput) {
-    return await this.repository.create(data);
+    return this.repository.create(data);
   }
 
   async getLinkById(id: string) {
@@ -18,15 +18,15 @@ export class CompetencyResourceLinkService {
   }
 
   async getLinksByCompetencyId(competencyId: string) {
-    return await this.repository.findByCompetencyId(competencyId);
+    return this.repository.findByCompetencyId(competencyId);
   }
 
   async getLinksByResourceId(resourceId: string) {
-    return await this.repository.findByResourceId(resourceId);
+    return this.repository.findByResourceId(resourceId);
   }
 
   async getAllLinks() {
-    return await this.repository.findAll();
+    return this.repository.findAll();
   }
 
   async deleteLink(id: string) {

@@ -7,10 +7,14 @@ export async function createCompetencyRelationshipAction(formData: FormData) {
   try {
     const relationshipType = formData.get(
       'relationshipType'
-    ) as RelationshipType;
-    const originId = formData.get('originId') as string;
-    const destinationId = formData.get('destinationId') as string;
-    const userId = formData.get('userId') as string;
+    ) as RelationshipType | null;
+    const originId = formData.get('originId') as string | null;
+    const destinationId = formData.get('destinationId') as string | null;
+    const userId = formData.get('userId') as string | null;
+
+    if (!relationshipType || !originId || !destinationId || !userId) {
+      return { success: false, error: 'All fields are required' };
+    }
 
     const relationship = await competencyRelationshipService.createRelationship(
       {

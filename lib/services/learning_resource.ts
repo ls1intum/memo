@@ -13,7 +13,7 @@ export class LearningResourceService {
     if (existing) {
       throw new Error('Learning resource with this URL already exists');
     }
-    return await this.repository.create(data);
+    return this.repository.create(data);
   }
 
   async getLearningResourceById(id: string) {
@@ -25,16 +25,16 @@ export class LearningResourceService {
   }
 
   async getLearningResourceByUrl(url: string) {
-    return await this.repository.findByUrl(url);
+    return this.repository.findByUrl(url);
   }
 
   async getAllLearningResources() {
-    return await this.repository.findAll();
+    return this.repository.findAll();
   }
 
   async updateLearningResource(id: string, data: UpdateLearningResourceInput) {
     await this.getLearningResourceById(id);
-    return await this.repository.update(id, data);
+    return this.repository.update(id, data);
   }
 
   async deleteLearningResource(id: string) {
