@@ -58,3 +58,32 @@ export async function deleteUserAction(id: string) {
     };
   }
 }
+
+/**
+ * Gets or creates the demo user for development/testing purposes.
+ * Returns the demo user with email 'demo@memo.local'.
+ */
+export async function getOrCreateDemoUserAction() {
+  try {
+    // Try to find existing demo user
+    let user = await userService.getUserByEmail('demo@memo.local');
+    
+    // If not found, create it
+    if (!user) {
+      user = await userService.createUser({
+        name: 'Demo User',
+        email: 'demo@memo.local',
+      });
+    }
+    
+    return { success: true, user };
+  } catch (error) {
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to get or create demo user',
+    };
+  }
+}

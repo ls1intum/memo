@@ -10,7 +10,7 @@ export const Card = ({
   return (
     <div
       className={cn(
-        'group rounded-xl border border-border bg-card p-6 text-card-foreground shadow-sm transition-all duration-300 hover:shadow-xl hover:shadow-air-superiority-blue/10 dark:hover:shadow-air-superiority-blue/20 hover:-translate-y-1 hover:border-air-superiority-blue/50 dark:hover:border-air-superiority-blue/40',
+        'rounded-xl border border-border bg-card p-6 text-card-foreground shadow-sm',
         className
       )}
     >
@@ -36,7 +36,7 @@ export const CardTitle = ({
 }) => (
   <h3
     className={cn(
-      'text-lg font-semibold bg-gradient-to-r from-yinmn-blue to-air-superiority-blue dark:from-air-superiority-blue dark:to-air-superiority-blue bg-clip-text text-transparent transition-all duration-300 group-hover:scale-105',
+      'text-lg font-semibold bg-gradient-to-r from-yinmn-blue to-air-superiority-blue dark:from-air-superiority-blue dark:to-air-superiority-blue bg-clip-text text-transparent',
       className
     )}
   >

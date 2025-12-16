@@ -246,9 +246,16 @@ export default function SessionPage() {
         return;
       }
 
-      // ⌘+Z or Ctrl+Z for Undo
-      if ((event.metaKey || event.ctrlKey) && event.key === 'z' && !event.shiftKey) {
+      // ⌘+Shift+Z or Ctrl+Shift+Z for Undo (only if there's history to undo)
+      // Using Shift+Z to avoid browser's default undo behavior
+      if (
+        (event.metaKey || event.ctrlKey) &&
+        event.key === 'z' &&
+        event.shiftKey &&
+        history.length > 0
+      ) {
         event.preventDefault();
+        event.stopPropagation();
         handleUndo();
         return;
       }
@@ -286,7 +293,7 @@ export default function SessionPage() {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isLoading, isCreating, userId, relation, competencies, handleAction, handleUndo]);
+  }, [isLoading, isCreating, userId, relation, competencies, history, handleAction, handleUndo]);
 
   return (
     <div
@@ -299,7 +306,7 @@ export default function SessionPage() {
         <div className="absolute right-[14%] top-[28%] h-[22rem] w-[22rem] rounded-[40%] bg-gradient-to-br from-[#ffdff3]/55 via-[#fff3f8]/35 to-transparent blur-[140px]" />
       </div>
 
-      <main className="relative z-10 mx-auto mt-24 flex w-full max-w-6xl flex-col gap-8 px-6 pb-70 lg:mt-32 lg:px-0">
+      <main className="relative z-10 mx-auto mt-24 flex w-full max-w-6xl flex-col gap-8 px-6 pb-60 lg:mt-32 lg:px-0">
         <section className="space-y-8 rounded-[32px] border border-white/70 bg-white/85 p-8 shadow-[0_26px_90px_-55px_rgba(7,30,84,0.5)] backdrop-blur-xl">
           <div className="flex flex-wrap items-center gap-3 text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">
             <span>Mapping Session</span>
@@ -502,18 +509,22 @@ export default function SessionPage() {
 
           <div className="mt-2 flex flex-wrap items-center gap-3">
             <Button
-                  variant="outline"
+              variant="ghost"
               size="sm"
-                  className="bg-slate-200 text-slate-700 hover:bg-slate-300 border-slate-300"
+              className="text-slate-700"
               onClick={handleUndo}
+              disabled={history.length === 0}
             >
-                  Undo{' '}
-                  <Kbd className="ml-2 bg-slate-200 text-slate-700 border border-slate-300">
-                    ⌘
-                  </Kbd>
-                  <Kbd className="ml-1 bg-slate-200 text-slate-700 border border-slate-300">
-                    Z
-                  </Kbd>
+              Undo{' '}
+              <Kbd className="ml-2 bg-slate-200 text-slate-700 border border-slate-300">
+                ⌘
+              </Kbd>
+              <Kbd className="ml-1 bg-slate-200 text-slate-700 border border-slate-300">
+                ⇧
+              </Kbd>
+              <Kbd className="ml-1 bg-slate-200 text-slate-700 border border-slate-300">
+                Z
+              </Kbd>
             </Button>
             <div className="flex-1" />
             <Button
