@@ -1,12 +1,19 @@
 'use server';
 
-import { userService } from '@/lib/services/user';
+import { userService } from '@/domain_core/services/user';
 import { UserRole } from '@prisma/client';
 
 export async function createUserAction(formData: FormData) {
   try {
-    const name = formData.get('name') as string;
-    const email = formData.get('email') as string;
+    const name = formData.get('name') as string | null;
+    const email = formData.get('email') as string | null;
+
+    if (!name || !email) {
+      return {
+        success: false,
+        error: 'Name and email are required',
+      };
+    }
 
     const user = await userService.createUser({ name, email });
 

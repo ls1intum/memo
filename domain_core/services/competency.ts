@@ -1,9 +1,9 @@
-import { CompetencyRepository } from '@/lib/repositories/dc_interface';
-import { competencyRepository } from '@/lib/repositories/dc_repo';
+import { CompetencyRepository } from '@/domain_core/repositories/dc_interface';
+import { competencyRepository } from '@/domain_core/repositories/dc_repo';
 import {
   CreateCompetencyInput,
   UpdateCompetencyInput,
-} from '@/lib/domain/domain_core';
+} from '@/domain_core/model/domain_model';
 
 export class CompetencyService {
   constructor(private readonly repository: CompetencyRepository) {}

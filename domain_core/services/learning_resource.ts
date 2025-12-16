@@ -1,9 +1,9 @@
-import { LearningResourceRepository } from '@/lib/repositories/dc_interface';
-import { learningResourceRepository } from '@/lib/repositories/dc_repo';
+import { LearningResourceRepository } from '@/domain_core/repositories/dc_interface';
+import { learningResourceRepository } from '@/domain_core/repositories/dc_repo';
 import {
   CreateLearningResourceInput,
   UpdateLearningResourceInput,
-} from '@/lib/domain/domain_core';
+} from '@/domain_core/model/domain_model';
 
 export class LearningResourceService {
   constructor(private readonly repository: LearningResourceRepository) {}

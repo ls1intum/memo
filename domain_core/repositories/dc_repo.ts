@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/client/prisma';
+import { prisma } from '@/domain_core/infrastructure/prisma';
 import {
   UserRepository,
   CompetencyRepository,
@@ -20,7 +20,7 @@ import {
   CreateCompetencyRelationshipInput,
   CompetencyResourceLink,
   CreateCompetencyResourceLinkInput,
-} from '@/lib/domain/domain_core';
+} from '@/domain_core/model/domain_model';
 
 // Prisma implementation of repositories - ONLY these touch the database
 

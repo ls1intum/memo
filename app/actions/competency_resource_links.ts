@@ -1,6 +1,6 @@
 'use server';
 
-import { competencyResourceLinkService } from '@/lib/services/competency_resource_link';
+import { competencyResourceLinkService } from '@/domain_core/services/competency_resource_link';
 
 export async function createCompetencyResourceLinkAction(formData: FormData) {
   try {

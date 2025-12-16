@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { cn } from '../../lib/client/utils';
+import { cn } from '../../domain_core/infrastructure/utils';
 
 export const AccordionItem = ({
   title,

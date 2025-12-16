@@ -1,6 +1,6 @@
-import { CompetencyResourceLinkRepository } from '@/lib/repositories/dc_interface';
-import { competencyResourceLinkRepository } from '@/lib/repositories/dc_repo';
-import { CreateCompetencyResourceLinkInput } from '@/lib/domain/domain_core';
+import { CompetencyResourceLinkRepository } from '@/domain_core/repositories/dc_interface';
+import { competencyResourceLinkRepository } from '@/domain_core/repositories/dc_repo';
+import { CreateCompetencyResourceLinkInput } from '@/domain_core/model/domain_model';
 
 export class CompetencyResourceLinkService {
   constructor(private readonly repository: CompetencyResourceLinkRepository) {}

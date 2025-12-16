@@ -12,7 +12,7 @@ import {
   CreateCompetencyRelationshipInput,
   CompetencyResourceLink,
   CreateCompetencyResourceLinkInput,
-} from '@/lib/domain/domain_core';
+} from '@/domain_core/model/domain_model';
 
 export interface UserRepository {
   create(data: CreateUserInput): Promise<User>;

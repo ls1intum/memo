@@ -1,7 +1,7 @@
 'use server';
 
-import { competencyRelationshipService } from '@/lib/services/competency_relationship';
-import { RelationshipType } from '@/lib/domain/domain_core';
+import { competencyRelationshipService } from '@/domain_core/services/competency_relationship';
+import { RelationshipType } from '@/domain_core/model/domain_model';
 
 export async function createCompetencyRelationshipAction(formData: FormData) {
   try {

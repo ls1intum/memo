@@ -1,10 +1,10 @@
-import { UserRepository } from '@/lib/repositories/dc_interface';
-import { userRepository } from '@/lib/repositories/dc_repo';
+import { UserRepository } from '@/domain_core/repositories/dc_interface';
+import { userRepository } from '@/domain_core/repositories/dc_repo';
 import {
   CreateUserInput,
   UpdateUserInput,
   UserRole,
-} from '@/lib/domain/domain_core';
+} from '@/domain_core/model/domain_model';
 
 // Service layer - business logic, uses repository interface
 export class UserService {
