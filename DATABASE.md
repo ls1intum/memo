@@ -90,10 +90,13 @@ npm run db:reset
 ```
 
 **Seed demo content (user + 5 competencies):**
+
 ```bash
 npm run db:seed
 ```
-Creates a demo user (`demo@memo.local`) and 5 sample competencies. Idempotent, safe to run multiple times.
+
+Creates a demo user (`demo@memo.local`) and 5 sample competencies. Idempotent, safe to run multiple
+times.
 
 ## Schema
 

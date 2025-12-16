@@ -81,8 +81,7 @@ export function Navbar() {
                   className="absolute inset-y-1 rounded-full bg-gradient-to-r from-[#0a4da2] to-[#7c6cff] shadow-md transition-all duration-300 ease-out"
                   style={{
                     width: 'calc(50% - 1rem)',
-                    left:
-                      activeIndex === 1 ? 'calc(50% + 0.5rem)' : '0.5rem',
+                    left: activeIndex === 1 ? 'calc(50% + 0.5rem)' : '0.5rem',
                   }}
                   aria-hidden
                 />

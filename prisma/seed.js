@@ -80,7 +80,7 @@ async function main() {
 
 // Execute main function and handle errors
 main()
-  .catch((error) => {
+  .catch(error => {
     console.error('[Seed] Error during seeding:', error);
     process.exit(1);
   })

@@ -13,12 +13,15 @@ import type { Competency } from '@/lib/domain/domain_core';
 import type { RelationshipType } from '@/lib/domain/domain_core';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { Kbd } from '@/components/ui/kbd';
 import { ArrowRight } from 'lucide-react';
 import {
   Card,
-  CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
@@ -40,7 +43,8 @@ export default function SessionPage() {
   const searchParams = useSearchParams();
   const countParam = searchParams.get('count');
   const parsedCount = countParam ? Number(countParam) : NaN;
-  const count = Number.isFinite(parsedCount) && parsedCount > 0 ? parsedCount : 2;
+  const count =
+    Number.isFinite(parsedCount) && parsedCount > 0 ? parsedCount : 2;
 
   const [relationshipTypes, setRelationshipTypes] = useState<
     RelationshipTypeOption[]
@@ -84,7 +88,6 @@ export default function SessionPage() {
 
     void loadRelationshipTypes();
     void loadDemoUser();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadCompetencies = useCallback(async () => {
@@ -117,12 +120,7 @@ export default function SessionPage() {
     async (type: 'completed' | 'skipped') => {
       if (type === 'completed') {
         // Create relationship in database using FormData
-        if (
-          !competencies ||
-          competencies.length < 2 ||
-          !relation ||
-          !userId
-        ) {
+        if (!competencies || competencies.length < 2 || !relation || !userId) {
           setError('Missing required data to create relationship');
           return;
         }
@@ -158,9 +156,7 @@ export default function SessionPage() {
           await loadCompetencies();
         } catch (err) {
           setError(
-            err instanceof Error
-              ? err.message
-              : 'An unexpected error occurred'
+            err instanceof Error ? err.message : 'An unexpected error occurred'
           );
         } finally {
           setIsCreating(false);
@@ -211,16 +207,12 @@ export default function SessionPage() {
       deleteCompetencyRelationshipAction(relationshipToDelete)
         .then(result => {
           if (!result.success) {
-            setError(
-              result.error ?? 'Failed to delete relationship'
-            );
+            setError(result.error ?? 'Failed to delete relationship');
           }
         })
         .catch(err => {
           setError(
-            err instanceof Error
-              ? err.message
-              : 'Failed to delete relationship'
+            err instanceof Error ? err.message : 'Failed to delete relationship'
           );
         })
         .finally(() => {
@@ -231,7 +223,8 @@ export default function SessionPage() {
 
   const isLoading = competencies === null && !error;
   const noCompetencies = competencies !== null && competencies.length === 0;
-  const notEnough = !!competencies && competencies.length > 0 && competencies.length < 2;
+  const notEnough =
+    !!competencies && competencies.length > 0 && competencies.length < 2;
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -293,7 +286,16 @@ export default function SessionPage() {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isLoading, isCreating, userId, relation, competencies, history, handleAction, handleUndo]);
+  }, [
+    isLoading,
+    isCreating,
+    userId,
+    relation,
+    competencies,
+    history,
+    handleAction,
+    handleUndo,
+  ]);
 
   return (
     <div
@@ -359,16 +361,16 @@ export default function SessionPage() {
 
           {!error && !noCompetencies && !notEnough && (
             <>
-          <h2 className="text-2xl font-semibold text-slate-900">
+              <h2 className="text-2xl font-semibold text-slate-900">
                 {isLoading || !competencies || competencies.length < 2
                   ? 'Loading competencies for this mapping session...'
                   : `How does "${competencies[0]!.title}" relate to "${
                       competencies[1]!.title
                     }"?`}
-          </h2>
+              </h2>
 
-          <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-3">
-            <div className="col-span-1">
+              <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-3">
+                <div className="col-span-1">
                   {isLoading || !competencies || !competencies[0] ? (
                     <Card className="border border-white/70 bg-white/60">
                       <CardHeader>
@@ -391,12 +393,17 @@ export default function SessionPage() {
                               </Badge>
                             </TooltipTrigger>
                             <TooltipContent>
-                              <p>Bloom&apos;s Taxonomy categorizes learning objectives by cognitive level.</p>
+                              <p>
+                                Bloom&apos;s Taxonomy categorizes learning
+                                objectives by cognitive level.
+                              </p>
                               <p className="mt-1">
-                                → Apply: use knowledge in practice (implement, execute, solve).
+                                → Apply: use knowledge in practice (implement,
+                                execute, solve).
                               </p>
                               <p className="mt-1 text-[11px] text-slate-200">
-                                Levels: Remember • Understand • Apply • Analyze • Evaluate • Create
+                                Levels: Remember • Understand • Apply • Analyze
+                                • Evaluate • Create
                               </p>
                             </TooltipContent>
                           </Tooltip>
@@ -415,7 +422,7 @@ export default function SessionPage() {
                       </CardHeader>
                     </Card>
                   )}
-            </div>
+                </div>
 
                 <div className="col-span-1 flex flex-col items-center justify-center gap-6 text-center md:col-start-2">
                   <div className="flex items-center justify-center gap-4 text-slate-500">
@@ -427,37 +434,39 @@ export default function SessionPage() {
                     Select Relation Type
                   </div>
                   <div className="w-full max-w-[260px] md:ml-40">
-                  <RadioGroup
-                    value={relation}
-                      onValueChange={value => setRelation(value as RelationshipType)}
+                    <RadioGroup
+                      value={relation}
+                      onValueChange={value =>
+                        setRelation(value as RelationshipType)
+                      }
                       className="gap-4 items-start"
-                  >
+                    >
                       {relationshipTypes.length > 0 ? (
                         relationshipTypes.map(({ value, label }) => (
-                      <div key={value} className="flex items-center gap-3">
-                        <RadioGroupItem
-                          value={value}
-                          id={value}
-                          className="h-4 w-4"
-                        />
-                        <Label
-                          htmlFor={value}
-                          className="text-sm font-normal text-slate-800"
-                        >
-                          {label}
-                        </Label>
-                      </div>
+                          <div key={value} className="flex items-center gap-3">
+                            <RadioGroupItem
+                              value={value}
+                              id={value}
+                              className="h-4 w-4"
+                            />
+                            <Label
+                              htmlFor={value}
+                              className="text-sm font-normal text-slate-800"
+                            >
+                              {label}
+                            </Label>
+                          </div>
                         ))
                       ) : (
                         <div className="text-sm text-slate-400">
                           Loading relationship types...
                         </div>
                       )}
-                  </RadioGroup>
+                    </RadioGroup>
                   </div>
-            </div>
+                </div>
 
-            <div className="col-span-1">
+                <div className="col-span-1">
                   {isLoading || !competencies || !competencies[1] ? (
                     <Card className="border border-white/70 bg-white/60">
                       <CardHeader>
@@ -480,12 +489,17 @@ export default function SessionPage() {
                               </Badge>
                             </TooltipTrigger>
                             <TooltipContent>
-                              <p>Bloom&apos;s Taxonomy categorizes learning objectives by cognitive level.</p>
+                              <p>
+                                Bloom&apos;s Taxonomy categorizes learning
+                                objectives by cognitive level.
+                              </p>
                               <p className="mt-1">
-                                → Apply: use knowledge in practice (implement, execute, solve).
+                                → Apply: use knowledge in practice (implement,
+                                execute, solve).
                               </p>
                               <p className="mt-1 text-[11px] text-slate-200">
-                                Levels: Remember • Understand • Apply • Analyze • Evaluate • Create
+                                Levels: Remember • Understand • Apply • Analyze
+                                • Evaluate • Create
                               </p>
                             </TooltipContent>
                           </Tooltip>
@@ -504,54 +518,54 @@ export default function SessionPage() {
                       </CardHeader>
                     </Card>
                   )}
-            </div>
-          </div>
+                </div>
+              </div>
 
-          <div className="mt-2 flex flex-wrap items-center gap-3">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-slate-700"
-              onClick={handleUndo}
-              disabled={history.length === 0}
-            >
-              Undo{' '}
-              <Kbd className="ml-2 bg-slate-200 text-slate-700 border border-slate-300">
-                ⌘
-              </Kbd>
-              <Kbd className="ml-1 bg-slate-200 text-slate-700 border border-slate-300">
-                ⇧
-              </Kbd>
-              <Kbd className="ml-1 bg-slate-200 text-slate-700 border border-slate-300">
-                Z
-              </Kbd>
-            </Button>
-            <div className="flex-1" />
-            <Button
-              variant="outline"
-              size="sm"
+              <div className="mt-2 flex flex-wrap items-center gap-3">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-slate-700"
+                  onClick={handleUndo}
+                  disabled={history.length === 0}
+                >
+                  Undo{' '}
+                  <Kbd className="ml-2 bg-slate-200 text-slate-700 border border-slate-300">
+                    ⌘
+                  </Kbd>
+                  <Kbd className="ml-1 bg-slate-200 text-slate-700 border border-slate-300">
+                    ⇧
+                  </Kbd>
+                  <Kbd className="ml-1 bg-slate-200 text-slate-700 border border-slate-300">
+                    Z
+                  </Kbd>
+                </Button>
+                <div className="flex-1" />
+                <Button
+                  variant="outline"
+                  size="sm"
                   className="bg-slate-200 text-slate-700 hover:bg-slate-300 border-slate-300"
-              onClick={() => handleAction('skipped')}
+                  onClick={() => handleAction('skipped')}
                   disabled={isLoading}
-            >
+                >
                   Skip{' '}
                   <Kbd className="ml-2 bg-slate-200 text-slate-700 border border-slate-300">
                     Space
                   </Kbd>
-            </Button>
-            <Button
-              variant="default"
-              size="sm"
-              className="bg-[#0a4da2] text-white shadow-[0_18px_45px_-26px_rgba(7,30,84,0.75)] hover:bg-[#0d56b5]"
-              onClick={() => handleAction('completed')}
+                </Button>
+                <Button
+                  variant="default"
+                  size="sm"
+                  className="bg-[#0a4da2] text-white shadow-[0_18px_45px_-26px_rgba(7,30,84,0.75)] hover:bg-[#0d56b5]"
+                  onClick={() => handleAction('completed')}
                   disabled={isLoading || isCreating || !userId || !relation}
-            >
+                >
                   {isCreating ? 'Creating...' : 'Add Relation'}{' '}
                   <Kbd className="ml-2 bg-slate-200 text-slate-700 border border-slate-300">
                     ⏎
                   </Kbd>
-            </Button>
-          </div>
+                </Button>
+              </div>
             </>
           )}
         </section>

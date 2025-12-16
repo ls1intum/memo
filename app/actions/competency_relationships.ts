@@ -125,22 +125,22 @@ export async function getRelationshipTypesAction() {
   try {
     // Import RelationshipType enum from Prisma client
     const { RelationshipType } = await import('@prisma/client');
-    
+
     // Get all enum values
     const types = Object.values(RelationshipType) as RelationshipType[];
-    
+
     // Map enum values to display labels
     const typeLabels: Record<RelationshipType, string> = {
       ASSUMES: 'Assumes',
       EXTENDS: 'Extends',
       MATCHES: 'Matches',
     };
-    
+
     const typesWithLabels = types.map(type => ({
       value: type,
       label: typeLabels[type] || type,
     }));
-    
+
     return { success: true, types: typesWithLabels };
   } catch (error) {
     return {

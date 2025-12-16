@@ -67,7 +67,7 @@ export async function getOrCreateDemoUserAction() {
   try {
     // Try to find existing demo user
     let user = await userService.getUserByEmail('demo@memo.local');
-    
+
     // If not found, create it
     if (!user) {
       user = await userService.createUser({
@@ -75,7 +75,7 @@ export async function getOrCreateDemoUserAction() {
         email: 'demo@memo.local',
       });
     }
-    
+
     return { success: true, user };
   } catch (error) {
     return {
