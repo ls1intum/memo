@@ -81,7 +81,7 @@ export function Navbar() {
                 }}
                 aria-hidden
               />
-              {navItems.map((item, _index) => (
+              {navItems.map(item => (
                 <Link
                   key={item.href}
                   href={item.href}

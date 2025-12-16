@@ -37,7 +37,7 @@ export default function Page() {
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#d7e3ff] via-[#f3f5ff] to-[#e8ecff] text-slate-900">
       <LiquidGlassGradient />
 
-      <main className="relative z-20 mx-auto flex w-full max-w-6xl flex-col gap-28 px-6 pb-4 pt-46 lg:px-0">
+      <main className="relative z-20 mx-auto flex w-full max-w-6xl flex-col gap-28 px-6 pb-4 pt-[11.5rem] lg:px-0">
         <section id="overview" className="grid items-center gap-16 pb-8">
           <div className="space-y-12">
             <div className="space-y-8">
@@ -81,7 +81,7 @@ export default function Page() {
           </div>
         </section>
 
-        <section className="relative isolate left-1/2 right-1/2 w-screen -translate-x-1/2 transform bg-white px-6 pb-34 pt-32 lg:px-0 -mt-56">
+        <section className="relative isolate left-1/2 right-1/2 w-screen -translate-x-1/2 transform bg-white px-6 pb-[8.5rem] pt-32 lg:px-0 -mt-56">
           <div className="relative mx-auto flex w-full max-w-5xl flex-col items-center gap-8 text-center">
             <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-4 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-600">
               Problem
