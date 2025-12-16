@@ -1,9 +1,14 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { getRandomCompetenciesAction } from '@/app/actions/competencies';
-import { getRelationshipTypesAction } from '@/app/actions/competency_relationships';
+import {
+  getRelationshipTypesAction,
+  createCompetencyRelationshipAction,
+  deleteCompetencyRelationshipAction,
+} from '@/app/actions/competency_relationships';
+import { getOrCreateDemoUserAction } from '@/app/actions/users';
 import type { Competency } from '@/lib/domain/domain_core';
 import type { RelationshipType } from '@/lib/domain/domain_core';
 import { Button } from '@/components/ui/button';
@@ -45,9 +50,20 @@ export default function SessionPage() {
     completed: 0,
     skipped: 0,
   });
-  const [, setHistory] = useState<Array<'completed' | 'skipped'>>([]);
+  const [history, setHistory] = useState<
+    Array<{
+      type: 'completed' | 'skipped';
+      relationshipId?: string;
+      competencies?: Competency[];
+    }>
+  >([]);
   const [competencies, setCompetencies] = useState<Competency[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
+  const [relationshipToDelete, setRelationshipToDelete] = useState<
+    string | null
+  >(null);
 
   useEffect(() => {
     async function loadRelationshipTypes() {
@@ -59,11 +75,19 @@ export default function SessionPage() {
       }
     }
 
+    async function loadDemoUser() {
+      const result = await getOrCreateDemoUserAction();
+      if (result.success && result.user) {
+        setUserId(result.user.id);
+      }
+    }
+
     void loadRelationshipTypes();
+    void loadDemoUser();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const loadCompetencies = async () => {
+  const loadCompetencies = useCallback(async () => {
     setError(null);
     setCompetencies(null);
 
@@ -83,35 +107,127 @@ export default function SessionPage() {
     }
 
     setCompetencies(result.competencies);
-  };
+  }, [count]);
 
   useEffect(() => {
     void loadCompetencies();
-  }, [count]);
+  }, [loadCompetencies]);
 
-  function handleAction(type: 'completed' | 'skipped') {
-    setStats(prev => ({ ...prev, [type]: prev[type] + 1 }));
-    setHistory(prev => [...prev, type]);
-    
-    // When skipping, reload new random competencies
-    if (type === 'skipped') {
-      void loadCompetencies();
-    }
-  }
+  const handleAction = useCallback(
+    async (type: 'completed' | 'skipped') => {
+      if (type === 'completed') {
+        // Create relationship in database using FormData
+        if (
+          !competencies ||
+          competencies.length < 2 ||
+          !relation ||
+          !userId
+        ) {
+          setError('Missing required data to create relationship');
+          return;
+        }
 
-  function handleUndo() {
+        setIsCreating(true);
+        setError(null);
+
+        try {
+          const formData = new FormData();
+          formData.set('relationshipType', relation);
+          formData.set('originId', competencies[0]!.id);
+          formData.set('destinationId', competencies[1]!.id);
+          formData.set('userId', userId);
+
+          const result = await createCompetencyRelationshipAction(formData);
+
+          if (!result.success) {
+            setError(result.error ?? 'Failed to create relationship');
+            setIsCreating(false);
+            return;
+          }
+
+          // Success - update stats and reload new competencies
+          setStats(prev => ({ ...prev, completed: prev.completed + 1 }));
+          setHistory(prev => [
+            ...prev,
+            {
+              type: 'completed',
+              relationshipId: result.relationship?.id,
+              competencies: competencies ? [...competencies] : undefined,
+            },
+          ]);
+          await loadCompetencies();
+        } catch (err) {
+          setError(
+            err instanceof Error
+              ? err.message
+              : 'An unexpected error occurred'
+          );
+        } finally {
+          setIsCreating(false);
+        }
+      } else if (type === 'skipped') {
+        // When skipping, just update stats and reload
+        setStats(prev => ({ ...prev, skipped: prev.skipped + 1 }));
+        setHistory(prev => [
+          ...prev,
+          {
+            type: 'skipped',
+            competencies: competencies ? [...competencies] : undefined,
+          },
+        ]);
+        void loadCompetencies();
+      }
+    },
+    [competencies, relation, userId, loadCompetencies]
+  );
+
+  const handleUndo = useCallback(() => {
     setHistory(prev => {
       const updated = [...prev];
       const last = updated.pop();
       if (last) {
         setStats(prevStats => ({
           ...prevStats,
-          [last]: Math.max(0, prevStats[last] - 1),
+          [last.type]: Math.max(0, prevStats[last.type] - 1),
         }));
+
+        // If it was a completed action with a relationship, mark it for deletion
+        if (last.type === 'completed' && last.relationshipId) {
+          setRelationshipToDelete(last.relationshipId);
+        }
+
+        // Restore the competencies that were shown before this action
+        if (last.competencies && last.competencies.length >= 2) {
+          setCompetencies(last.competencies);
+        }
       }
       return updated;
     });
-  }
+  }, []);
+
+  // Delete relationship from DB when relationshipToDelete is set
+  useEffect(() => {
+    if (relationshipToDelete) {
+      deleteCompetencyRelationshipAction(relationshipToDelete)
+        .then(result => {
+          if (!result.success) {
+            setError(
+              result.error ?? 'Failed to delete relationship'
+            );
+          }
+        })
+        .catch(err => {
+          setError(
+            err instanceof Error
+              ? err.message
+              : 'Failed to delete relationship'
+          );
+        })
+        .finally(() => {
+          setRelationshipToDelete(null);
+        });
+    }
+  }, [relationshipToDelete]);
 
   const isLoading = competencies === null && !error;
   const noCompetencies = competencies !== null && competencies.length === 0;
@@ -138,14 +254,28 @@ export default function SessionPage() {
       }
 
       // Space for Skip (only if not loading and has competencies)
-      if (event.key === ' ' && !isLoading && competencies && competencies.length >= 2) {
+      if (
+        event.key === ' ' &&
+        !isLoading &&
+        !isCreating &&
+        competencies &&
+        competencies.length >= 2
+      ) {
         event.preventDefault();
         handleAction('skipped');
         return;
       }
 
-      // Enter for Add Relation (only if not loading and has competencies)
-      if (event.key === 'Enter' && !isLoading && competencies && competencies.length >= 2) {
+      // Enter for Add Relation (only if not loading, not creating, has userId, relation, and competencies)
+      if (
+        event.key === 'Enter' &&
+        !isLoading &&
+        !isCreating &&
+        userId &&
+        relation &&
+        competencies &&
+        competencies.length >= 2
+      ) {
         event.preventDefault();
         handleAction('completed');
         return;
@@ -156,12 +286,12 @@ export default function SessionPage() {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isLoading, competencies, handleAction, handleUndo]);
+  }, [isLoading, isCreating, userId, relation, competencies, handleAction, handleUndo]);
 
   return (
     <div
       suppressHydrationWarning
-      className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#d7e3ff] via-[#f3f5ff] to-[#e8ecff] text-slate-900"
+      className="relative overflow-hidden bg-gradient-to-br from-[#d7e3ff] via-[#f3f5ff] to-[#e8ecff] text-slate-900"
     >
       <div className="absolute inset-0 -z-10 opacity-70">
         <div className="absolute left-1/2 top-[-6rem] h-[36rem] w-[36rem] -translate-x-1/2 rounded-full bg-white/80 blur-[140px]" />
@@ -169,7 +299,7 @@ export default function SessionPage() {
         <div className="absolute right-[14%] top-[28%] h-[22rem] w-[22rem] rounded-[40%] bg-gradient-to-br from-[#ffdff3]/55 via-[#fff3f8]/35 to-transparent blur-[140px]" />
       </div>
 
-      <main className="relative z-10 mx-auto mt-24 flex min-h-screen w-full max-w-6xl flex-col gap-12 px-6 pb-24 lg:mt-32 lg:px-0">
+      <main className="relative z-10 mx-auto mt-24 flex w-full max-w-6xl flex-col gap-8 px-6 pb-70 lg:mt-32 lg:px-0">
         <section className="space-y-8 rounded-[32px] border border-white/70 bg-white/85 p-8 shadow-[0_26px_90px_-55px_rgba(7,30,84,0.5)] backdrop-blur-xl">
           <div className="flex flex-wrap items-center gap-3 text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">
             <span>Mapping Session</span>
@@ -222,16 +352,16 @@ export default function SessionPage() {
 
           {!error && !noCompetencies && !notEnough && (
             <>
-              <h2 className="text-2xl font-semibold text-slate-900">
+          <h2 className="text-2xl font-semibold text-slate-900">
                 {isLoading || !competencies || competencies.length < 2
                   ? 'Loading competencies for this mapping session...'
                   : `How does "${competencies[0]!.title}" relate to "${
                       competencies[1]!.title
                     }"?`}
-              </h2>
+          </h2>
 
-              <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-3">
-                <div className="col-span-1">
+          <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-3">
+            <div className="col-span-1">
                   {isLoading || !competencies || !competencies[0] ? (
                     <Card className="border border-white/70 bg-white/60">
                       <CardHeader>
@@ -278,7 +408,7 @@ export default function SessionPage() {
                       </CardHeader>
                     </Card>
                   )}
-                </div>
+            </div>
 
                 <div className="col-span-1 flex flex-col items-center justify-center gap-6 text-center md:col-start-2">
                   <div className="flex items-center justify-center gap-4 text-slate-500">
@@ -289,38 +419,38 @@ export default function SessionPage() {
                   <div className="text-sm font-semibold text-slate-800">
                     Select Relation Type
                   </div>
-                  <div className="w-full max-w-[260px] md:ml-42">
-                    <RadioGroup
-                      value={relation}
+                  <div className="w-full max-w-[260px] md:ml-40">
+                  <RadioGroup
+                    value={relation}
                       onValueChange={value => setRelation(value as RelationshipType)}
                       className="gap-4 items-start"
-                    >
+                  >
                       {relationshipTypes.length > 0 ? (
                         relationshipTypes.map(({ value, label }) => (
-                          <div key={value} className="flex items-center gap-3">
-                            <RadioGroupItem
-                              value={value}
-                              id={value}
-                              className="h-4 w-4"
-                            />
-                            <Label
-                              htmlFor={value}
-                              className="text-sm font-normal text-slate-800"
-                            >
-                              {label}
-                            </Label>
-                          </div>
+                      <div key={value} className="flex items-center gap-3">
+                        <RadioGroupItem
+                          value={value}
+                          id={value}
+                          className="h-4 w-4"
+                        />
+                        <Label
+                          htmlFor={value}
+                          className="text-sm font-normal text-slate-800"
+                        >
+                          {label}
+                        </Label>
+                      </div>
                         ))
                       ) : (
                         <div className="text-sm text-slate-400">
                           Loading relationship types...
                         </div>
                       )}
-                    </RadioGroup>
+                  </RadioGroup>
                   </div>
-                </div>
+            </div>
 
-                <div className="col-span-1">
+            <div className="col-span-1">
                   {isLoading || !competencies || !competencies[1] ? (
                     <Card className="border border-white/70 bg-white/60">
                       <CardHeader>
@@ -367,16 +497,16 @@ export default function SessionPage() {
                       </CardHeader>
                     </Card>
                   )}
-                </div>
-              </div>
+            </div>
+          </div>
 
-              <div className="mt-2 flex flex-wrap items-center gap-3">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-slate-700"
-                  onClick={handleUndo}
-                >
+          <div className="mt-2 flex flex-wrap items-center gap-3">
+            <Button
+                  variant="outline"
+              size="sm"
+                  className="bg-slate-200 text-slate-700 hover:bg-slate-300 border-slate-300"
+              onClick={handleUndo}
+            >
                   Undo{' '}
                   <Kbd className="ml-2 bg-slate-200 text-slate-700 border border-slate-300">
                     ⌘
@@ -384,33 +514,33 @@ export default function SessionPage() {
                   <Kbd className="ml-1 bg-slate-200 text-slate-700 border border-slate-300">
                     Z
                   </Kbd>
-                </Button>
-                <div className="flex-1" />
-                <Button
-                  variant="outline"
-                  size="sm"
+            </Button>
+            <div className="flex-1" />
+            <Button
+              variant="outline"
+              size="sm"
                   className="bg-slate-200 text-slate-700 hover:bg-slate-300 border-slate-300"
-                  onClick={() => handleAction('skipped')}
+              onClick={() => handleAction('skipped')}
                   disabled={isLoading}
-                >
+            >
                   Skip{' '}
                   <Kbd className="ml-2 bg-slate-200 text-slate-700 border border-slate-300">
                     Space
                   </Kbd>
-                </Button>
-                <Button
-                  variant="default"
-                  size="sm"
-                  className="bg-[#0a4da2] text-white shadow-[0_18px_45px_-26px_rgba(7,30,84,0.75)] hover:bg-[#0d56b5]"
-                  onClick={() => handleAction('completed')}
-                  disabled={isLoading}
-                >
-                  Add Relation{' '}
+            </Button>
+            <Button
+              variant="default"
+              size="sm"
+              className="bg-[#0a4da2] text-white shadow-[0_18px_45px_-26px_rgba(7,30,84,0.75)] hover:bg-[#0d56b5]"
+              onClick={() => handleAction('completed')}
+                  disabled={isLoading || isCreating || !userId || !relation}
+            >
+                  {isCreating ? 'Creating...' : 'Add Relation'}{' '}
                   <Kbd className="ml-2 bg-slate-200 text-slate-700 border border-slate-300">
                     ⏎
                   </Kbd>
-                </Button>
-              </div>
+            </Button>
+          </div>
             </>
           )}
         </section>
