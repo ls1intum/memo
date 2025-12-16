@@ -20,6 +20,7 @@ import {
   CreateCompetencyRelationshipInput,
   CompetencyResourceLink,
   CreateCompetencyResourceLinkInput,
+  UserRole,
 } from '@/lib/domain/domain_core';
 
 // Prisma implementation of repositories - ONLY these touch the database
@@ -30,7 +31,7 @@ export class PrismaUserRepository implements UserRepository {
       data: {
         name: data.name,
         email: data.email,
-        role: data.role!,
+        role: data.role ?? UserRole.USER,
       },
     });
   }

@@ -55,27 +55,15 @@ async function main() {
   });
   console.log(`[Seed] Demo user ready: ${user.email}`);
 
-  // Seed competencies, skipping any that already exist
-  let created = 0;
-  for (const competency of competencies) {
-    // Check if competency with this title already exists
-    const exists = await prisma.competency.findFirst({
-      where: { title: competency.title },
-      select: { id: true },
-    });
+  // Seed competencies in bulk, skipping duplicates by title
+  const result = await prisma.competency.createMany({
+    data: competencies,
+    skipDuplicates: true,
+  });
 
-    if (exists) {
-      console.log(`[Seed] Skipping existing competency: ${competency.title}`);
-      continue;
-    }
-
-    // Create new competency
-    await prisma.competency.create({ data: competency });
-    created += 1;
-    console.log(`[Seed] Created competency: ${competency.title}`);
-  }
-
-  console.log(`[Seed] Seeding complete. Created ${created} new competencies.`);
+  console.log(
+    `[Seed] Seeding complete. Created ${result.count} new competencies (duplicates skipped).`
+  );
 }
 
 // Execute main function and handle errors

@@ -71,18 +71,44 @@ function SessionPageContent() {
 
   useEffect(() => {
     async function loadRelationshipTypes() {
-      const result = await getRelationshipTypesAction();
-      if (result.success && result.types && result.types.length > 0) {
-        setRelationshipTypes(result.types);
-        // Set initial relation state if not already set
-        setRelation(prev => (prev === '' ? result.types[0]!.value : prev));
+      try {
+        const result = await getRelationshipTypesAction();
+        if (result.success && result.types && result.types.length > 0) {
+          setRelationshipTypes(result.types);
+          // Set initial relation state if not already set
+          setRelation(prev => (prev === '' ? result.types[0]!.value : prev));
+        } else {
+          setError(
+            result.error ??
+              'Failed to load relationship types. Please try again later.'
+          );
+        }
+      } catch (err) {
+        setError(
+          err instanceof Error
+            ? err.message
+            : 'An unexpected error occurred while loading relationship types.'
+        );
       }
     }
 
     async function loadDemoUser() {
-      const result = await getOrCreateDemoUserAction();
-      if (result.success && result.user) {
-        setUserId(result.user.id);
+      try {
+        const result = await getOrCreateDemoUserAction();
+        if (result.success && result.user) {
+          setUserId(result.user.id);
+        } else {
+          setError(
+            result.error ??
+              'Failed to load user information. Please try again later.'
+          );
+        }
+      } catch (err) {
+        setError(
+          err instanceof Error
+            ? err.message
+            : 'An unexpected error occurred while loading user information.'
+        );
       }
     }
 
@@ -171,7 +197,15 @@ function SessionPageContent() {
             competencies: competencies ? [...competencies] : undefined,
           },
         ]);
-        void loadCompetencies();
+        try {
+          await loadCompetencies();
+        } catch (err) {
+          setError(
+            err instanceof Error
+              ? err.message
+              : 'An unexpected error occurred while fetching competencies.'
+          );
+        }
       }
     },
     [competencies, relation, userId, loadCompetencies]
@@ -383,6 +417,7 @@ function SessionPageContent() {
                     <Card className="border border-white/70 bg-white/85 shadow-[0_28px_80px_-42px_rgba(7,30,84,0.55)] backdrop-blur-lg">
                       <CardHeader className="space-y-4 pb-4">
                         <div className="flex flex-wrap gap-2">
+                          {/* Placeholder badges; replace with competency metadata once available */}
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <Badge
@@ -479,6 +514,7 @@ function SessionPageContent() {
                     <Card className="border border-white/70 bg-white/85 shadow-[0_28px_80px_-42px_rgba(7,30,84,0.55)] backdrop-blur-lg">
                       <CardHeader className="space-y-4 pb-4">
                         <div className="flex flex-wrap gap-2">
+                          {/* Placeholder badges; replace with competency metadata once available */}
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <Badge
