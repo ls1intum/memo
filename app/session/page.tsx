@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { getRandomCompetenciesAction } from '@/app/actions/competencies';
 import {
@@ -39,7 +39,7 @@ type RelationshipTypeOption = {
   label: string;
 };
 
-export default function SessionPage() {
+function SessionPageContent() {
   const searchParams = useSearchParams();
   const countParam = searchParams.get('count');
   const parsedCount = countParam ? Number(countParam) : NaN;
@@ -571,5 +571,19 @@ export default function SessionPage() {
         </section>
       </main>
     </div>
+  );
+}
+
+export default function SessionPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-[#d7e3ff] via-[#f3f5ff] to-[#e8ecff]">
+          <div className="text-slate-600">Loading session...</div>
+        </div>
+      }
+    >
+      <SessionPageContent />
+    </Suspense>
   );
 }
