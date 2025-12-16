@@ -7,8 +7,6 @@ import {
 import { Badge } from '../../components/ui/badge';
 import { Accordion, AccordionItem } from '../../components/ui/accordion';
 import { Tabs } from '../../components/ui/tabs';
-import { Avatar } from '../../components/ui/avatar';
-import Image from 'next/image';
 
 export const metadata = {
   title: 'About Us',
@@ -17,49 +15,105 @@ export const metadata = {
 
 export default function About() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-uranian-blue/20 dark:to-yinmn-blue/10">
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12">
-        {/* Hero Section */}
-        <header className="text-center space-y-6 py-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-          <div className="flex justify-center mb-6">
-            <div className="relative group">
-              <div className="absolute -inset-4 bg-gradient-to-r from-yinmn-blue to-air-superiority-blue rounded-full blur-lg opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
-              <div className="relative p-1">
-                <Image
-                  src="/technical-university-of-munich-tum-logo-vector.svg"
-                  alt="TUM Logo"
-                  width={200}
-                  height={60}
-                  className="transition-transform group-hover:scale-105"
-                  priority
-                />
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#d7e3ff] via-[#f3f5ff] to-[#e8ecff] text-slate-900">
+      <LiquidGlassGradient />
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 space-y-20">
+        {/* Hero + Gallery Section */}
+        <section className="space-y-10 px-4 py-12 sm:px-8 lg:px-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <div className="text-center space-y-4 max-w-3xl mx-auto">
+            <Badge className="mx-auto w-fit rounded-full border border-slate-200 bg-white px-4 py-1.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-900 shadow-sm">
+              About us
+            </Badge>
+            <h1 className="text-balance text-[2.6rem] font-semibold leading-tight tracking-tight text-slate-900 sm:text-[3.3rem] lg:text-[3.7rem]">
+              Applied Software Engineering — Grounded in Research and{' '}
+              <span className="relative inline-block whitespace-nowrap">
+                <span className="absolute inset-x-0 bottom-1 h-3 rounded-full bg-[#d8e4ff]" />
+                <span className="relative text-[#0a4da2]">
+                  Built with Partners
+                </span>
+              </span>{' '}
+            </h1>
+            <p className="text-lg leading-relaxed text-slate-600">
+              At the Chair of Applied Software Engineering (TUM), we design
+              practice-first courses, competency graphs, and industry labs so
+              students ship real software with academic rigor. Our teams
+              publish, coach partners, and keep every cohort anchored in
+              reproducible engineering.
+            </p>
+          </div>
+
+          <div className="grid gap-6 lg:grid-cols-12 lg:auto-rows-[minmax(0,1fr)] items-start">
+            <div className="lg:col-span-3 flex flex-col gap-4">
+              <div className="flex flex-wrap lg:flex-col gap-3">
+                {[
+                  'Applied Software Engineering',
+                  'Competency Graphs',
+                  'Industry Labs',
+                  'Teaching Innovation',
+                ].map(label => (
+                  <span
+                    key={label}
+                    className="rounded-full border border-slate-200 bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm"
+                  >
+                    {label}
+                  </span>
+                ))}
+              </div>
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 shadow-sm">
+                <div className="text-3xl font-semibold text-slate-900">
+                  400+
+                </div>
+                <div className="text-sm font-medium text-slate-600">
+                  students coached each year
+                </div>
+              </div>
+              <button className="inline-flex w-fit items-center gap-2 rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-black">
+                Explore teaching
+                <span className="inline-block text-base">→</span>
+              </button>
+            </div>
+
+            <div className="lg:col-span-5 flex flex-col gap-4">
+              <div className="relative aspect-[4/3] overflow-hidden rounded-3xl border border-slate-200 bg-slate-100 shadow-md flex items-center justify-center text-slate-400 text-sm font-semibold">
+                Visual placeholder
+              </div>
+              <div className="relative overflow-hidden rounded-3xl border border-slate-900 bg-slate-900 p-6 text-white shadow-xl">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="space-y-3">
+                    <div className="text-xl font-semibold leading-tight">
+                      Meet our lecturers
+                    </div>
+                    <p className="text-sm text-white/70">
+                      Coaches, researchers, and industry mentors guiding student
+                      teams on architecture, AI, and continuous delivery across
+                      TUM courses.
+                    </p>
+                    <button className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-2 text-sm font-medium transition hover:bg-white/15">
+                      View teaching formats
+                      <span className="text-lg">→</span>
+                    </button>
+                  </div>
+                </div>
+                <div className="pointer-events-none absolute -right-10 -bottom-12 h-40 w-40 rounded-full border border-white/10" />
+                <div className="pointer-events-none absolute -right-20 -bottom-20 h-52 w-52 rounded-full border border-white/5" />
+              </div>
+            </div>
+
+            <div className="lg:col-span-4 flex flex-col gap-4">
+              <div className="relative aspect-[4/3] overflow-hidden rounded-3xl border border-slate-200 bg-slate-100 shadow-md flex items-center justify-center text-slate-400 text-sm font-semibold">
+                Visual placeholder
               </div>
             </div>
           </div>
-          <div className="space-y-3">
-            <h1 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-yinmn-blue to-air-superiority-blue dark:from-air-superiority-blue dark:via-air-superiority-blue dark:to-uranian-blue bg-clip-text text-transparent leading-relaxed pb-2">
-              Applied Education Technologies
-            </h1>
-            <p className="text-xl text-muted-foreground">Memo Demo Platform</p>
-            <p className="text-base text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              The Applied Education Technologies (AET) group develops
-              educational technologies and course formats to make hands-on
-              computing education more accessible, project-based, and impactful.
-              We collaborate with industry and academic partners to design
-              practical learning experiences, real client projects, and
-              AI-powered tools that support teaching and learning.
-            </p>
-          </div>
-        </header>
+        </section>
 
         {/* Core Values Section */}
         <section className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200">
-          <Card className="relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-air-superiority-blue/10 to-transparent rounded-full -mr-16 -mt-16"></div>
+          <Card className="relative overflow-hidden border-white/70 bg-white/60 backdrop-blur-sm hover:bg-white/80 transition-all duration-300 shadow-lg rounded-[32px]">
             <CardHeader>
-              <div className="w-12 h-12 rounded-lg bg-uranian-blue/40 dark:bg-air-superiority-blue/30 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300">
+              <div className="w-14 h-14 rounded-2xl bg-[#0a4da2]/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
                 <svg
-                  className="w-6 h-6 text-yinmn-blue dark:text-air-superiority-blue"
+                  className="w-7 h-7 text-[#0a4da2]"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -72,9 +126,11 @@ export default function About() {
                   />
                 </svg>
               </div>
-              <CardTitle>Mission</CardTitle>
+              <CardTitle className="text-2xl font-semibold text-slate-900">
+                Mission
+              </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="text-base leading-relaxed text-slate-600">
               We address complex problems with agile methods and continuous
               software engineering. Our work focuses on AI-powered educational
               technologies, project-based learning, and practical courses that
@@ -82,12 +138,11 @@ export default function About() {
             </CardContent>
           </Card>
 
-          <Card className="relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-air-superiority-blue/10 to-transparent rounded-full -mr-16 -mt-16"></div>
+          <Card className="relative overflow-hidden border-white/70 bg-white/60 backdrop-blur-sm hover:bg-white/80 transition-all duration-300 shadow-lg rounded-[32px]">
             <CardHeader>
-              <div className="w-12 h-12 rounded-lg bg-uranian-blue/40 dark:bg-air-superiority-blue/30 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300">
+              <div className="w-14 h-14 rounded-2xl bg-[#0a4da2]/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
                 <svg
-                  className="w-6 h-6 text-yinmn-blue dark:text-air-superiority-blue"
+                  className="w-7 h-7 text-[#0a4da2]"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -100,9 +155,11 @@ export default function About() {
                   />
                 </svg>
               </div>
-              <CardTitle>iPraktikum</CardTitle>
+              <CardTitle className="text-2xl font-semibold text-slate-900">
+                iPraktikum
+              </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="text-base leading-relaxed text-slate-600">
               iPraktikum pairs students with industry partners to build
               production-ready applications. Students gain hands-on skills
               including CI/CD, usability testing, and full-stack development
@@ -110,12 +167,11 @@ export default function About() {
             </CardContent>
           </Card>
 
-          <Card className="relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-air-superiority-blue/10 to-transparent rounded-full -mr-16 -mt-16"></div>
+          <Card className="relative overflow-hidden border-white/70 bg-white/60 backdrop-blur-sm hover:bg-white/80 transition-all duration-300 shadow-lg rounded-[32px]">
             <CardHeader>
-              <div className="w-12 h-12 rounded-lg bg-uranian-blue/40 dark:bg-air-superiority-blue/30 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300">
+              <div className="w-14 h-14 rounded-2xl bg-[#0a4da2]/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
                 <svg
-                  className="w-6 h-6 text-yinmn-blue dark:text-air-superiority-blue"
+                  className="w-7 h-7 text-[#0a4da2]"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -128,9 +184,11 @@ export default function About() {
                   />
                 </svg>
               </div>
-              <CardTitle>Partners</CardTitle>
+              <CardTitle className="text-2xl font-semibold text-slate-900">
+                Partners
+              </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="text-base leading-relaxed text-slate-600">
               AET works with universities and industry partners (BMW, Bosch,
               Capgemini, ETH, and more) to scale projects and bring real-world
               contexts into teaching.
@@ -138,212 +196,93 @@ export default function About() {
           </Card>
         </section>
 
-        {/* Projects Section */}
         <section className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300">
-          <div className="text-center">
-            <h2 className="text-3xl font-bold bg-gradient-to-r from-yinmn-blue to-air-superiority-blue dark:from-air-superiority-blue dark:to-air-superiority-blue bg-clip-text text-transparent mb-2">
-              Projects & Highlights
+          <div className="text-center space-y-3">
+            <h2 className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
+              How We Work
             </h2>
-            <div className="w-24 h-1 bg-gradient-to-r from-yinmn-blue to-air-superiority-blue mx-auto rounded-full"></div>
-          </div>
-          <div className="grid gap-6 md:grid-cols-2">
-            <Card className="relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-air-superiority-blue/10 to-transparent rounded-full -mr-20 -mt-20"></div>
-              <CardHeader>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-yinmn-blue to-air-superiority-blue flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                    <svg
-                      className="w-5 h-5 text-white"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
-                      />
-                    </svg>
-                  </div>
-                  <CardTitle>LEARN-Kit</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <p>
-                  A modular teaching kit for hands-on CS workshops that supports
-                  inclusive, practical learning experiences for classrooms and
-                  outreach.
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  <Badge className="px-3 py-1 rounded-full bg-uranian-blue/50 text-yinmn-blue dark:bg-air-superiority-blue/30 dark:text-air-superiority-blue">
-                    Education
-                  </Badge>
-                  <Badge className="px-3 py-1 rounded-full bg-uranian-blue/50 text-yinmn-blue dark:bg-air-superiority-blue/30 dark:text-air-superiority-blue">
-                    Workshops
-                  </Badge>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-air-superiority-blue/10 to-transparent rounded-full -mr-20 -mt-20"></div>
-              <CardHeader>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-yinmn-blue to-air-superiority-blue flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                    <svg
-                      className="w-5 h-5 text-white"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                      />
-                    </svg>
-                  </div>
-                  <CardTitle>Research & Publications</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <p>
-                  Recent work includes peer assessment studies, dynamic GUI
-                  testing for auto-graders, and virtual prototyping for
-                  industrial design reviews.
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  <Badge className="px-3 py-1 rounded-full bg-uranian-blue/50 text-yinmn-blue dark:bg-air-superiority-blue/30 dark:text-air-superiority-blue">
-                    Research
-                  </Badge>
-                  <Badge className="px-3 py-1 rounded-full bg-uranian-blue/50 text-yinmn-blue dark:bg-air-superiority-blue/30 dark:text-air-superiority-blue">
-                    Innovation
-                  </Badge>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </section>
-
-        {/* Stats Section */}
-        <section className="grid grid-cols-2 md:grid-cols-4 gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-400">
-          <div className="text-center p-6 rounded-xl bg-gradient-to-br from-uranian-blue/50 to-air-superiority-blue/30 dark:from-yinmn-blue/20 dark:to-air-superiority-blue/20 border border-air-superiority-blue/30 dark:border-air-superiority-blue/40 hover:scale-105 transition-transform duration-300 shadow-md">
-            <div className="text-3xl font-bold text-yinmn-blue dark:text-air-superiority-blue mb-1">
-              500+
-            </div>
-            <div className="text-sm text-muted-foreground">Students</div>
-          </div>
-          <div className="text-center p-6 rounded-xl bg-gradient-to-br from-uranian-blue/50 to-air-superiority-blue/30 dark:from-yinmn-blue/20 dark:to-air-superiority-blue/20 border border-air-superiority-blue/30 dark:border-air-superiority-blue/40 hover:scale-105 transition-transform duration-300 shadow-md">
-            <div className="text-3xl font-bold text-yinmn-blue dark:text-air-superiority-blue mb-1">
-              50+
-            </div>
-            <div className="text-sm text-muted-foreground">Projects</div>
-          </div>
-          <div className="text-center p-6 rounded-xl bg-gradient-to-br from-uranian-blue/50 to-air-superiority-blue/30 dark:from-yinmn-blue/20 dark:to-air-superiority-blue/20 border border-air-superiority-blue/30 dark:border-air-superiority-blue/40 hover:scale-105 transition-transform duration-300 shadow-md">
-            <div className="text-3xl font-bold text-yinmn-blue dark:text-air-superiority-blue mb-1">
-              20+
-            </div>
-            <div className="text-sm text-muted-foreground">Partners</div>
-          </div>
-          <div className="text-center p-6 rounded-xl bg-gradient-to-br from-uranian-blue/50 to-air-superiority-blue/30 dark:from-yinmn-blue/20 dark:to-air-superiority-blue/20 border border-air-superiority-blue/30 dark:border-air-superiority-blue/40 hover:scale-105 transition-transform duration-300 shadow-md">
-            <div className="text-3xl font-bold text-yinmn-blue dark:text-air-superiority-blue mb-1">
-              10+
-            </div>
-            <div className="text-sm text-muted-foreground">Years</div>
+            <p className="text-base leading-relaxed text-slate-600 max-w-3xl mx-auto">
+              We pair research-backed methods with rapid prototyping, invite
+              partners into our studios early, and share what we learn through
+              open assets and reproducible workflows. Every initiative is
+              treated as a pilot that we iterate in the open before scaling.
+            </p>
+            <p className="text-base leading-relaxed text-slate-600 max-w-3xl mx-auto">
+              Teams rotate between discovery, delivery, and reflection cycles so
+              students, faculty, and industry mentors stay aligned. We keep our
+              playbooks lightweight—clear success metrics, transparent retros,
+              and artifacts anyone can reuse.
+            </p>
           </div>
         </section>
 
         {/* Team Section */}
-        <section className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-500">
-          <div className="text-center">
-            <h2 className="text-3xl font-bold bg-gradient-to-r from-yinmn-blue to-air-superiority-blue dark:from-air-superiority-blue dark:to-air-superiority-blue bg-clip-text text-transparent mb-2">
-              Our Team
+        <section className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-500">
+          <div className="text-center space-y-4">
+            <h2 className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
+              Meet Our Team
             </h2>
-            <div className="w-24 h-1 bg-gradient-to-r from-yinmn-blue to-air-superiority-blue mx-auto rounded-full"></div>
+            <p className="text-base leading-relaxed text-slate-600 max-w-2xl mx-auto">
+              Passionate educators, researchers, and engineers dedicated to
+              transforming software education.
+            </p>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
-            <div className="flex flex-col items-center gap-3 group">
-              <div className="relative">
-                <div className="absolute -inset-2 bg-gradient-to-r from-yinmn-blue to-air-superiority-blue rounded-full blur opacity-30 group-hover:opacity-75 transition duration-300"></div>
-                <Avatar
-                  initials="SK"
-                  alt="Prof. Dr. Stephan Krusche"
-                  size={96}
-                  className="relative ring-4 ring-uranian-blue/50 dark:ring-air-superiority-blue/50"
-                />
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            <div className="flex flex-col items-center gap-4 group">
+              <div className="relative w-32 h-32 rounded-2xl overflow-hidden bg-white/60 backdrop-blur-sm border border-white/70 shadow-lg group-hover:shadow-xl transition-all duration-300 flex items-center justify-center text-slate-400 text-sm font-semibold">
+                Photo
               </div>
-              <div className="text-center">
-                <div className="font-semibold text-sm">
+              <div className="text-center space-y-1">
+                <div className="font-semibold text-slate-900">
                   Prof. Dr. Stephan Krusche
                 </div>
-                <div className="text-xs text-muted-foreground">Group Lead</div>
+                <div className="text-sm text-slate-600">Group Lead</div>
               </div>
             </div>
-            <div className="flex flex-col items-center gap-3 group">
-              <div className="relative">
-                <div className="absolute -inset-2 bg-gradient-to-r from-yinmn-blue to-air-superiority-blue rounded-full blur opacity-30 group-hover:opacity-75 transition duration-300"></div>
-                <Avatar
-                  initials="RL"
-                  alt="Research Team Member"
-                  size={96}
-                  className="relative ring-4 ring-uranian-blue/50 dark:ring-air-superiority-blue/50"
-                />
+            <div className="flex flex-col items-center gap-4 group">
+              <div className="relative w-32 h-32 rounded-2xl overflow-hidden bg-white/60 backdrop-blur-sm border border-white/70 shadow-lg group-hover:shadow-xl transition-all duration-300 flex items-center justify-center text-slate-400 text-sm font-semibold">
+                Photo
               </div>
-              <div className="text-center">
-                <div className="font-semibold text-sm">Dr. Research Lead</div>
-                <div className="text-xs text-muted-foreground">
-                  Senior Researcher
+              <div className="text-center space-y-1">
+                <div className="font-semibold text-slate-900">
+                  Dr. Research Lead
                 </div>
+                <div className="text-sm text-slate-600">Senior Researcher</div>
               </div>
             </div>
-            <div className="flex flex-col items-center gap-3 group">
-              <div className="relative">
-                <div className="absolute -inset-2 bg-gradient-to-r from-yinmn-blue to-air-superiority-blue rounded-full blur opacity-30 group-hover:opacity-75 transition duration-300"></div>
-                <Avatar
-                  initials="TL"
-                  alt="Development Team Member"
-                  size={96}
-                  className="relative ring-4 ring-uranian-blue/50 dark:ring-air-superiority-blue/50"
-                />
+            <div className="flex flex-col items-center gap-4 group">
+              <div className="relative w-32 h-32 rounded-2xl overflow-hidden bg-white/60 backdrop-blur-sm border border-white/70 shadow-lg group-hover:shadow-xl transition-all duration-300 flex items-center justify-center text-slate-400 text-sm font-semibold">
+                Photo
               </div>
-              <div className="text-center">
-                <div className="font-semibold text-sm">Tech Lead</div>
-                <div className="text-xs text-muted-foreground">
-                  Software Architect
-                </div>
+              <div className="text-center space-y-1">
+                <div className="font-semibold text-slate-900">Tech Lead</div>
+                <div className="text-sm text-slate-600">Software Architect</div>
               </div>
             </div>
-            <div className="flex flex-col items-center gap-3 group">
-              <div className="relative">
-                <div className="absolute -inset-2 bg-gradient-to-r from-yinmn-blue to-air-superiority-blue rounded-full blur opacity-30 group-hover:opacity-75 transition duration-300"></div>
-                <Avatar
-                  initials="ES"
-                  alt="Education Team Member"
-                  size={96}
-                  className="relative ring-4 ring-uranian-blue/50 dark:ring-air-superiority-blue/50"
-                />
+            <div className="flex flex-col items-center gap-4 group">
+              <div className="relative w-32 h-32 rounded-2xl overflow-hidden bg-white/60 backdrop-blur-sm border border-white/70 shadow-lg group-hover:shadow-xl transition-all duration-300 flex items-center justify-center text-slate-400 text-sm font-semibold">
+                Photo
               </div>
-              <div className="text-center">
-                <div className="font-semibold text-sm">
+              <div className="text-center space-y-1">
+                <div className="font-semibold text-slate-900">
                   Education Specialist
                 </div>
-                <div className="text-xs text-muted-foreground">
-                  Pedagogy Expert
-                </div>
+                <div className="text-sm text-slate-600">Pedagogy Expert</div>
               </div>
             </div>
           </div>
         </section>
 
         {/* Course Offerings with Tabs */}
-        <section className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-600">
-          <div className="text-center">
-            <h2 className="text-3xl font-bold bg-gradient-to-r from-yinmn-blue to-air-superiority-blue dark:from-verdigris dark:to-wisteria bg-clip-text text-transparent mb-2">
+        <section className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-600">
+          <div className="text-center space-y-4">
+            <h2 className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
               Course Offerings
             </h2>
-            <div className="w-24 h-1 bg-gradient-to-r from-yinmn-blue to-air-superiority-blue mx-auto rounded-full"></div>
+            <p className="text-base leading-relaxed text-slate-600 max-w-2xl mx-auto">
+              Comprehensive programs from undergraduate basics to advanced
+              graduate projects.
+            </p>
           </div>
           <Tabs
             items={[
@@ -503,12 +442,14 @@ export default function About() {
         </section>
 
         {/* FAQ Section */}
-        <section className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-700">
-          <div className="text-center">
-            <h2 className="text-3xl font-bold bg-gradient-to-r from-yinmn-blue to-air-superiority-blue dark:from-verdigris dark:to-wisteria bg-clip-text text-transparent mb-2">
+        <section className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-700">
+          <div className="text-center space-y-4">
+            <h2 className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
               Frequently Asked Questions
             </h2>
-            <div className="w-24 h-1 bg-gradient-to-r from-yinmn-blue to-air-superiority-blue mx-auto rounded-full"></div>
+            <p className="text-base leading-relaxed text-slate-600 max-w-2xl mx-auto">
+              Everything you need to know about our programs and partnerships.
+            </p>
           </div>
           <div className="max-w-3xl mx-auto">
             <Accordion>
@@ -550,6 +491,19 @@ export default function About() {
           </div>
         </section>
       </main>
+    </div>
+  );
+}
+
+function LiquidGlassGradient() {
+  return (
+    <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.9),_rgba(237,242,255,0.6))]" />
+      <div className="absolute left-1/2 top-[-8rem] h-[44rem] w-[44rem] -translate-x-1/2 rounded-[50%] bg-white/80 blur-[140px] opacity-85 mix-blend-screen" />
+      <div className="absolute left-[12%] top-[22%] h-80 w-80 rounded-full bg-[#7fb0ff]/40 blur-[120px] mix-blend-screen" />
+      <div className="absolute right-[18%] top-[30%] h-[26rem] w-[24rem] rounded-[40%] bg-gradient-to-br from-[#ffdff3]/65 via-[#fff3f8]/45 to-transparent blur-[150px] mix-blend-screen" />
+      <div className="absolute bottom-[-10rem] left-1/2 h-[36rem] w-[50rem] -translate-x-1/2 rounded-[220px] bg-white/70 blur-[160px] opacity-95 mix-blend-screen" />
+      <div className="absolute left-1/3 top-[58%] h-72 w-72 rounded-full bg-[#9ce8d1]/35 blur-[130px] mix-blend-screen" />
     </div>
   );
 }

@@ -17,65 +17,94 @@ export function Navbar() {
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const activeIndex =
+    navItems.findIndex(item => item.href === pathname) === -1
+      ? 0
+      : navItems.findIndex(item => item.href === pathname);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 4);
+    };
+    handleScroll();
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   return (
     <header
       role="banner"
-      className="sticky top-0 z-50 border-b bg-primary/95 backdrop-blur supports-[backdrop-filter]:bg-primary/90 shadow-sm"
-      style={{ maxHeight: '3.75rem' }}
+      className={cn(
+        'sticky top-0 z-50 border-b border-white/30 bg-white/15 backdrop-blur-xl dark:border-slate-800/30 dark:bg-slate-900/15 supports-[backdrop-filter]:bg-white/12 transition-shadow duration-200',
+        scrolled
+          ? 'shadow-[0_10px_30px_-12px_rgba(15,23,42,0.35)]'
+          : 'shadow-none'
+      )}
+      style={{ maxHeight: '5rem' }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <nav
           role="navigation"
           aria-label="Main navigation"
-          className="relative flex items-center justify-between h-[3.75rem]"
+          className="relative flex items-center h-[4.25rem]"
         >
           {/* Left side - App name & Version */}
-          <div className="flex items-center gap-3">
+          <div className="relative z-10 flex items-center gap-2 py-0.5">
             <Link
               href="/"
-              className="group transition-transform hover:scale-105 inline-block focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-primary rounded"
+              className="group inline-flex items-center gap-2 rounded-md px-1.5 py-1 text-slate-900 transition hover:text-[#0a4da2] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0a4da2] focus-visible:ring-offset-2 dark:text-white dark:hover:text-[#b3c8ff]"
               aria-label="Memo - Home"
             >
-              <span className="font-bold text-xl text-white">Memo</span>
+              <span className="font-bold text-lg">Memo</span>
             </Link>
             <span
-              className="text-xs text-white/70 font-mono"
+              className="rounded-full border border-slate-200/80 bg-white/70 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-600 shadow-sm dark:border-slate-800/80 dark:bg-slate-900/80 dark:text-slate-300"
               aria-label={`Version ${APP_VERSION}`}
             >
               v{APP_VERSION}
             </span>
           </div>
 
-          {/* Center - Navigation items */}
-          <div className="flex items-center gap-1">
-            {navItems.map(item => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  'px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-primary',
-                  pathname === item.href
-                    ? 'bg-white/20 text-white shadow-md'
-                    : 'text-white/80 hover:bg-white/10 hover:text-white'
-                )}
-                aria-current={pathname === item.href ? 'page' : undefined}
-              >
-                {item.label}
-              </Link>
-            ))}
+          {/* Center - Sliding nav */}
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+            <div className="pointer-events-auto relative flex w-[16rem] max-w-full items-center justify-between rounded-full border border-slate-200/80 bg-white/70 px-[0px] py-[8px] shadow-inner backdrop-blur dark:border-slate-800/70 dark:bg-slate-900/70">
+              <div
+                className="absolute inset-y-1 rounded-full bg-gradient-to-r from-[#0a4da2] to-[#7c6cff] shadow-md transition-all duration-300 ease-out"
+                style={{
+                  width: 'calc(50% - 1rem)',
+                  left: activeIndex === 1 ? 'calc(50% + 0.5rem)' : '0.5rem',
+                }}
+                aria-hidden
+              />
+              {navItems.map(item => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    'relative z-10 flex flex-1 items-center justify-center px-4 py-1.5 text-center text-sm font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0a4da2] focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900',
+                    pathname === item.href
+                      ? 'text-white'
+                      : 'text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'
+                  )}
+                  aria-current={pathname === item.href ? 'page' : undefined}
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </div>
           </div>
 
           {/* Right side - Dark mode toggle & Login (per guidelines order) */}
-          <div className="flex items-center gap-3">
+          <div className="relative z-10 ml-auto flex items-center gap-3">
             {/* Dark mode toggle */}
             <button
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              className="p-2 rounded-lg text-white/80 hover:bg-white/10 hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-primary"
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200/80 bg-white/70 text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-white/100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0a4da2] focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:border-slate-800/70 dark:bg-slate-900/80 dark:text-slate-200 dark:hover:bg-slate-800/80 dark:focus-visible:ring-offset-slate-900"
               aria-label={
                 mounted
                   ? `Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`
@@ -121,10 +150,12 @@ export function Navbar() {
 
             {/* Login button - last element per guidelines */}
             <button
-              className="px-4 py-2 rounded-lg text-sm font-medium bg-white text-primary hover:bg-white/90 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-primary"
-              aria-label="Sign in to your account"
+              className="hidden rounded-full bg-gradient-to-r from-[#0a4da2] to-[#7c6cff] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_30px_-12px_rgba(10,77,162,0.65)] transition hover:-translate-y-0.5 hover:shadow-[0_16px_40px_-20px_rgba(10,77,162,0.7)] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-white focus-visible:ring-[#0a4da2] dark:focus-visible:ring-offset-slate-900 sm:inline-flex"
+              aria-label="Start contributing"
             >
-              Sign In
+              <Link href="/onboarding" className="inline-flex items-center">
+                Start Contributing
+              </Link>
             </button>
           </div>
         </nav>

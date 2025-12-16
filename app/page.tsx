@@ -2,6 +2,7 @@
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import Image from 'next/image';
 
 type ProblemStatement = {
   headline: string;
@@ -36,29 +37,7 @@ export default function Page() {
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#d7e3ff] via-[#f3f5ff] to-[#e8ecff] text-slate-900">
       <LiquidGlassGradient />
 
-      <header className="relative z-20 mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-10 lg:px-0">
-        <div className="flex items-center gap-3">
-          <span className="text-sm font-bold tracking-[0.05em] text-slate-900">
-            Competency Benchmark Mapping Platform
-          </span>
-        </div>
-        <div className="flex items-center gap-4">
-          <Button
-            className="hidden h-12 rounded-full border border-white/70 bg-white/80 px-7 text-sm font-semibold text-slate-900 shadow-[0_14px_38px_-30px_rgba(7,30,84,0.55)] transition hover:border-slate-200 hover:bg-white md:inline-flex"
-            asChild
-          >
-            <a href="#challenges">Current Challenges</a>
-          </Button>
-          <Button
-            className="h-12 rounded-full bg-[#0a4da2] px-7 text-sm font-semibold text-white shadow-[0_18px_45px_-26px_rgba(7,30,84,0.75)] transition hover:bg-[#0d56b5]"
-            asChild
-          >
-            <a href="/onboarding">Start Mapping</a>
-          </Button>
-        </div>
-      </header>
-
-      <main className="relative z-20 mx-auto flex w-full max-w-6xl flex-col gap-28 px-6 pb-32 pt-48 lg:px-0">
+      <main className="relative z-20 mx-auto flex w-full max-w-6xl flex-col gap-28 px-6 pb-4 pt-[11.5rem] lg:px-0">
         <section id="overview" className="grid items-center gap-16 pb-8">
           <div className="space-y-12">
             <div className="space-y-8">
@@ -69,96 +48,139 @@ export default function Page() {
                 </span>
                 . Let’s build it together.
               </h1>
-              <p className="max-w-4xl text-xl leading-relaxed text-slate-1000">
-                Memo brings people together to build and validate shared
-                competency networks to create the trusted data foundation
-                recommender systems need for meaningful evaluation.{' '}
+              <p className="max-w-4xl text-xl font-medium leading-relaxed text-slate-1000">
+                Memo turns collaborative competency mapping into an open
+                benchmark dataset for fair, reproducible evaluation of
+                competency-aware recommender systems.
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
-              <Button className="h-12 rounded-full bg-[#0a4da2] px-7 text-base font-semibold text-white shadow-[0_18px_45px_-26px_rgba(7,30,84,0.75)] transition hover:bg-[#0d56b5]">
-                Discover Platform
+              <Button
+                className="h-12 rounded-full bg-[#0a4da2] px-7 text-base font-semibold text-white shadow-[0_18px_45px_-26px_rgba(7,30,84,0.75)] transition hover:bg-[#0d56b5]"
+                asChild
+              >
+                <a href="/onboarding">Start Contributing</a>
               </Button>
+            </div>
+            <div className="relative flex justify-center pt-20 pb-12">
+              <div className="relative w-full max-h-[520px] overflow-hidden">
+                <Image
+                  src="/sessionPreview.png"
+                  alt="Preview of a Memo competency mapping session"
+                  width={1600}
+                  height={900}
+                  className="mx-auto h-auto w-[90%] max-w-6xl rounded-[32px]"
+                  sizes="(max-width: 1024px) 100vw, 90vw"
+                  priority
+                />
+              </div>
+              <div className="pointer-events-none absolute left-1/2 bottom-10 flex w-screen -translate-x-1/2 items-end justify-center">
+                <div className="h-24 w-screen bg-gradient-to-b from-transparent via-white/70 to-white" />
+              </div>
             </div>
           </div>
         </section>
 
-        <section id="challenges" className="space-y-10">
-          <div className="space-y-3">
-            <Badge className="w-fit rounded-full border border-white/70 bg-white/75 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-[#0a4da2]">
-              Current Challenges
-            </Badge>
-            <h2 className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
-              Why competency-aware recommenders stall
-            </h2>
-            <p className="max-w-2xl text-base leading-relaxed text-slate-600">
-              Personalization is only as strong as the competency data beneath
-              it. Incompatible graphs and opaque recommendations keep research
-              and practice from compounding.
-            </p>
-          </div>
-          <div className="grid gap-8 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
-            <div className="relative overflow-hidden rounded-[40px] bg-gradient-to-br from-[#0a4da2] via-[#4263eb] to-[#9775fa] p-[1px] shadow-[0_32px_110px_-55px_rgba(7,30,84,0.65)] transition hover:-translate-y-1 hover:shadow-[0_36px_120px_-65px_rgba(7,30,84,0.55)]">
-              <div className="absolute -left-10 top-[-12rem] h-[28rem] w-[24rem] rounded-full bg-white/20 blur-[160px]" />
-              <div className="absolute right-[-8rem] bottom-[-10rem] h-[24rem] w-[24rem] rounded-full bg-[#ffe8ff]/30 blur-[150px]" />
-              <div className="relative flex h-full flex-col justify-between gap-8 rounded-[38px] bg-gradient-to-br from-white/15 via-white/10 to-white/5 p-10 text-white backdrop-blur-2xl transition hover:bg-white/12">
-                <div className="space-y-4">
-                  <Badge className="w-fit rounded-full border border-white/30 bg-white/20 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-white/90">
-                    {leadProblem.insight}
-                  </Badge>
-                  <h3 className="text-3xl font-semibold leading-snug sm:text-4xl">
-                    {leadProblem.headline}
-                  </h3>
-                  <p className="max-w-2xl text-base leading-relaxed text-white/80">
-                    {leadProblem.detail}
-                  </p>
-                </div>
-              </div>
+        <section className="relative isolate left-1/2 right-1/2 w-screen -translate-x-1/2 transform bg-white px-6 pb-[8.5rem] pt-32 lg:px-0 -mt-56">
+          <div className="relative mx-auto flex w-full max-w-5xl flex-col items-center gap-8 text-center">
+            <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-4 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-600">
+              Problem
+            </span>
+            <div className="space-y-4">
+              <h2 className="text-balance text-4xl font-semibold leading-tight text-slate-900 sm:text-[2.7rem] lg:text-[3rem]">
+                Missing Benchmarks for
+                <br />
+                Competency-Based Recommenders
+              </h2>
+              <p
+                className="text-lg leading-relaxed text-slate-700"
+                style={{
+                  display: '-webkit-box',
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: 'vertical',
+                  overflow: 'hidden',
+                }}
+              >
+                Competency-based recommenders use{' '}
+                <span className="font-semibold text-slate-900">
+                  competency networks
+                </span>
+                —graphs of skills and their relationships—to suggest learning
+                content. However, reliance on custom networks and datasets makes
+                results across recommender systems hard to compare and trust.
+              </p>
             </div>
-            <div className="space-y-6">
-              {otherProblems.map((problem, _index) => (
-                <div
-                  key={problem.headline}
-                  className="group relative overflow-hidden rounded-[32px] border border-white/70 bg-white/80 p-6 shadow-[0_26px_90px_-55px_rgba(7,30,84,0.5)] transition hover:-translate-y-1 hover:bg-white/90"
-                >
-                  <div className="relative z-10 space-y-4">
-                    <h3 className="text-xl font-semibold text-slate-900">
-                      {problem.headline}
+            <button className="w-full max-w-xl rounded-2xl border border-[#d9e6ff] bg-[#e9f1ff] px-6 py-6 text-lg font-semibold text-[#0a4da2] shadow-[0_22px_60px_-36px_rgba(7,30,84,0.35)] transition hover:-translate-y-0.5 hover:shadow-[0_26px_70px_-40px_rgba(7,30,84,0.45)]">
+              Visualization
+            </button>
+          </div>
+        </section>
+
+        <section
+          id="challenges"
+          className="relative isolate left-1/2 right-1/2 w-screen -translate-x-1/2 transform px-6 pb-12 pt-32 lg:px-0 -mt-24"
+        >
+          <div className="absolute inset-0 bg-white" aria-hidden />
+          <div
+            className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,0)_0%,rgba(255,255,255,1)_20%,rgba(255,255,255,1)_80%,rgba(255,255,255,0)_100%)]"
+            aria-hidden
+          />
+          <div className="relative mx-auto flex w-full max-w-6xl flex-col gap-12 px-6 lg:px-0">
+            <div className="space-y-4 text-center">
+              <Badge className="mx-auto w-fit rounded-full border border-slate-200 bg-slate-50 px-4 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-[#0a4da2]">
+                Current Challenges
+              </Badge>
+              <h2 className="text-balance text-4xl font-semibold leading-tight text-slate-900 sm:text-[2.7rem] lg:text-[3rem]">
+                Why Competency-Aware Recommenders Stall
+              </h2>
+              <p className="mx-auto max-w-3xl text-lg leading-relaxed text-slate-700">
+                Personalization is only as strong as the competency data beneath
+                it. Incompatible graphs and opaque recommendations keep research
+                and practice from compounding.
+              </p>
+            </div>
+            <div className="grid gap-8 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
+              <div className="relative overflow-hidden rounded-[40px] bg-gradient-to-br from-[#0a4da2] via-[#4263eb] to-[#9775fa] p-[1px] shadow-[0_32px_110px_-55px_rgba(7,30,84,0.65)] transition hover:-translate-y-1 hover:shadow-[0_36px_120px_-65px_rgba(7,30,84,0.55)]">
+                <div className="absolute -left-10 top-[-12rem] h-[28rem] w-[24rem] rounded-full bg-white/20 blur-[160px]" />
+                <div className="absolute right-[-8rem] bottom-[-10rem] h-[24rem] w-[24rem] rounded-full bg-[#ffe8ff]/30 blur-[150px]" />
+                <div className="relative flex h-full flex-col justify-between gap-8 rounded-[38px] bg-gradient-to-br from-white/15 via-white/10 to-white/5 p-10 text-white backdrop-blur-2xl transition hover:bg-white/12">
+                  <div className="space-y-4">
+                    <Badge className="w-fit rounded-full border border-white/30 bg-white/20 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-white/90">
+                      {leadProblem.insight}
+                    </Badge>
+                    <h3 className="text-3xl font-semibold leading-snug sm:text-4xl">
+                      {leadProblem.headline}
                     </h3>
-                    <div className="text-xs font-semibold uppercase tracking-[0.16em] text-[#0a4da2]">
-                      {problem.insight}
-                    </div>
-                    <p className="text-base leading-relaxed text-slate-600">
-                      {problem.detail}
+                    <p className="max-w-2xl text-base leading-relaxed text-white/80">
+                      {leadProblem.detail}
                     </p>
                   </div>
                 </div>
-              ))}
+              </div>
+              <div className="space-y-6">
+                {otherProblems.map((problem, _index) => (
+                  <div
+                    key={problem.headline}
+                    className="group relative overflow-hidden rounded-[32px] border border-white/70 bg-white/80 p-6 shadow-[0_26px_90px_-55px_rgba(7,30,84,0.5)] transition hover:-translate-y-1 hover:bg-white/90"
+                  >
+                    <div className="relative z-10 space-y-4">
+                      <h3 className="text-xl font-semibold text-slate-900">
+                        {problem.headline}
+                      </h3>
+                      <div className="text-xs font-semibold uppercase tracking-[0.16em] text-[#0a4da2]">
+                        {problem.insight}
+                      </div>
+                      <p className="text-base leading-relaxed text-slate-600">
+                        {problem.detail}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </section>
       </main>
-
-      <footer className="relative z-20 border-t border-slate-200/70 bg-white/80 text-sm text-slate-500 shadow-[0_-15px_60px_-45px_rgba(7,30,84,0.35)] backdrop-blur-xl">
-        <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-6 py-8 lg:flex-row lg:items-center lg:justify-between lg:px-0">
-          <div className="flex items-center gap-2 text-slate-700">
-            <span className="text-sm font-semibold">
-              Memo Benchmark Platform
-            </span>
-          </div>
-          <div className="flex flex-wrap gap-4 text-sm font-semibold text-slate-700">
-            <a className="transition hover:text-slate-900" href="#overview">
-              Overview
-            </a>
-            <a className="transition hover:text-slate-900" href="#challenges">
-              Challenges
-            </a>
-          </div>
-          <div className="text-slate-400">
-            © {new Date().getFullYear()} Memo
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }
