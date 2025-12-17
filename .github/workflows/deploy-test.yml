@@ -1,0 +1,20 @@
+name: Deploy to Test
+
+on:
+  workflow_dispatch: # For manual triggers via the GitHub Actions UI
+    inputs:
+      image-tag:
+        type: string
+        description: 'Image tag to deploy (default: pr-<number> if PR exists, latest for default branch)'
+
+jobs:
+  deploy:
+    uses: ls1intum/.github/.github/workflows/deploy-docker-compose.yml@main
+    with:
+      environment: Test
+      docker-compose-file: './docker/test/docker-compose.yml'
+      main-image-name: ls1intum/memo/memo-app
+      image-tag: ${{ inputs.image-tag }}
+      env-file-name: ./docker/test/.env
+      remove-volumes: false
+    secrets: inherit
