@@ -108,7 +108,7 @@ export default function About() {
         </section>
 
         {/* Core Values Section */}
-        <section className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200">
+        <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Card className="relative overflow-hidden border-white/70 bg-white/60 backdrop-blur-sm hover:bg-white/80 transition-all duration-300 shadow-lg rounded-[32px]">
             <CardHeader>
               <div className="w-14 h-14 rounded-2xl bg-[#0a4da2]/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
@@ -196,7 +196,7 @@ export default function About() {
           </Card>
         </section>
 
-        <section className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300">
+        <section className="space-y-6">
           <div className="text-center space-y-3">
             <h2 className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
               How We Work
@@ -217,7 +217,7 @@ export default function About() {
         </section>
 
         {/* Team Section */}
-        <section className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-500">
+        <section className="space-y-12">
           <div className="text-center space-y-4">
             <h2 className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
               Meet Our Team
@@ -274,7 +274,7 @@ export default function About() {
         </section>
 
         {/* Course Offerings with Tabs */}
-        <section className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-600">
+        <section className="space-y-8">
           <div className="text-center space-y-4">
             <h2 className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
               Course Offerings
@@ -442,7 +442,7 @@ export default function About() {
         </section>
 
         {/* FAQ Section */}
-        <section className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-700">
+        <section className="space-y-8">
           <div className="text-center space-y-4">
             <h2 className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
               Frequently Asked Questions

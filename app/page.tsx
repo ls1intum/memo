@@ -38,7 +38,10 @@ export default function Page() {
       <LiquidGlassGradient />
 
       <main className="relative z-20 mx-auto flex w-full max-w-6xl flex-col gap-28 px-6 pb-4 pt-[11.5rem] lg:px-0">
-        <section id="overview" className="grid items-center gap-16 pb-8">
+        <section
+          id="overview"
+          className="grid items-center gap-16 pb-8 animate-in fade-in slide-in-from-bottom-4 duration-700"
+        >
           <div className="space-y-12">
             <div className="space-y-8">
               <h1 className="text-balance text-[3.2rem] font-semibold leading-[1.04] tracking-tight text-slate-900 sm:text-[3.9rem] lg:text-[4.9rem]">
