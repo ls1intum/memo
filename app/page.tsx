@@ -35,7 +35,11 @@ const [leadProblem, ...otherProblems] = problemStatements;
 export default function Page() {
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#d7e3ff] via-[#f3f5ff] to-[#e8ecff] text-slate-900">
-      <LiquidGlassGradient />
+      <div className="absolute inset-0 -z-10 opacity-70">
+        <div className="absolute left-1/2 top-[-6rem] h-[36rem] w-[36rem] -translate-x-1/2 rounded-full bg-white/80 blur-[140px]" />
+        <div className="absolute left-[10%] top-[22%] h-80 w-80 rounded-full bg-[#7fb0ff]/35 blur-[120px]" />
+        <div className="absolute right-[14%] top-[28%] h-[22rem] w-[22rem] rounded-[40%] bg-gradient-to-br from-[#ffdff3]/55 via-[#fff3f8]/35 to-transparent blur-[140px]" />
+      </div>
 
       <main className="relative z-20 mx-auto flex w-full max-w-6xl flex-col gap-28 px-6 pb-4 pt-[11.5rem] lg:px-0">
         <section
@@ -121,7 +125,7 @@ export default function Page() {
 
         <section
           id="challenges"
-          className="relative isolate left-1/2 right-1/2 w-screen -translate-x-1/2 transform px-6 pb-12 pt-32 lg:px-0 -mt-24"
+          className="relative isolate left-1/2 right-1/2 w-screen -translate-x-1/2 transform px-6 pb-[8.5rem] pt-32 lg:px-0 -mt-24"
         >
           <div className="absolute inset-0 bg-white" aria-hidden />
           <div
@@ -184,19 +188,6 @@ export default function Page() {
           </div>
         </section>
       </main>
-    </div>
-  );
-}
-
-function LiquidGlassGradient() {
-  return (
-    <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.9),_rgba(237,242,255,0.6))]" />
-      <div className="absolute left-1/2 top-[-8rem] h-[44rem] w-[44rem] -translate-x-1/2 rounded-[50%] bg-white/80 blur-[140px] opacity-85 mix-blend-screen" />
-      <div className="absolute left-[12%] top-[22%] h-80 w-80 rounded-full bg-[#7fb0ff]/40 blur-[120px] mix-blend-screen" />
-      <div className="absolute right-[18%] top-[30%] h-[26rem] w-[24rem] rounded-[40%] bg-gradient-to-br from-[#ffdff3]/65 via-[#fff3f8]/45 to-transparent blur-[150px] mix-blend-screen" />
-      <div className="absolute bottom-[-10rem] left-1/2 h-[36rem] w-[50rem] -translate-x-1/2 rounded-[220px] bg-white/70 blur-[160px] opacity-95 mix-blend-screen" />
-      <div className="absolute left-1/3 top-[58%] h-72 w-72 rounded-full bg-[#9ce8d1]/35 blur-[130px] mix-blend-screen" />
     </div>
   );
 }

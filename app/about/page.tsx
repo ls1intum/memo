@@ -23,9 +23,9 @@ export default function About() {
         <div className="absolute right-[14%] top-[28%] h-[22rem] w-[22rem] rounded-[40%] bg-gradient-to-br from-[#ffdff3]/55 via-[#fff3f8]/35 to-transparent blur-[140px]" />
       </div>
 
-      <main className="relative z-10 mx-auto flex w-full max-w-6xl flex-col gap-16 px-6 pb-20 pt-[7rem] lg:px-0">
+      <main className="relative z-10 mx-auto flex w-full max-w-6xl flex-col gap-16 px-6 pb-20 pt-[8rem] lg:px-0">
         {/* Hero Section */}
-        <section className="space-y-12 text-center">
+        <section className="space-y-12 text-center animate-in fade-in slide-in-from-bottom-4 duration-700">
           <div className="space-y-8">
             <h1 className="text-balance text-[3.2rem] font-semibold leading-[1.04] tracking-tight text-slate-900 sm:text-[3.9rem] lg:text-[4.9rem]">
               Building the foundation for{' '}
@@ -50,7 +50,7 @@ export default function About() {
               className="h-12 rounded-full border border-white/70 bg-white/80 px-7 text-base font-semibold text-slate-900 shadow-sm transition hover:border-slate-200 hover:bg-white"
               asChild
             >
-              <Link href="/onboarding">Learn More</Link>
+              <Link href="#problem">Learn More</Link>
             </Button>
           </div>
         </section>
@@ -78,7 +78,10 @@ export default function About() {
         </section>
 
         {/* The Problem Section */}
-        <section className="grid gap-6 rounded-[32px] border border-white/70 bg-white/85 p-8 shadow-[0_26px_90px_-55px_rgba(7,30,84,0.5)] backdrop-blur-xl">
+        <section
+          id="problem"
+          className="grid gap-6 rounded-[32px] border border-white/70 bg-white/85 p-8 shadow-[0_26px_90px_-55px_rgba(7,30,84,0.5)] backdrop-blur-xl scroll-mt-28"
+        >
           <div className="space-y-3">
             <Badge className="w-fit rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-600">
               The Problem
@@ -409,7 +412,7 @@ export default function About() {
         </section>
 
         {/* Tech Stack Section */}
-        <section className="space-y-6 rounded-[32px] border border-white/70 bg-white/85 p-8 shadow-[0_26px_90px_-55px_rgba(7,30,84,0.5)] backdrop-blur-xl">
+        <section className="space-y-8 rounded-[32px] border border-white/70 bg-white/85 p-8 shadow-[0_26px_90px_-55px_rgba(7,30,84,0.5)] backdrop-blur-xl">
           <div className="space-y-3">
             <Badge className="w-fit rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-600">
               Technology
@@ -422,25 +425,28 @@ export default function About() {
               reliability, scalability, and maintainability.
             </p>
           </div>
-
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-3">
             {[
-              'Next.js 15',
-              'React 19',
-              'TypeScript',
-              'PostgreSQL',
-              'Prisma',
-              'Tailwind CSS',
-              'Docker',
-              'Zustand',
-              'TanStack Query',
-              'shadcn/ui',
-            ].map(tech => (
+              { name: 'Next.js 15', color: 'from-black to-gray-800' },
+              { name: 'React 19', color: 'from-blue-500 to-cyan-500' },
+              { name: 'TypeScript', color: 'from-blue-600 to-blue-700' },
+              { name: 'PostgreSQL', color: 'from-blue-700 to-indigo-800' },
+              { name: 'Prisma', color: 'from-teal-600 to-cyan-600' },
+              { name: 'Tailwind CSS', color: 'from-cyan-500 to-blue-500' },
+            ].map((tech) => (
               <div
-                key={tech}
-                className="rounded-xl border border-slate-200 bg-white/60 px-4 py-3 text-center text-sm font-medium text-slate-800 transition hover:bg-white/80"
+                key={tech.name}
+                className="group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-gradient-to-br from-white to-slate-50/50 p-6 shadow-sm transition-all duration-300 hover:scale-105 hover:border-[#0a4da2]/30 hover:shadow-lg hover:shadow-[#0a4da2]/10"
               >
-                {tech}
+                <div className="relative z-10">
+                  <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-slate-100 to-slate-200/50 transition-all duration-300 group-hover:scale-110 group-hover:from-[#0a4da2]/10 group-hover:to-[#0a4da2]/5">
+                    <div className={`h-6 w-6 rounded-lg bg-gradient-to-br ${tech.color} opacity-80 group-hover:opacity-100`} />
+                  </div>
+                  <h3 className="text-base font-semibold text-slate-900 transition-colors group-hover:text-[#0a4da2]">
+                    {tech.name}
+                  </h3>
+                </div>
+                <div className="absolute inset-0 -z-0 bg-gradient-to-br from-transparent via-transparent to-[#0a4da2]/5 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
               </div>
             ))}
           </div>
@@ -462,7 +468,7 @@ export default function About() {
               <CardHeader>
                 <CardTitle>Viktoriya Totalova</CardTitle>
                 <CardDescription>
-                  Bachelor Computer Science Student
+                  B.Sc. Computer Science Student, TUM
                 </CardDescription>
               </CardHeader>
               <CardContent className="text-sm text-slate-600">
@@ -475,7 +481,9 @@ export default function About() {
             <Card className="border-white/70 bg-white/60">
               <CardHeader>
                 <CardTitle>Mark Stockhausen</CardTitle>
-                <CardDescription>TUM BWL Student</CardDescription>
+                <CardDescription>
+                  B.Sc. Management & Technology Student, TUM
+                </CardDescription>
               </CardHeader>
               <CardContent className="text-sm text-slate-600">
                 Implementing contributor interface, scheduling service, and
