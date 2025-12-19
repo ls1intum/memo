@@ -433,14 +433,16 @@ export default function About() {
               { name: 'PostgreSQL', color: 'from-blue-700 to-indigo-800' },
               { name: 'Prisma', color: 'from-teal-600 to-cyan-600' },
               { name: 'Tailwind CSS', color: 'from-cyan-500 to-blue-500' },
-            ].map((tech) => (
+            ].map(tech => (
               <div
                 key={tech.name}
                 className="group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-gradient-to-br from-white to-slate-50/50 p-6 shadow-sm transition-all duration-300 hover:scale-105 hover:border-[#0a4da2]/30 hover:shadow-lg hover:shadow-[#0a4da2]/10"
               >
                 <div className="relative z-10">
                   <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-slate-100 to-slate-200/50 transition-all duration-300 group-hover:scale-110 group-hover:from-[#0a4da2]/10 group-hover:to-[#0a4da2]/5">
-                    <div className={`h-6 w-6 rounded-lg bg-gradient-to-br ${tech.color} opacity-80 group-hover:opacity-100`} />
+                    <div
+                      className={`h-6 w-6 rounded-lg bg-gradient-to-br ${tech.color} opacity-80 group-hover:opacity-100`}
+                    />
                   </div>
                   <h3 className="text-base font-semibold text-slate-900 transition-colors group-hover:text-[#0a4da2]">
                     {tech.name}
