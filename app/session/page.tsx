@@ -19,15 +19,13 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Kbd } from '@/components/ui/kbd';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, ArrowDown, Info, ArrowLeftRight, Check, Layers, TrendingUp, Equal } from 'lucide-react';
 import {
   Card,
   CardDescription,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 type SessionStats = {
   completed: number;
@@ -75,8 +73,6 @@ function SessionPageContent() {
         const result = await getRelationshipTypesAction();
         if (result.success && result.types && result.types.length > 0) {
           setRelationshipTypes(result.types);
-          // Set initial relation state if not already set
-          setRelation(prev => (prev === '' ? result.types[0]!.value : prev));
         } else {
           setError(
             result.error ??
@@ -179,6 +175,7 @@ function SessionPageContent() {
               competencies: competencies ? [...competencies] : undefined,
             },
           ]);
+          setRelation(''); // Clear selection after adding relation
           await loadCompetencies();
         } catch (err) {
           setError(
@@ -197,6 +194,7 @@ function SessionPageContent() {
             competencies: competencies ? [...competencies] : undefined,
           },
         ]);
+        setRelation(''); // Reset relationship type selection
         try {
           await loadCompetencies();
         } catch (err) {
@@ -273,6 +271,18 @@ function SessionPageContent() {
         return;
       }
 
+      // If Enter is pressed on a relationship button, prevent default button behavior
+      // and let the global handler manage it
+      if (
+        event.key === 'Enter' &&
+        target.tagName === 'BUTTON' &&
+        target.closest('[data-relationship-button]')
+      ) {
+        event.preventDefault();
+        event.stopPropagation();
+        // Continue to global Enter handler below
+      }
+
       // ⌘+Shift+Z or Ctrl+Shift+Z for Undo (only if there's history to undo)
       // Using Shift+Z to avoid browser's default undo behavior
       if (
@@ -300,6 +310,24 @@ function SessionPageContent() {
         return;
       }
 
+      // 1, 2, 3 for relationship types (only if relationship types are loaded)
+      // Check this BEFORE Enter to prevent conflicts
+      if (
+        ['1', '2', '3'].includes(event.key) &&
+        relationshipTypes.length > 0 &&
+        !isLoading &&
+        !isCreating
+      ) {
+        event.preventDefault();
+        event.stopPropagation();
+        const index = parseInt(event.key) - 1;
+        if (relationshipTypes[index]) {
+          const selectedValue = relationshipTypes[index]!.value;
+          setRelation(relation === selectedValue ? '' : selectedValue);
+        }
+        return;
+      }
+
       // Enter for Add Relation (only if not loading, not creating, has userId, relation, and competencies)
       if (
         event.key === 'Enter' &&
@@ -311,6 +339,7 @@ function SessionPageContent() {
         competencies.length >= 2
       ) {
         event.preventDefault();
+        event.stopPropagation();
         handleAction('completed');
         return;
       }
@@ -327,6 +356,7 @@ function SessionPageContent() {
     relation,
     competencies,
     history,
+    relationshipTypes,
     handleAction,
     handleUndo,
   ]);
@@ -395,7 +425,8 @@ function SessionPageContent() {
 
           {!error && !noCompetencies && !notEnough && (
             <>
-              <h2 className="text-2xl font-semibold text-slate-900">
+              {/* Dynamic Title */}
+              <h2 className="text-2xl font-semibold text-slate-900 text-left">
                 {isLoading || !competencies || competencies.length < 2
                   ? 'Loading competencies for this mapping session...'
                   : `How does "${competencies[0]!.title}" relate to "${
@@ -403,204 +434,354 @@ function SessionPageContent() {
                     }"?`}
               </h2>
 
-              <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-3">
-                <div className="col-span-1">
-                  {isLoading || !competencies || !competencies[0] ? (
-                    <Card className="border border-white/70 bg-white/60">
-                      <CardHeader>
-                        <CardTitle className="text-slate-400">
-                          Loading first competency...
+              {/* Competencies Side by Side for Comparison */}
+              <div className="relative grid grid-cols-1 gap-6 lg:grid-cols-[1fr_auto_1fr]" style={{ isolation: 'isolate' }}>
+                {/* Origin Competency */}
+                {isLoading || !competencies || !competencies[0] ? (
+                  <Card className="border border-slate-200 bg-slate-50/50">
+                    <CardHeader>
+                      <CardTitle className="text-slate-400">Loading...</CardTitle>
+                    </CardHeader>
+                  </Card>
+                ) : (
+                  <Card className="relative flex h-[300px] flex-col border-2 border-[#0a4da2]/30 bg-gradient-to-br from-blue-50/80 to-white shadow-lg transition-all hover:border-[#0a4da2]/50 overflow-hidden">
+                    <div className="absolute left-0 top-0 h-full w-1.5 bg-gradient-to-b from-[#0a4da2] to-[#4263eb] rounded-r-full" />
+                    <CardHeader className="flex h-full flex-col space-y-4 pb-4 pl-6 overflow-visible">
+                      <div className="flex-shrink-0">
+                        <Badge className="w-fit bg-[#0a4da2] text-white border-[#0a4da2] font-semibold text-xs px-3 py-1.5">
+                          Competency
+                        </Badge>
+                      </div>
+                      <div className="flex flex-wrap gap-2 flex-shrink-0">
+                        {/* Placeholder badges; replace with competency metadata once available */}
+                        <Tooltip side="top">
+                          <TooltipTrigger asChild>
+                            <Badge
+                              tabIndex={0}
+                              className="bg-slate-100 text-slate-700 border-slate-200 cursor-help hover:bg-slate-200 transition-colors"
+                            >
+                              Apply
+                              <Info className="h-3 w-3 ml-1.5" />
+                            </Badge>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>
+                              Bloom&apos;s Taxonomy categorizes learning
+                              objectives by cognitive level.
+                            </p>
+                            <p className="mt-1">
+                              → Apply: use knowledge in practice (implement,
+                              execute, solve).
+                            </p>
+                            <p className="mt-1 text-[11px] text-slate-200">
+                              Levels: Remember • Understand • Apply • Analyze
+                              • Evaluate • Create
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                        <Badge className="bg-slate-100 text-slate-700 border-slate-200">
+                          Control Flow
+                        </Badge>
+                      </div>
+                      <div className="flex-1 flex flex-col min-h-0 space-y-2">
+                        <CardTitle className="text-xl font-bold text-slate-900 flex-shrink-0">
+                          {competencies[0]!.title}
                         </CardTitle>
-                      </CardHeader>
-                    </Card>
-                  ) : (
-                    <Card className="border border-white/70 bg-white/85 shadow-[0_28px_80px_-42px_rgba(7,30,84,0.55)] backdrop-blur-lg">
-                      <CardHeader className="space-y-4 pb-4">
-                        <div className="flex flex-wrap gap-2">
-                          {/* Placeholder badges; replace with competency metadata once available */}
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Badge
-                                tabIndex={0}
-                                className="bg-slate-100 text-slate-700 border-slate-200"
-                              >
-                                Apply
-                              </Badge>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>
-                                Bloom&apos;s Taxonomy categorizes learning
-                                objectives by cognitive level.
-                              </p>
-                              <p className="mt-1">
-                                → Apply: use knowledge in practice (implement,
-                                execute, solve).
-                              </p>
-                              <p className="mt-1 text-[11px] text-slate-200">
-                                Levels: Remember • Understand • Apply • Analyze
-                                • Evaluate • Create
-                              </p>
-                            </TooltipContent>
-                          </Tooltip>
-                          <Badge className="bg-slate-100 text-slate-700 border-slate-200">
-                            Control Flow
-                          </Badge>
-                        </div>
-                        <div className="space-y-2">
-                          <CardTitle className="text-lg text-slate-900">
-                            {competencies[0]!.title}
-                          </CardTitle>
-                          <CardDescription className="text-sm text-slate-600">
+                        <div 
+                          className="flex-1 overflow-y-scroll pr-2 scrollbar-thin"
+                          style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgb(203 213 225) transparent' }}
+                        >
+                          <CardDescription className="text-base leading-relaxed text-slate-600">
                             {competencies[0]!.description}
                           </CardDescription>
                         </div>
-                      </CardHeader>
-                    </Card>
+                      </div>
+                    </CardHeader>
+                  </Card>
+                )}
+
+                {/* Arrow Connection with Swap Button */}
+                <div className="flex flex-col items-center justify-center z-10 px-4 gap-3">
+                  <div className="flex items-center gap-2">
+                    <div className="h-0.5 w-12 bg-gradient-to-r from-[#0a4da2] to-[#4263eb]" />
+                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#0a4da2] via-[#4263eb] to-[#9775fa] shadow-xl ring-4 ring-white">
+                      <ArrowRight className="h-7 w-7 text-white" aria-hidden="true" />
+                    </div>
+                    <div className="h-0.5 w-12 bg-gradient-to-l from-[#9775fa] to-[#5538d1]" />
+                  </div>
+                  {competencies && competencies.length >= 2 && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => {
+                        if (competencies && competencies.length >= 2) {
+                          setCompetencies([competencies[1]!, competencies[0]!]);
+                        }
+                        // Remove focus after click
+                        (e.currentTarget as HTMLButtonElement).blur();
+                      }}
+                      className="text-slate-600 hover:text-slate-900 hover:bg-slate-100 focus:outline-none"
+                      title="Swap competencies"
+                    >
+                      <ArrowLeftRight className="h-4 w-4 mr-1.5" />
+                      Swap Direction
+                    </Button>
                   )}
                 </div>
 
-                <div className="col-span-1 flex flex-col items-center justify-center gap-6 text-center md:col-start-2">
-                  <div className="flex items-center justify-center gap-4 text-slate-500">
-                    <div className="h-px w-12 bg-slate-300" />
-                    <ArrowRight className="h-8 w-8" aria-hidden="true" />
-                    <div className="h-px w-12 bg-slate-300" />
-                  </div>
-                  <div className="text-sm font-semibold text-slate-800">
-                    Select Relation Type
-                  </div>
-                  <div className="w-full max-w-[260px] md:ml-40">
-                    <RadioGroup
-                      value={relation}
-                      onValueChange={value =>
-                        setRelation(value as RelationshipType)
-                      }
-                      className="gap-4 items-start"
-                    >
-                      {relationshipTypes.length > 0 ? (
-                        relationshipTypes.map(({ value, label }) => (
-                          <div key={value} className="flex items-center gap-3">
-                            <RadioGroupItem
-                              value={value}
-                              id={value}
-                              className="h-4 w-4"
-                            />
-                            <Label
-                              htmlFor={value}
-                              className="text-sm font-normal text-slate-800"
+                {/* Destination Competency */}
+                {isLoading || !competencies || !competencies[1] ? (
+                  <Card className="border border-slate-200 bg-slate-50/50">
+                    <CardHeader>
+                      <CardTitle className="text-slate-400">Loading...</CardTitle>
+                    </CardHeader>
+                  </Card>
+                ) : (
+                  <Card className="relative flex h-[300px] flex-col border-2 border-[#9775fa]/30 bg-gradient-to-br from-purple-50/80 to-white shadow-lg transition-all hover:border-[#9775fa]/50 overflow-hidden">
+                    <div className="absolute left-0 top-0 h-full w-1.5 bg-gradient-to-b from-[#9775fa] to-[#5538d1] rounded-r-full" />
+                    <CardHeader className="flex h-full flex-col space-y-4 pb-4 pl-6 overflow-visible">
+                      <div className="flex-shrink-0">
+                        <Badge className="w-fit bg-[#9775fa] text-white border-[#9775fa] font-semibold text-xs px-3 py-1.5">
+                          Competency
+                        </Badge>
+                      </div>
+                      <div className="flex flex-wrap gap-2 flex-shrink-0">
+                        {/* Placeholder badges; replace with competency metadata once available */}
+                        <Tooltip side="top">
+                          <TooltipTrigger asChild>
+                            <Badge
+                              tabIndex={0}
+                              className="bg-slate-100 text-slate-700 border-slate-200 cursor-help hover:bg-slate-200 transition-colors"
                             >
-                              {label}
-                            </Label>
-                          </div>
-                        ))
-                      ) : (
-                        <div className="text-sm text-slate-400">
-                          Loading relationship types...
-                        </div>
-                      )}
-                    </RadioGroup>
-                  </div>
-                </div>
-
-                <div className="col-span-1">
-                  {isLoading || !competencies || !competencies[1] ? (
-                    <Card className="border border-white/70 bg-white/60">
-                      <CardHeader>
-                        <CardTitle className="text-slate-400">
-                          Loading second competency...
+                              Apply
+                              <Info className="h-3 w-3 ml-1.5" />
+                            </Badge>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>
+                              Bloom&apos;s Taxonomy categorizes learning
+                              objectives by cognitive level.
+                            </p>
+                            <p className="mt-1">
+                              → Apply: use knowledge in practice (implement,
+                              execute, solve).
+                            </p>
+                            <p className="mt-1 text-[11px] text-slate-200">
+                              Levels: Remember • Understand • Apply • Analyze
+                              • Evaluate • Create
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                        <Badge className="bg-slate-100 text-slate-700 border-slate-200">
+                          Programming Fundamentals
+                        </Badge>
+                      </div>
+                      <div className="flex-1 flex flex-col min-h-0 space-y-2">
+                        <CardTitle className="text-xl font-bold text-slate-900 flex-shrink-0">
+                          {competencies[1]!.title}
                         </CardTitle>
-                      </CardHeader>
-                    </Card>
-                  ) : (
-                    <Card className="border border-white/70 bg-white/85 shadow-[0_28px_80px_-42px_rgba(7,30,84,0.55)] backdrop-blur-lg">
-                      <CardHeader className="space-y-4 pb-4">
-                        <div className="flex flex-wrap gap-2">
-                          {/* Placeholder badges; replace with competency metadata once available */}
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Badge
-                                tabIndex={0}
-                                className="bg-slate-100 text-slate-700 border-slate-200"
-                              >
-                                Apply
-                              </Badge>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>
-                                Bloom&apos;s Taxonomy categorizes learning
-                                objectives by cognitive level.
-                              </p>
-                              <p className="mt-1">
-                                → Apply: use knowledge in practice (implement,
-                                execute, solve).
-                              </p>
-                              <p className="mt-1 text-[11px] text-slate-200">
-                                Levels: Remember • Understand • Apply • Analyze
-                                • Evaluate • Create
-                              </p>
-                            </TooltipContent>
-                          </Tooltip>
-                          <Badge className="bg-slate-100 text-slate-700 border-slate-200">
-                            Programming Fundamentals
-                          </Badge>
-                        </div>
-                        <div className="space-y-2">
-                          <CardTitle className="text-lg text-slate-900">
-                            {competencies[1]!.title}
-                          </CardTitle>
-                          <CardDescription className="text-sm text-slate-600">
+                        <div 
+                          className="flex-1 overflow-y-scroll pr-2 scrollbar-thin"
+                          style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgb(203 213 225) transparent' }}
+                        >
+                          <CardDescription className="text-base leading-relaxed text-slate-600">
                             {competencies[1]!.description}
                           </CardDescription>
                         </div>
-                      </CardHeader>
-                    </Card>
-                  )}
-                </div>
+                      </div>
+                    </CardHeader>
+                  </Card>
+                )}
               </div>
 
-              <div className="mt-2 flex flex-wrap items-center gap-3">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-slate-700"
+              {/* Relationship Selector - Prominent Below Competencies */}
+              <div className="space-y-4 p-6 -mt-2 mb-8">
+                {/* Live Preview Sentence */}
+                {competencies && competencies.length >= 2 && (
+                  <div className="text-center py-3 px-4 rounded-lg bg-slate-50 border border-slate-200 min-h-[48px] flex items-center justify-center">
+                    {relation ? (
+                      <p className="text-sm text-slate-700">
+                        <span className="font-semibold text-slate-900">{competencies[0]!.title}</span>
+                        {' '}
+                        <span className="text-[#0a4da2] font-semibold bg-blue-50 px-1 py-0.5 rounded">
+                          {relationshipTypes.find(rt => rt.value === relation)?.label.toLowerCase() || ''}
+                        </span>
+                        {' '}
+                        <span className="font-semibold text-slate-900">{competencies[1]!.title}</span>
+                      </p>
+                    ) : (
+                      <p className="text-sm text-slate-700">
+                        Click or press <Kbd className="bg-slate-200 text-slate-700 border border-slate-300 text-xs">1</Kbd> – <Kbd className="bg-slate-200 text-slate-700 border border-slate-300 text-xs">3</Kbd> to select a relationship type
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full">
+                  {relationshipTypes.length > 0 ? (
+                    relationshipTypes.map(({ value, label }) => {
+                      const isSelected = relation === value;
+                        const iconMap = {
+                          ASSUMES: Layers,
+                          EXTENDS: TrendingUp,
+                          MATCHES: Equal,
+                        };
+                        const Icon = iconMap[value] || ArrowDown;
+                        const getColorClasses = (val: string, selected: boolean) => {
+                        if (val === 'ASSUMES') {
+                          return selected
+                            ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-500/30'
+                            : 'bg-white border-blue-500/30 text-slate-700 hover:border-blue-500 hover:bg-blue-50';
+                        }
+                        if (val === 'EXTENDS') {
+                          return selected
+                            ? 'bg-purple-600 border-purple-600 text-white shadow-lg shadow-purple-500/30'
+                            : 'bg-white border-purple-500/30 text-slate-700 hover:border-purple-500 hover:bg-purple-50';
+                        }
+                        if (val === 'MATCHES') {
+                          return selected
+                            ? 'bg-emerald-600 border-emerald-600 text-white shadow-lg shadow-emerald-500/30'
+                            : 'bg-white border-emerald-500/30 text-slate-700 hover:border-emerald-500 hover:bg-emerald-50';
+                        }
+                        return 'bg-white border-slate-300 text-slate-700';
+                      };
+
+                      const getIconBgClasses = (val: string, selected: boolean) => {
+                        if (val === 'ASSUMES') {
+                          return selected ? 'bg-white/20' : 'bg-blue-500/10 group-hover:bg-blue-500/20';
+                        }
+                        if (val === 'EXTENDS') {
+                          return selected ? 'bg-white/20' : 'bg-purple-500/10 group-hover:bg-purple-500/20';
+                        }
+                        if (val === 'MATCHES') {
+                          return selected ? 'bg-white/20' : 'bg-emerald-500/10 group-hover:bg-emerald-500/20';
+                        }
+                        return 'bg-slate-500/10';
+                      };
+
+                      const getIconColorClasses = (val: string, selected: boolean) => {
+                        if (selected) return 'text-white';
+                        if (val === 'ASSUMES') return 'text-blue-500';
+                        if (val === 'EXTENDS') return 'text-purple-500';
+                        if (val === 'MATCHES') return 'text-emerald-500';
+                        return 'text-slate-500';
+                      };
+
+                      const getDotColorClasses = (val: string) => {
+                        if (val === 'ASSUMES') return 'bg-blue-600';
+                        if (val === 'EXTENDS') return 'bg-purple-600';
+                        if (val === 'MATCHES') return 'bg-emerald-600';
+                        return 'bg-slate-600';
+                      };
+
+                      const shortcutIndex = relationshipTypes.findIndex(rt => rt.value === value);
+                      const shortcutKey = shortcutIndex >= 0 ? (shortcutIndex + 1).toString() : null;
+                      
+                      const relationDescriptions = {
+                        ASSUMES: 'A requires B as prerequisite',
+                        EXTENDS: 'A builds on / is a subset or advanced form of B',
+                        MATCHES: 'A is equivalent / strongly overlaps with B',
+                      };
+                      const description = relationDescriptions[value] || '';
+
+                      return (
+                        <button
+                          key={value}
+                          type="button"
+                          data-relationship-button
+                          onClick={() => setRelation(isSelected ? '' : value)}
+                          className={`group relative flex items-center gap-3 rounded-lg border-2 px-4 py-3 transition-all duration-200 w-full ${
+                            isSelected ? 'scale-[1.02]' : ''
+                          } ${getColorClasses(value, isSelected)}`}
+                        >
+                          <div
+                            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-colors ${getIconBgClasses(value, isSelected)}`}
+                          >
+                            <Icon className={`h-5 w-5 ${getIconColorClasses(value, isSelected)}`} />
+                          </div>
+                              <div className="flex-1 text-left">
+                                <div className="font-semibold flex items-center gap-2">
+                                  {label}
+                                  <Tooltip side="top">
+                                    <TooltipTrigger asChild>
+                                      <Info className={`h-3.5 w-3.5 cursor-help ${
+                                        isSelected 
+                                          ? 'text-white/70' 
+                                          : 'text-slate-500'
+                                      }`} />
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p>{description}</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2 shrink-0">
+                                {isSelected && (
+                                  <>
+                                    <span className="text-xs opacity-90">Selected</span>
+                                    <div className="flex h-5 w-5 items-center justify-center rounded-full bg-white/30">
+                                      <Check className="h-3 w-3 text-white" />
+                                    </div>
+                                  </>
+                                )}
+                                {shortcutKey && (
+                                  <Kbd className={`${isSelected ? 'bg-white/20 text-white border-white/30' : 'bg-slate-200 text-slate-700 border-slate-300'} text-xs`}>
+                                    {shortcutKey}
+                                  </Kbd>
+                                )}
+                              </div>
+                        </button>
+                      );
+                      })
+                    ) : (
+                      <div className="col-span-3 rounded-xl border border-slate-200 bg-white p-6 text-center text-slate-400">
+                        Loading relationship types...
+                      </div>
+                    )}
+                  </div>
+              </div>
+
+              <div className="sticky bottom-0 mt-12 pt-8">
+                <div className="relative">
+                  <div className="absolute -top-12 left-0 right-0 h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent" />
+                </div>
+                <div className="flex flex-wrap items-center gap-3 px-6">
+                <button
+                  type="button"
                   onClick={handleUndo}
                   disabled={history.length === 0}
+                  className="flex items-center gap-3 rounded-lg border-2 border-slate-300 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition-all duration-200 hover:bg-slate-50 hover:border-slate-400 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white"
                 >
-                  Undo{' '}
-                  <Kbd className="ml-2 bg-slate-200 text-slate-700 border border-slate-300">
-                    ⌘
+                  Undo
+                  <Kbd className="shrink-0 bg-slate-200 text-slate-700 border border-slate-300 text-xs">
+                    ⌘⇧Z
                   </Kbd>
-                  <Kbd className="ml-1 bg-slate-200 text-slate-700 border border-slate-300">
-                    ⇧
-                  </Kbd>
-                  <Kbd className="ml-1 bg-slate-200 text-slate-700 border border-slate-300">
-                    Z
-                  </Kbd>
-                </Button>
+                </button>
                 <div className="flex-1" />
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="bg-slate-200 text-slate-700 hover:bg-slate-300 border-slate-300"
+                <button
+                  type="button"
                   onClick={() => handleAction('skipped')}
                   disabled={isLoading}
+                  className="flex items-center gap-3 rounded-lg border-2 border-slate-300 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition-all duration-200 hover:bg-slate-50 hover:border-slate-400 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Skip{' '}
-                  <Kbd className="ml-2 bg-slate-200 text-slate-700 border border-slate-300">
+                  Skip
+                  <Kbd className="shrink-0 bg-slate-200 text-slate-700 border border-slate-300 text-xs">
                     Space
                   </Kbd>
-                </Button>
-                <Button
-                  variant="default"
-                  size="sm"
-                  className="bg-[#0a4da2] text-white shadow-[0_18px_45px_-26px_rgba(7,30,84,0.75)] hover:bg-[#0d56b5]"
+                </button>
+                <button
+                  type="button"
                   onClick={() => handleAction('completed')}
                   disabled={isLoading || isCreating || !userId || !relation}
+                  className="flex items-center gap-3 rounded-lg border-2 border-[#0a4da2] bg-[#0a4da2] px-4 py-3 text-sm font-medium text-white transition-all duration-200 hover:bg-[#0d56b5] hover:border-[#0d56b5] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#0a4da2]"
                 >
-                  {isCreating ? 'Creating...' : 'Add Relation'}{' '}
-                  <Kbd className="ml-2 bg-slate-200 text-slate-700 border border-slate-300">
+                  {isCreating ? 'Creating...' : 'Add Relation'}
+                  <Kbd className="shrink-0 bg-white/20 text-white border border-white/30 text-xs">
                     ⏎
                   </Kbd>
-                </Button>
+                </button>
+                </div>
               </div>
             </>
           )}
