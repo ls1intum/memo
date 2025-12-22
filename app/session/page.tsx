@@ -19,7 +19,16 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Kbd } from '@/components/ui/kbd';
-import { ArrowRight, ArrowDown, Info, ArrowLeftRight, Check, Layers, TrendingUp, Equal } from 'lucide-react';
+import {
+  ArrowRight,
+  ArrowDown,
+  Info,
+  ArrowLeftRight,
+  Check,
+  Layers,
+  TrendingUp,
+  Equal,
+} from 'lucide-react';
 import {
   Card,
   CardDescription,
@@ -435,12 +444,17 @@ function SessionPageContent() {
               </h2>
 
               {/* Competencies Side by Side for Comparison */}
-              <div className="relative grid grid-cols-1 gap-6 lg:grid-cols-[1fr_auto_1fr]" style={{ isolation: 'isolate' }}>
+              <div
+                className="relative grid grid-cols-1 gap-6 lg:grid-cols-[1fr_auto_1fr]"
+                style={{ isolation: 'isolate' }}
+              >
                 {/* Origin Competency */}
                 {isLoading || !competencies || !competencies[0] ? (
                   <Card className="border border-slate-200 bg-slate-50/50">
                     <CardHeader>
-                      <CardTitle className="text-slate-400">Loading...</CardTitle>
+                      <CardTitle className="text-slate-400">
+                        Loading...
+                      </CardTitle>
                     </CardHeader>
                   </Card>
                 ) : (
@@ -474,8 +488,8 @@ function SessionPageContent() {
                               execute, solve).
                             </p>
                             <p className="mt-1 text-[11px] text-slate-200">
-                              Levels: Remember • Understand • Apply • Analyze
-                              • Evaluate • Create
+                              Levels: Remember • Understand • Apply • Analyze •
+                              Evaluate • Create
                             </p>
                           </TooltipContent>
                         </Tooltip>
@@ -487,9 +501,12 @@ function SessionPageContent() {
                         <CardTitle className="text-xl font-bold text-slate-900 flex-shrink-0">
                           {competencies[0]!.title}
                         </CardTitle>
-                        <div 
+                        <div
                           className="flex-1 overflow-y-scroll pr-2 scrollbar-thin"
-                          style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgb(203 213 225) transparent' }}
+                          style={{
+                            scrollbarWidth: 'thin',
+                            scrollbarColor: 'rgb(203 213 225) transparent',
+                          }}
                         >
                           <CardDescription className="text-base leading-relaxed text-slate-600">
                             {competencies[0]!.description}
@@ -505,7 +522,10 @@ function SessionPageContent() {
                   <div className="flex items-center gap-2">
                     <div className="h-0.5 w-12 bg-gradient-to-r from-[#0a4da2] to-[#4263eb]" />
                     <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#0a4da2] via-[#4263eb] to-[#9775fa] shadow-xl ring-4 ring-white">
-                      <ArrowRight className="h-7 w-7 text-white" aria-hidden="true" />
+                      <ArrowRight
+                        className="h-7 w-7 text-white"
+                        aria-hidden="true"
+                      />
                     </div>
                     <div className="h-0.5 w-12 bg-gradient-to-l from-[#9775fa] to-[#5538d1]" />
                   </div>
@@ -513,7 +533,7 @@ function SessionPageContent() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={(e) => {
+                      onClick={e => {
                         if (competencies && competencies.length >= 2) {
                           setCompetencies([competencies[1]!, competencies[0]!]);
                         }
@@ -533,7 +553,9 @@ function SessionPageContent() {
                 {isLoading || !competencies || !competencies[1] ? (
                   <Card className="border border-slate-200 bg-slate-50/50">
                     <CardHeader>
-                      <CardTitle className="text-slate-400">Loading...</CardTitle>
+                      <CardTitle className="text-slate-400">
+                        Loading...
+                      </CardTitle>
                     </CardHeader>
                   </Card>
                 ) : (
@@ -567,8 +589,8 @@ function SessionPageContent() {
                               execute, solve).
                             </p>
                             <p className="mt-1 text-[11px] text-slate-200">
-                              Levels: Remember • Understand • Apply • Analyze
-                              • Evaluate • Create
+                              Levels: Remember • Understand • Apply • Analyze •
+                              Evaluate • Create
                             </p>
                           </TooltipContent>
                         </Tooltip>
@@ -580,9 +602,12 @@ function SessionPageContent() {
                         <CardTitle className="text-xl font-bold text-slate-900 flex-shrink-0">
                           {competencies[1]!.title}
                         </CardTitle>
-                        <div 
+                        <div
                           className="flex-1 overflow-y-scroll pr-2 scrollbar-thin"
-                          style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgb(203 213 225) transparent' }}
+                          style={{
+                            scrollbarWidth: 'thin',
+                            scrollbarColor: 'rgb(203 213 225) transparent',
+                          }}
                         >
                           <CardDescription className="text-base leading-relaxed text-slate-600">
                             {competencies[1]!.description}
@@ -601,17 +626,29 @@ function SessionPageContent() {
                   <div className="text-center py-3 px-4 rounded-lg bg-slate-50 border border-slate-200 min-h-[48px] flex items-center justify-center">
                     {relation ? (
                       <p className="text-sm text-slate-700">
-                        <span className="font-semibold text-slate-900">{competencies[0]!.title}</span>
-                        {' '}
+                        <span className="font-semibold text-slate-900">
+                          {competencies[0]!.title}
+                        </span>{' '}
                         <span className="text-[#0a4da2] font-semibold bg-blue-50 px-1 py-0.5 rounded">
-                          {relationshipTypes.find(rt => rt.value === relation)?.label.toLowerCase() || ''}
+                          {relationshipTypes
+                            .find(rt => rt.value === relation)
+                            ?.label.toLowerCase() || ''}
+                        </span>{' '}
+                        <span className="font-semibold text-slate-900">
+                          {competencies[1]!.title}
                         </span>
-                        {' '}
-                        <span className="font-semibold text-slate-900">{competencies[1]!.title}</span>
                       </p>
                     ) : (
                       <p className="text-sm text-slate-700">
-                        Click or press <Kbd className="bg-slate-200 text-slate-700 border border-slate-300 text-xs">1</Kbd> – <Kbd className="bg-slate-200 text-slate-700 border border-slate-300 text-xs">3</Kbd> to select a relationship type
+                        Click or press{' '}
+                        <Kbd className="bg-slate-200 text-slate-700 border border-slate-300 text-xs">
+                          1
+                        </Kbd>{' '}
+                        –{' '}
+                        <Kbd className="bg-slate-200 text-slate-700 border border-slate-300 text-xs">
+                          3
+                        </Kbd>{' '}
+                        to select a relationship type
                       </p>
                     )}
                   </div>
@@ -621,13 +658,16 @@ function SessionPageContent() {
                   {relationshipTypes.length > 0 ? (
                     relationshipTypes.map(({ value, label }) => {
                       const isSelected = relation === value;
-                        const iconMap = {
-                          ASSUMES: Layers,
-                          EXTENDS: TrendingUp,
-                          MATCHES: Equal,
-                        };
-                        const Icon = iconMap[value] || ArrowDown;
-                        const getColorClasses = (val: string, selected: boolean) => {
+                      const iconMap = {
+                        ASSUMES: Layers,
+                        EXTENDS: TrendingUp,
+                        MATCHES: Equal,
+                      };
+                      const Icon = iconMap[value] || ArrowDown;
+                      const getColorClasses = (
+                        val: string,
+                        selected: boolean
+                      ) => {
                         if (val === 'ASSUMES') {
                           return selected
                             ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-500/30'
@@ -646,20 +686,32 @@ function SessionPageContent() {
                         return 'bg-white border-slate-300 text-slate-700';
                       };
 
-                      const getIconBgClasses = (val: string, selected: boolean) => {
+                      const getIconBgClasses = (
+                        val: string,
+                        selected: boolean
+                      ) => {
                         if (val === 'ASSUMES') {
-                          return selected ? 'bg-white/20' : 'bg-blue-500/10 group-hover:bg-blue-500/20';
+                          return selected
+                            ? 'bg-white/20'
+                            : 'bg-blue-500/10 group-hover:bg-blue-500/20';
                         }
                         if (val === 'EXTENDS') {
-                          return selected ? 'bg-white/20' : 'bg-purple-500/10 group-hover:bg-purple-500/20';
+                          return selected
+                            ? 'bg-white/20'
+                            : 'bg-purple-500/10 group-hover:bg-purple-500/20';
                         }
                         if (val === 'MATCHES') {
-                          return selected ? 'bg-white/20' : 'bg-emerald-500/10 group-hover:bg-emerald-500/20';
+                          return selected
+                            ? 'bg-white/20'
+                            : 'bg-emerald-500/10 group-hover:bg-emerald-500/20';
                         }
                         return 'bg-slate-500/10';
                       };
 
-                      const getIconColorClasses = (val: string, selected: boolean) => {
+                      const getIconColorClasses = (
+                        val: string,
+                        selected: boolean
+                      ) => {
                         if (selected) return 'text-white';
                         if (val === 'ASSUMES') return 'text-blue-500';
                         if (val === 'EXTENDS') return 'text-purple-500';
@@ -667,19 +719,18 @@ function SessionPageContent() {
                         return 'text-slate-500';
                       };
 
-                      const getDotColorClasses = (val: string) => {
-                        if (val === 'ASSUMES') return 'bg-blue-600';
-                        if (val === 'EXTENDS') return 'bg-purple-600';
-                        if (val === 'MATCHES') return 'bg-emerald-600';
-                        return 'bg-slate-600';
-                      };
+                      const shortcutIndex = relationshipTypes.findIndex(
+                        rt => rt.value === value
+                      );
+                      const shortcutKey =
+                        shortcutIndex >= 0
+                          ? (shortcutIndex + 1).toString()
+                          : null;
 
-                      const shortcutIndex = relationshipTypes.findIndex(rt => rt.value === value);
-                      const shortcutKey = shortcutIndex >= 0 ? (shortcutIndex + 1).toString() : null;
-                      
                       const relationDescriptions = {
                         ASSUMES: 'A requires B as prerequisite',
-                        EXTENDS: 'A builds on / is a subset or advanced form of B',
+                        EXTENDS:
+                          'A builds on / is a subset or advanced form of B',
                         MATCHES: 'A is equivalent / strongly overlaps with B',
                       };
                       const description = relationDescriptions[value] || '';
@@ -697,49 +748,57 @@ function SessionPageContent() {
                           <div
                             className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-colors ${getIconBgClasses(value, isSelected)}`}
                           >
-                            <Icon className={`h-5 w-5 ${getIconColorClasses(value, isSelected)}`} />
+                            <Icon
+                              className={`h-5 w-5 ${getIconColorClasses(value, isSelected)}`}
+                            />
                           </div>
-                              <div className="flex-1 text-left">
-                                <div className="font-semibold flex items-center gap-2">
-                                  {label}
-                                  <Tooltip side="top">
-                                    <TooltipTrigger asChild>
-                                      <Info className={`h-3.5 w-3.5 cursor-help ${
-                                        isSelected 
-                                          ? 'text-white/70' 
-                                          : 'text-slate-500'
-                                      }`} />
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                      <p>{description}</p>
-                                    </TooltipContent>
-                                  </Tooltip>
+                          <div className="flex-1 text-left">
+                            <div className="font-semibold flex items-center gap-2">
+                              {label}
+                              <Tooltip side="top">
+                                <TooltipTrigger asChild>
+                                  <Info
+                                    className={`h-3.5 w-3.5 cursor-help ${
+                                      isSelected
+                                        ? 'text-white/70'
+                                        : 'text-slate-500'
+                                    }`}
+                                  />
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>{description}</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0">
+                            {isSelected && (
+                              <>
+                                <span className="text-xs opacity-90">
+                                  Selected
+                                </span>
+                                <div className="flex h-5 w-5 items-center justify-center rounded-full bg-white/30">
+                                  <Check className="h-3 w-3 text-white" />
                                 </div>
-                              </div>
-                              <div className="flex items-center gap-2 shrink-0">
-                                {isSelected && (
-                                  <>
-                                    <span className="text-xs opacity-90">Selected</span>
-                                    <div className="flex h-5 w-5 items-center justify-center rounded-full bg-white/30">
-                                      <Check className="h-3 w-3 text-white" />
-                                    </div>
-                                  </>
-                                )}
-                                {shortcutKey && (
-                                  <Kbd className={`${isSelected ? 'bg-white/20 text-white border-white/30' : 'bg-slate-200 text-slate-700 border-slate-300'} text-xs`}>
-                                    {shortcutKey}
-                                  </Kbd>
-                                )}
-                              </div>
+                              </>
+                            )}
+                            {shortcutKey && (
+                              <Kbd
+                                className={`${isSelected ? 'bg-white/20 text-white border-white/30' : 'bg-slate-200 text-slate-700 border-slate-300'} text-xs`}
+                              >
+                                {shortcutKey}
+                              </Kbd>
+                            )}
+                          </div>
                         </button>
                       );
-                      })
-                    ) : (
-                      <div className="col-span-3 rounded-xl border border-slate-200 bg-white p-6 text-center text-slate-400">
-                        Loading relationship types...
-                      </div>
-                    )}
-                  </div>
+                    })
+                  ) : (
+                    <div className="col-span-3 rounded-xl border border-slate-200 bg-white p-6 text-center text-slate-400">
+                      Loading relationship types...
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="sticky bottom-0 mt-12 pt-8">
@@ -747,40 +806,40 @@ function SessionPageContent() {
                   <div className="absolute -top-12 left-0 right-0 h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent" />
                 </div>
                 <div className="flex flex-wrap items-center gap-3 px-6">
-                <button
-                  type="button"
-                  onClick={handleUndo}
-                  disabled={history.length === 0}
-                  className="flex items-center gap-3 rounded-lg border-2 border-slate-300 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition-all duration-200 hover:bg-slate-50 hover:border-slate-400 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white"
-                >
-                  Undo
-                  <Kbd className="shrink-0 bg-slate-200 text-slate-700 border border-slate-300 text-xs">
-                    ⌘⇧Z
-                  </Kbd>
-                </button>
-                <div className="flex-1" />
-                <button
-                  type="button"
-                  onClick={() => handleAction('skipped')}
-                  disabled={isLoading}
-                  className="flex items-center gap-3 rounded-lg border-2 border-slate-300 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition-all duration-200 hover:bg-slate-50 hover:border-slate-400 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Skip
-                  <Kbd className="shrink-0 bg-slate-200 text-slate-700 border border-slate-300 text-xs">
-                    Space
-                  </Kbd>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleAction('completed')}
-                  disabled={isLoading || isCreating || !userId || !relation}
-                  className="flex items-center gap-3 rounded-lg border-2 border-[#0a4da2] bg-[#0a4da2] px-4 py-3 text-sm font-medium text-white transition-all duration-200 hover:bg-[#0d56b5] hover:border-[#0d56b5] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#0a4da2]"
-                >
-                  {isCreating ? 'Creating...' : 'Add Relation'}
-                  <Kbd className="shrink-0 bg-white/20 text-white border border-white/30 text-xs">
-                    ⏎
-                  </Kbd>
-                </button>
+                  <button
+                    type="button"
+                    onClick={handleUndo}
+                    disabled={history.length === 0}
+                    className="flex items-center gap-3 rounded-lg border-2 border-slate-300 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition-all duration-200 hover:bg-slate-50 hover:border-slate-400 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white"
+                  >
+                    Undo
+                    <Kbd className="shrink-0 bg-slate-200 text-slate-700 border border-slate-300 text-xs">
+                      ⌘⇧Z
+                    </Kbd>
+                  </button>
+                  <div className="flex-1" />
+                  <button
+                    type="button"
+                    onClick={() => handleAction('skipped')}
+                    disabled={isLoading}
+                    className="flex items-center gap-3 rounded-lg border-2 border-slate-300 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition-all duration-200 hover:bg-slate-50 hover:border-slate-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Skip
+                    <Kbd className="shrink-0 bg-slate-200 text-slate-700 border border-slate-300 text-xs">
+                      Space
+                    </Kbd>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleAction('completed')}
+                    disabled={isLoading || isCreating || !userId || !relation}
+                    className="flex items-center gap-3 rounded-lg border-2 border-[#0a4da2] bg-[#0a4da2] px-4 py-3 text-sm font-medium text-white transition-all duration-200 hover:bg-[#0d56b5] hover:border-[#0d56b5] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#0a4da2]"
+                  >
+                    {isCreating ? 'Creating...' : 'Add Relation'}
+                    <Kbd className="shrink-0 bg-white/20 text-white border border-white/30 text-xs">
+                      ⏎
+                    </Kbd>
+                  </button>
                 </div>
               </div>
             </>

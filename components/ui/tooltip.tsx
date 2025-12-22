@@ -41,11 +41,20 @@ export function Tooltip({
 }: TooltipProps) {
   const [open, setOpen] = React.useState(false);
   const timerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [triggerElement, setTriggerElement] = React.useState<HTMLElement | null>(null);
+  const [triggerElement, setTriggerElement] =
+    React.useState<HTMLElement | null>(null);
 
   return (
     <TooltipContext.Provider
-      value={{ open, setOpen, delayDuration, timerRef, side, triggerElement, setTriggerElement }}
+      value={{
+        open,
+        setOpen,
+        delayDuration,
+        timerRef,
+        side,
+        triggerElement,
+        setTriggerElement,
+      }}
     >
       <div className={cn('relative inline-flex', className)}>{children}</div>
     </TooltipContext.Provider>
@@ -131,7 +140,10 @@ export function TooltipTrigger({
 
 export function TooltipContent({ children, className }: TooltipContentProps) {
   const context = React.useContext(TooltipContext);
-  const [position, setPosition] = React.useState<{ top: number; left: number } | null>(null);
+  const [position, setPosition] = React.useState<{
+    top: number;
+    left: number;
+  } | null>(null);
   const [isVisible, setIsVisible] = React.useState(false);
 
   if (!context) {
