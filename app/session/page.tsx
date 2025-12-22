@@ -816,14 +816,9 @@ function SessionPageContent() {
                           </div>
                           <div className="flex items-center gap-2 shrink-0">
                             {isSelected && (
-                              <>
-                                <span className="text-xs opacity-90">
-                                  Selected
-                                </span>
-                                <div className="flex h-5 w-5 items-center justify-center rounded-full bg-white/30">
-                                  <Check className="h-3 w-3 text-white" />
-                                </div>
-                              </>
+                              <span className="text-xs opacity-90">
+                                Selected
+                              </span>
                             )}
                             {shortcutKey && (
                               <Kbd
