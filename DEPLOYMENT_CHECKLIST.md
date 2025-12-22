@@ -48,7 +48,8 @@
    - `VM_SSH_PRIVATE_KEY` - SSH private key for deployment user
 
    **Variables:**
-   - `VM_HOST` - Server hostname (e.g., `memo-test1.aet.cit.tum.de`, `staging.memo.aet.cit.tum.de`, `memo.aet.cit.tum.de`)
+   - `VM_HOST` - Server hostname (e.g., `memo-test1.aet.cit.tum.de`, `staging.memo.aet.cit.tum.de`,
+     `memo.aet.cit.tum.de`)
    - `VM_USERNAME` - `github_deployment`
 
 ### VM Setup (for each environment):

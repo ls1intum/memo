@@ -76,7 +76,8 @@ cat ~/.ssh/id_ed25519.pub
 cat ~/.ssh/id_ed25519
 ```
 
-Copy the entire output (including `-----BEGIN OPENSSH PRIVATE KEY-----` and `-----END OPENSSH PRIVATE KEY-----`)
+Copy the entire output (including `-----BEGIN OPENSSH PRIVATE KEY-----` and
+`-----END OPENSSH PRIVATE KEY-----`)
 
 ### 2.3 Add Your Own SSH Key for Deployment User
 
@@ -110,6 +111,7 @@ sudo certbot certonly --standalone -d memo-test1.aet.cit.tum.de
 ```
 
 Follow the prompts:
+
 - Enter your email address
 - Agree to terms of service
 - Choose whether to share email with EFF
@@ -222,6 +224,7 @@ exit
 ### 8.2 Monitor Deployment
 
 The deployment will:
+
 1. SSH into your VM
 2. Pull the Docker image from GitHub Container Registry
 3. Copy docker-compose.yml and nginx.conf
@@ -404,6 +407,7 @@ Once your test server is running successfully:
 ## Support
 
 For issues specific to:
+
 - **LRZ Infrastructure**: Contact LRZ support
 - **Application Issues**: Check application logs and GitHub Issues
 - **Deployment Issues**: Check GitHub Actions logs
