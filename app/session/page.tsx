@@ -491,7 +491,7 @@ function SessionPageContent() {
         <div className="absolute right-[14%] top-[28%] h-[22rem] w-[22rem] rounded-[40%] bg-gradient-to-br from-[#ffdff3]/55 via-[#fff3f8]/35 to-transparent blur-[140px]" />
       </div>
 
-      <main className="relative z-10 mx-auto mt-24 flex w-full max-w-6xl flex-col gap-8 px-6 pb-60 lg:mt-32 lg:px-0">
+      <main className="relative z-10 mx-auto mt-20 flex w-full max-w-6xl flex-col gap-8 px-6 pb-28 lg:mt-24 lg:px-0">
         <section className="space-y-8 rounded-[32px] border border-white/70 bg-white/85 p-8 shadow-[0_26px_90px_-55px_rgba(7,30,84,0.5)] backdrop-blur-xl">
           <div className="flex flex-wrap items-center gap-3 text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">
             <span>Mapping Session</span>
@@ -557,7 +557,7 @@ function SessionPageContent() {
               {competencies && competencies.length >= 2 && (
                 <div className="text-center py-3 px-4 rounded-lg bg-slate-50 border border-slate-200 min-h-[48px] flex items-center justify-center mb-8">
                   {relation ? (
-                    <p className="text-sm text-slate-700">
+                    <p className="text-base text-slate-700">
                       <span className="font-semibold text-slate-900">
                         {competencies[0]!.title}
                       </span>{' '}
@@ -571,13 +571,13 @@ function SessionPageContent() {
                       </span>
                     </p>
                   ) : (
-                    <p className="text-sm font-semibold text-slate-700">
+                    <p className="text-base font-semibold text-slate-700">
                       Click or press{' '}
-                      <Kbd className="bg-slate-200 text-slate-700 border border-slate-300 text-xs">
+                      <Kbd className="bg-slate-200 text-slate-700 border border-slate-300 text-sm">
                         1
                       </Kbd>{' '}
                       –{' '}
-                      <Kbd className="bg-slate-200 text-slate-700 border border-slate-300 text-xs">
+                      <Kbd className="bg-slate-200 text-slate-700 border border-slate-300 text-sm">
                         3
                       </Kbd>{' '}
                       to select a relationship type
@@ -756,7 +756,7 @@ function SessionPageContent() {
               </div>
 
               {/* Relationship Selector - Prominent Below Competencies */}
-              <div className="space-y-4 p-6 -mt-2 mb-8">
+              <div className="space-y-4 px-6">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full">
                   {relationshipTypes.length > 0 ? (
                     relationshipTypes.map(({ value, label }) => {
