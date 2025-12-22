@@ -75,10 +75,16 @@ export function TooltipTrigger({
 
   const { setOpen, delayDuration, timerRef, setTriggerElement } = context;
 
+  // Unified ref callback that handles both triggerRef and setTriggerElement
+  const handleRef = React.useCallback(
+    (node: HTMLElement | null) => {
+      triggerRef.current = node;
+      setTriggerElement(node);
+    },
+    [setTriggerElement]
+  );
+
   React.useEffect(() => {
-    if (triggerRef.current) {
-      setTriggerElement(triggerRef.current);
-    }
     return () => setTriggerElement(null);
   }, [setTriggerElement]);
 
@@ -110,27 +116,10 @@ export function TooltipTrigger({
 
   const TriggerComponent = asChild ? Slot : 'span';
 
-  if (asChild) {
-    return (
-      <TriggerComponent
-        {...triggerProps}
-        ref={(node: HTMLElement | null) => {
-          triggerRef.current = node;
-          if (node) {
-            setTriggerElement(node);
-          }
-        }}
-        className={cn('inline-flex focus:outline-none', className)}
-      >
-        {children}
-      </TriggerComponent>
-    );
-  }
-
   return (
     <TriggerComponent
       {...triggerProps}
-      ref={triggerRef}
+      ref={handleRef}
       className={cn('inline-flex focus:outline-none', className)}
     >
       {children}
@@ -189,7 +178,7 @@ export function TooltipContent({ children, className }: TooltipContentProps) {
     };
   }, [open, triggerElement, isTop]);
 
-  if (!open || !position || !isVisible) return null;
+  if (!open || !position) return null;
 
   const content = (
     <div

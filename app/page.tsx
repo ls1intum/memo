@@ -92,15 +92,7 @@ export default function Page() {
                 <br />
                 Competency-Based Recommenders
               </h2>
-              <p
-                className="text-lg leading-relaxed text-slate-700"
-                style={{
-                  display: '-webkit-box',
-                  WebkitLineClamp: 2,
-                  WebkitBoxOrient: 'vertical',
-                  overflow: 'hidden',
-                }}
-              >
+              <p className="text-lg leading-relaxed text-slate-700 line-clamp-2">
                 Competency-based recommenders use{' '}
                 <span className="font-semibold text-slate-900">
                   competency networks

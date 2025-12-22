@@ -18,8 +18,7 @@ export function Navbar() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const matchedIndex = navItems.findIndex(item => item.href === pathname);
-  const activeIndex = matchedIndex === -1 ? null : matchedIndex;
+  const activeIndex = navItems.findIndex(item => item.href === pathname);
 
   useEffect(() => {
     setMounted(true);
@@ -33,11 +32,6 @@ export function Navbar() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  // Avoid hydration mismatches by rendering Navbar only on the client
-  if (!mounted) {
-    return null;
-  }
 
   return (
     <header
@@ -76,7 +70,7 @@ export function Navbar() {
           {/* Center - Sliding nav */}
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
             <div className="pointer-events-auto relative flex w-[16rem] max-w-full items-center justify-between rounded-full border border-slate-200/80 bg-white/70 px-[0px] py-[8px] shadow-inner backdrop-blur dark:border-slate-800/70 dark:bg-slate-900/70">
-              {activeIndex !== null && (
+              {activeIndex >= 0 && (
                 <div
                   className="absolute inset-y-1 rounded-full bg-gradient-to-r from-[#0a4da2] to-[#7c6cff] shadow-md transition-all duration-300 ease-out"
                   style={{

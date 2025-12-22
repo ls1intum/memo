@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback, Suspense } from 'react';
+import { useEffect, useState, useCallback, useRef, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { getRandomCompetenciesAction } from '@/app/actions/competencies';
 import {
@@ -46,6 +46,115 @@ type RelationshipTypeOption = {
   label: string;
 };
 
+// Configuration mapping relationship types to their theme classes
+const RELATIONSHIP_TYPE_THEMES: Record<
+  RelationshipType,
+  {
+    colorClasses: {
+      selected: string;
+      unselected: string;
+    };
+    iconBgClasses: {
+      selected: string;
+      unselected: string;
+    };
+    iconColorClass: string;
+  }
+> = {
+  ASSUMES: {
+    colorClasses: {
+      selected:
+        'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-500/30',
+      unselected:
+        'bg-white border-blue-500/30 text-slate-700 hover:border-blue-500 hover:bg-blue-50',
+    },
+    iconBgClasses: {
+      selected: 'bg-white/20',
+      unselected: 'bg-blue-500/10 group-hover:bg-blue-500/20',
+    },
+    iconColorClass: 'text-blue-500',
+  },
+  EXTENDS: {
+    colorClasses: {
+      selected:
+        'bg-purple-600 border-purple-600 text-white shadow-lg shadow-purple-500/30',
+      unselected:
+        'bg-white border-purple-500/30 text-slate-700 hover:border-purple-500 hover:bg-purple-50',
+    },
+    iconBgClasses: {
+      selected: 'bg-white/20',
+      unselected: 'bg-purple-500/10 group-hover:bg-purple-500/20',
+    },
+    iconColorClass: 'text-purple-500',
+  },
+  MATCHES: {
+    colorClasses: {
+      selected:
+        'bg-emerald-600 border-emerald-600 text-white shadow-lg shadow-emerald-500/30',
+      unselected:
+        'bg-white border-emerald-500/30 text-slate-700 hover:border-emerald-500 hover:bg-emerald-50',
+    },
+    iconBgClasses: {
+      selected: 'bg-white/20',
+      unselected: 'bg-emerald-500/10 group-hover:bg-emerald-500/20',
+    },
+    iconColorClass: 'text-emerald-500',
+  },
+};
+
+// Descriptions for relationship types (used in tooltips)
+const RELATIONSHIP_TYPE_DESCRIPTIONS: Record<RelationshipType, string> = {
+  ASSUMES: 'A requires B as prerequisite',
+  EXTENDS: 'A builds on / is a subset or advanced form of B',
+  MATCHES: 'A is equivalent / strongly overlaps with B',
+};
+
+// Utility functions for relationship type styling
+function getColorClasses(
+  relationshipType: RelationshipType,
+  selected: boolean
+): string {
+  const theme = RELATIONSHIP_TYPE_THEMES[relationshipType];
+  if (!theme) {
+    return 'bg-white border-slate-300 text-slate-700';
+  }
+  return selected ? theme.colorClasses.selected : theme.colorClasses.unselected;
+}
+
+function getIconBgClasses(
+  relationshipType: RelationshipType,
+  selected: boolean
+): string {
+  const theme = RELATIONSHIP_TYPE_THEMES[relationshipType];
+  if (!theme) {
+    return 'bg-slate-500/10';
+  }
+  return selected
+    ? theme.iconBgClasses.selected
+    : theme.iconBgClasses.unselected;
+}
+
+function getIconColorClasses(
+  relationshipType: RelationshipType,
+  selected: boolean
+): string {
+  if (selected) return 'text-white';
+  const theme = RELATIONSHIP_TYPE_THEMES[relationshipType];
+  if (!theme) {
+    return 'text-slate-500';
+  }
+  return theme.iconColorClass;
+}
+
+// Shared scrollbar styles for competency description containers
+const SCROLLBAR_STYLES: {
+  scrollbarWidth: 'thin';
+  scrollbarColor: string;
+} = {
+  scrollbarWidth: 'thin',
+  scrollbarColor: 'rgb(203 213 225) transparent',
+};
+
 function SessionPageContent() {
   const searchParams = useSearchParams();
   const countParam = searchParams.get('count');
@@ -75,6 +184,7 @@ function SessionPageContent() {
   const [relationshipToDelete, setRelationshipToDelete] = useState<
     string | null
   >(null);
+  const isMountedRef = useRef(true);
 
   useEffect(() => {
     async function loadRelationshipTypes() {
@@ -117,8 +227,8 @@ function SessionPageContent() {
       }
     }
 
-    void loadRelationshipTypes();
-    void loadDemoUser();
+    loadRelationshipTypes();
+    loadDemoUser();
   }, []);
 
   const loadCompetencies = useCallback(async () => {
@@ -135,6 +245,9 @@ function SessionPageContent() {
       return;
     }
 
+    // Clear any previous errors on success
+    setError(null);
+
     if (!result.competencies || result.competencies.length === 0) {
       setCompetencies([]);
       return;
@@ -144,7 +257,7 @@ function SessionPageContent() {
   }, [count]);
 
   useEffect(() => {
-    void loadCompetencies();
+    loadCompetencies();
   }, [loadCompetencies]);
 
   const handleAction = useCallback(
@@ -269,7 +382,12 @@ function SessionPageContent() {
 
   // Keyboard shortcuts
   useEffect(() => {
+    isMountedRef.current = true;
+
     function handleKeyDown(event: KeyboardEvent) {
+      // Don't execute if component is unmounted
+      if (!isMountedRef.current) return;
+
       // Don't trigger shortcuts if user is typing in an input/textarea
       const target = event.target as HTMLElement;
       if (
@@ -292,14 +410,8 @@ function SessionPageContent() {
         // Continue to global Enter handler below
       }
 
-      // ⌘+Shift+Z or Ctrl+Shift+Z for Undo (only if there's history to undo)
-      // Using Shift+Z to avoid browser's default undo behavior
-      if (
-        (event.metaKey || event.ctrlKey) &&
-        event.key === 'z' &&
-        event.shiftKey &&
-        history.length > 0
-      ) {
+      // Shift+Z for Undo (only if there's history to undo)
+      if (event.key === 'z' && event.shiftKey && history.length > 0) {
         event.preventDefault();
         event.stopPropagation();
         handleUndo();
@@ -356,6 +468,7 @@ function SessionPageContent() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => {
+      isMountedRef.current = false;
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [
@@ -371,10 +484,7 @@ function SessionPageContent() {
   ]);
 
   return (
-    <div
-      suppressHydrationWarning
-      className="relative overflow-hidden bg-gradient-to-br from-[#d7e3ff] via-[#f3f5ff] to-[#e8ecff] text-slate-900"
-    >
+    <div className="relative overflow-hidden bg-gradient-to-br from-[#d7e3ff] via-[#f3f5ff] to-[#e8ecff] text-slate-900">
       <div className="absolute inset-0 -z-10 opacity-70">
         <div className="absolute left-1/2 top-[-6rem] h-[36rem] w-[36rem] -translate-x-1/2 rounded-full bg-white/80 blur-[140px]" />
         <div className="absolute left-[10%] top-[22%] h-80 w-80 rounded-full bg-[#7fb0ff]/35 blur-[120px]" />
@@ -435,13 +545,46 @@ function SessionPageContent() {
           {!error && !noCompetencies && !notEnough && (
             <>
               {/* Dynamic Title */}
-              <h2 className="text-2xl font-semibold text-slate-900 text-left">
+              <h2 className="text-2xl font-semibold text-slate-900 text-left mb-4">
                 {isLoading || !competencies || competencies.length < 2
                   ? 'Loading competencies for this mapping session...'
                   : `How does "${competencies[0]!.title}" relate to "${
                       competencies[1]!.title
                     }"?`}
               </h2>
+
+              {/* Live Preview Sentence */}
+              {competencies && competencies.length >= 2 && (
+                <div className="text-center py-3 px-4 rounded-lg bg-slate-50 border border-slate-200 min-h-[48px] flex items-center justify-center mb-8">
+                  {relation ? (
+                    <p className="text-sm text-slate-700">
+                      <span className="font-semibold text-slate-900">
+                        {competencies[0]!.title}
+                      </span>{' '}
+                      <span className="text-[#0a4da2] font-semibold bg-blue-50 px-1 py-0.5 rounded">
+                        {relationshipTypes
+                          .find(rt => rt.value === relation)
+                          ?.label.toLowerCase() || ''}
+                      </span>{' '}
+                      <span className="font-semibold text-slate-900">
+                        {competencies[1]!.title}
+                      </span>
+                    </p>
+                  ) : (
+                    <p className="text-sm font-semibold text-slate-700">
+                      Click or press{' '}
+                      <Kbd className="bg-slate-200 text-slate-700 border border-slate-300 text-xs">
+                        1
+                      </Kbd>{' '}
+                      –{' '}
+                      <Kbd className="bg-slate-200 text-slate-700 border border-slate-300 text-xs">
+                        3
+                      </Kbd>{' '}
+                      to select a relationship type
+                    </p>
+                  )}
+                </div>
+              )}
 
               {/* Competencies Side by Side for Comparison */}
               <div
@@ -503,10 +646,7 @@ function SessionPageContent() {
                         </CardTitle>
                         <div
                           className="flex-1 overflow-y-scroll pr-2 scrollbar-thin"
-                          style={{
-                            scrollbarWidth: 'thin',
-                            scrollbarColor: 'rgb(203 213 225) transparent',
-                          }}
+                          style={SCROLLBAR_STYLES}
                         >
                           <CardDescription className="text-base leading-relaxed text-slate-600">
                             {competencies[0]!.description}
@@ -541,7 +681,6 @@ function SessionPageContent() {
                         (e.currentTarget as HTMLButtonElement).blur();
                       }}
                       className="text-slate-600 hover:text-slate-900 hover:bg-slate-100 focus:outline-none"
-                      title="Swap competencies"
                     >
                       <ArrowLeftRight className="h-4 w-4 mr-1.5" />
                       Swap Direction
@@ -604,10 +743,7 @@ function SessionPageContent() {
                         </CardTitle>
                         <div
                           className="flex-1 overflow-y-scroll pr-2 scrollbar-thin"
-                          style={{
-                            scrollbarWidth: 'thin',
-                            scrollbarColor: 'rgb(203 213 225) transparent',
-                          }}
+                          style={SCROLLBAR_STYLES}
                         >
                           <CardDescription className="text-base leading-relaxed text-slate-600">
                             {competencies[1]!.description}
@@ -621,39 +757,6 @@ function SessionPageContent() {
 
               {/* Relationship Selector - Prominent Below Competencies */}
               <div className="space-y-4 p-6 -mt-2 mb-8">
-                {/* Live Preview Sentence */}
-                {competencies && competencies.length >= 2 && (
-                  <div className="text-center py-3 px-4 rounded-lg bg-slate-50 border border-slate-200 min-h-[48px] flex items-center justify-center">
-                    {relation ? (
-                      <p className="text-sm text-slate-700">
-                        <span className="font-semibold text-slate-900">
-                          {competencies[0]!.title}
-                        </span>{' '}
-                        <span className="text-[#0a4da2] font-semibold bg-blue-50 px-1 py-0.5 rounded">
-                          {relationshipTypes
-                            .find(rt => rt.value === relation)
-                            ?.label.toLowerCase() || ''}
-                        </span>{' '}
-                        <span className="font-semibold text-slate-900">
-                          {competencies[1]!.title}
-                        </span>
-                      </p>
-                    ) : (
-                      <p className="text-sm text-slate-700">
-                        Click or press{' '}
-                        <Kbd className="bg-slate-200 text-slate-700 border border-slate-300 text-xs">
-                          1
-                        </Kbd>{' '}
-                        –{' '}
-                        <Kbd className="bg-slate-200 text-slate-700 border border-slate-300 text-xs">
-                          3
-                        </Kbd>{' '}
-                        to select a relationship type
-                      </p>
-                    )}
-                  </div>
-                )}
-
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full">
                   {relationshipTypes.length > 0 ? (
                     relationshipTypes.map(({ value, label }) => {
@@ -664,61 +767,6 @@ function SessionPageContent() {
                         MATCHES: Equal,
                       };
                       const Icon = iconMap[value] || ArrowDown;
-                      const getColorClasses = (
-                        val: string,
-                        selected: boolean
-                      ) => {
-                        if (val === 'ASSUMES') {
-                          return selected
-                            ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-500/30'
-                            : 'bg-white border-blue-500/30 text-slate-700 hover:border-blue-500 hover:bg-blue-50';
-                        }
-                        if (val === 'EXTENDS') {
-                          return selected
-                            ? 'bg-purple-600 border-purple-600 text-white shadow-lg shadow-purple-500/30'
-                            : 'bg-white border-purple-500/30 text-slate-700 hover:border-purple-500 hover:bg-purple-50';
-                        }
-                        if (val === 'MATCHES') {
-                          return selected
-                            ? 'bg-emerald-600 border-emerald-600 text-white shadow-lg shadow-emerald-500/30'
-                            : 'bg-white border-emerald-500/30 text-slate-700 hover:border-emerald-500 hover:bg-emerald-50';
-                        }
-                        return 'bg-white border-slate-300 text-slate-700';
-                      };
-
-                      const getIconBgClasses = (
-                        val: string,
-                        selected: boolean
-                      ) => {
-                        if (val === 'ASSUMES') {
-                          return selected
-                            ? 'bg-white/20'
-                            : 'bg-blue-500/10 group-hover:bg-blue-500/20';
-                        }
-                        if (val === 'EXTENDS') {
-                          return selected
-                            ? 'bg-white/20'
-                            : 'bg-purple-500/10 group-hover:bg-purple-500/20';
-                        }
-                        if (val === 'MATCHES') {
-                          return selected
-                            ? 'bg-white/20'
-                            : 'bg-emerald-500/10 group-hover:bg-emerald-500/20';
-                        }
-                        return 'bg-slate-500/10';
-                      };
-
-                      const getIconColorClasses = (
-                        val: string,
-                        selected: boolean
-                      ) => {
-                        if (selected) return 'text-white';
-                        if (val === 'ASSUMES') return 'text-blue-500';
-                        if (val === 'EXTENDS') return 'text-purple-500';
-                        if (val === 'MATCHES') return 'text-emerald-500';
-                        return 'text-slate-500';
-                      };
-
                       const shortcutIndex = relationshipTypes.findIndex(
                         rt => rt.value === value
                       );
@@ -727,13 +775,8 @@ function SessionPageContent() {
                           ? (shortcutIndex + 1).toString()
                           : null;
 
-                      const relationDescriptions = {
-                        ASSUMES: 'A requires B as prerequisite',
-                        EXTENDS:
-                          'A builds on / is a subset or advanced form of B',
-                        MATCHES: 'A is equivalent / strongly overlaps with B',
-                      };
-                      const description = relationDescriptions[value] || '';
+                      const description =
+                        RELATIONSHIP_TYPE_DESCRIPTIONS[value] || '';
 
                       return (
                         <button
@@ -814,7 +857,7 @@ function SessionPageContent() {
                   >
                     Undo
                     <Kbd className="shrink-0 bg-slate-200 text-slate-700 border border-slate-300 text-xs">
-                      ⌘⇧Z
+                      ⇧ + Z
                     </Kbd>
                   </button>
                   <div className="flex-1" />
