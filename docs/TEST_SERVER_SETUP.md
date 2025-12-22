@@ -372,8 +372,8 @@ docker compose restart
 # Create backup
 docker exec memo-test-db pg_dump -U memo_user memo_test > backup-$(date +%Y%m%d).sql
 
-# Restore backup
-docker exec -i memo-test-db psql -U memo_user -d memo_test < backup-20240101.sql
+# Restore backup (replace YYYYMMDD with the actual date of the backup file)
+docker exec -i memo-test-db psql -U memo_user -d memo_test < backup-YYYYMMDD.sql
 ```
 
 ### SSL Certificate Renewal
