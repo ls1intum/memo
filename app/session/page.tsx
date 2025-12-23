@@ -9,8 +9,8 @@ import {
   deleteCompetencyRelationshipAction,
 } from '@/app/actions/competency_relationships';
 import { getOrCreateDemoUserAction } from '@/app/actions/users';
-import type { Competency } from '@/lib/domain/domain_core';
-import type { RelationshipType } from '@/lib/domain/domain_core';
+import type { Competency } from '@/domain_core/model/domain_model';
+import type { RelationshipType } from '@/domain_core/model/domain_model';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
