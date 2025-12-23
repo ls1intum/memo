@@ -246,9 +246,6 @@ function SessionPageContent() {
       return;
     }
 
-    // Clear any previous errors on success
-    setError(null);
-
     if (!result.competencies || result.competencies.length === 0) {
       setCompetencies([]);
       return;
@@ -511,7 +508,12 @@ function SessionPageContent() {
               <div className="flex items-center gap-2 text-sm font-medium text-slate-700">
                 <span className="flex items-center gap-2">
                   <Check className="h-4 w-4 text-emerald-600" />
-                  <span>Completed: <span className="font-semibold text-slate-900">{stats.completed}</span></span>
+                  <span>
+                    Completed:{' '}
+                    <span className="font-semibold text-slate-900">
+                      {stats.completed}
+                    </span>
+                  </span>
                 </span>
               </div>
             </div>
@@ -572,9 +574,14 @@ function SessionPageContent() {
                   ) : (
                     <h1 className="text-xl sm:text-2xl font-bold text-slate-900 leading-tight">
                       How does{' '}
-                      <span className="text-[#0a4da2]">{competencies[0]!.title}</span>{' '}
+                      <span className="text-[#0a4da2]">
+                        {competencies[0]!.title}
+                      </span>{' '}
                       relate to{' '}
-                      <span className="text-[#7c3aed]">{competencies[1]!.title}</span>?
+                      <span className="text-[#7c3aed]">
+                        {competencies[1]!.title}
+                      </span>
+                      ?
                     </h1>
                   )}
                 </div>
@@ -586,168 +593,171 @@ function SessionPageContent() {
                   className="relative grid grid-cols-1 gap-6 lg:grid-cols-[1fr_auto_1fr]"
                   style={{ isolation: 'isolate' }}
                 >
-                {/* Origin Competency */}
-                {isLoading || !competencies || !competencies[0] ? (
-                  <Card className="border border-slate-200 bg-slate-50/50">
-                    <CardHeader>
-                      <CardTitle className="text-slate-400">
-                        Loading...
-                      </CardTitle>
-                    </CardHeader>
-                  </Card>
-                ) : (
-                  <Card className="relative flex h-[300px] flex-col border-2 border-[#0a4da2]/30 bg-gradient-to-br from-blue-50/80 to-white shadow-lg transition-all hover:border-[#0a4da2]/50 overflow-hidden">
-                    <div className="absolute left-0 top-0 h-full w-1.5 bg-gradient-to-b from-[#0a4da2] to-[#4263eb] rounded-r-full" />
-                    <CardHeader className="flex h-full flex-col space-y-3 pb-3 pl-5 overflow-visible">
-                      <div className="flex-shrink-0">
-                        <Badge className="w-fit bg-[#0a4da2] text-white border-[#0a4da2] font-semibold text-xs px-3 py-1.5">
-                          Competency
-                        </Badge>
-                      </div>
-                      <div className="flex flex-wrap gap-2 flex-shrink-0">
-                        {/* Placeholder badges; replace with competency metadata once available */}
-                        <Tooltip side="top">
-                          <TooltipTrigger asChild>
-                            <Badge
-                              tabIndex={0}
-                              className="bg-slate-100 text-slate-700 border border-slate-300 cursor-help hover:bg-slate-200 transition-colors"
-                            >
-                              Apply
-                              <Info className="h-3 w-3 ml-1.5" />
-                            </Badge>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>
-                              Bloom&apos;s Taxonomy categorizes learning
-                              objectives by cognitive level.
-                            </p>
-                            <p className="mt-1">
-                              → Apply: use knowledge in practice (implement,
-                              execute, solve).
-                            </p>
-                            <p className="mt-1 text-[11px] text-slate-200">
-                              Levels: Remember • Understand • Apply • Analyze •
-                              Evaluate • Create
-                            </p>
-                          </TooltipContent>
-                        </Tooltip>
-                        <Badge className="bg-slate-100 text-slate-700 border border-slate-300">
-                          Control Flow
-                        </Badge>
-                      </div>
-                      <div className="flex-1 flex flex-col min-h-0 space-y-2">
-                        <CardTitle className="text-lg font-bold text-slate-900 flex-shrink-0">
-                          {competencies[0]!.title}
+                  {/* Origin Competency */}
+                  {isLoading || !competencies || !competencies[0] ? (
+                    <Card className="border border-slate-200 bg-slate-50/50">
+                      <CardHeader>
+                        <CardTitle className="text-slate-400">
+                          Loading...
                         </CardTitle>
-                        <div
-                          className="flex-1 overflow-y-scroll pr-2 scrollbar-thin"
-                          style={SCROLLBAR_STYLES}
-                        >
-                          <CardDescription className="text-base leading-relaxed text-slate-600">
-                            {competencies[0]!.description}
-                          </CardDescription>
+                      </CardHeader>
+                    </Card>
+                  ) : (
+                    <Card className="relative flex h-[300px] flex-col border-2 border-[#0a4da2]/30 bg-gradient-to-br from-blue-50/80 to-white shadow-lg transition-all hover:border-[#0a4da2]/50 overflow-hidden">
+                      <div className="absolute left-0 top-0 h-full w-1.5 bg-gradient-to-b from-[#0a4da2] to-[#4263eb] rounded-r-full" />
+                      <CardHeader className="flex h-full flex-col space-y-3 pb-3 pl-5 overflow-visible">
+                        <div className="flex-shrink-0">
+                          <Badge className="w-fit bg-[#0a4da2] text-white border-[#0a4da2] font-semibold text-xs px-3 py-1.5">
+                            Competency
+                          </Badge>
                         </div>
-                      </div>
-                    </CardHeader>
-                  </Card>
-                )}
-
-                {/* Arrow Connection with Swap Button */}
-                <div className="flex flex-col items-center justify-center z-10 px-4 gap-3">
-                  <div className="flex items-center gap-2">
-                    <div className="h-0.5 w-12 bg-gradient-to-r from-[#0a4da2] to-[#4263eb]" />
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#0a4da2] via-[#4263eb] to-[#9775fa] shadow-xl ring-3 ring-white">
-                      <ArrowRight
-                        className="h-6 w-6 text-white"
-                        aria-hidden="true"
-                      />
-                    </div>
-                    <div className="h-0.5 w-12 bg-gradient-to-l from-[#9775fa] to-[#5538d1]" />
-                  </div>
-                  {competencies && competencies.length >= 2 && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={e => {
-                        if (competencies && competencies.length >= 2) {
-                          setCompetencies([competencies[1]!, competencies[0]!]);
-                        }
-                        // Remove focus after click
-                        (e.currentTarget as HTMLButtonElement).blur();
-                      }}
-                      className="text-slate-600 hover:text-slate-900 hover:bg-slate-100 focus:outline-none"
-                    >
-                      <ArrowLeftRight className="h-4 w-4 mr-1.5" />
-                      Swap Direction
-                    </Button>
+                        <div className="flex flex-wrap gap-2 flex-shrink-0">
+                          {/* Placeholder badges; replace with competency metadata once available */}
+                          <Tooltip side="top">
+                            <TooltipTrigger asChild>
+                              <Badge
+                                tabIndex={0}
+                                className="bg-slate-100 text-slate-700 border border-slate-300 cursor-help hover:bg-slate-200 transition-colors"
+                              >
+                                Apply
+                                <Info className="h-3 w-3 ml-1.5" />
+                              </Badge>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>
+                                Bloom&apos;s Taxonomy categorizes learning
+                                objectives by cognitive level.
+                              </p>
+                              <p className="mt-1">
+                                → Apply: use knowledge in practice (implement,
+                                execute, solve).
+                              </p>
+                              <p className="mt-1 text-[11px] text-slate-200">
+                                Levels: Remember • Understand • Apply • Analyze
+                                • Evaluate • Create
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+                          <Badge className="bg-slate-100 text-slate-700 border border-slate-300">
+                            Control Flow
+                          </Badge>
+                        </div>
+                        <div className="flex-1 flex flex-col min-h-0 space-y-2">
+                          <CardTitle className="text-lg font-bold text-slate-900 flex-shrink-0">
+                            {competencies[0]!.title}
+                          </CardTitle>
+                          <div
+                            className="flex-1 overflow-y-scroll pr-2 scrollbar-thin"
+                            style={SCROLLBAR_STYLES}
+                          >
+                            <CardDescription className="text-base leading-relaxed text-slate-600">
+                              {competencies[0]!.description}
+                            </CardDescription>
+                          </div>
+                        </div>
+                      </CardHeader>
+                    </Card>
                   )}
-                </div>
 
-                {/* Destination Competency */}
-                {isLoading || !competencies || !competencies[1] ? (
-                  <Card className="border border-slate-200 bg-slate-50/50">
-                    <CardHeader>
-                      <CardTitle className="text-slate-400">
-                        Loading...
-                      </CardTitle>
-                    </CardHeader>
-                  </Card>
-                ) : (
-                  <Card className="relative flex h-[300px] flex-col border-2 border-[#9775fa]/30 bg-gradient-to-br from-purple-50/80 to-white shadow-lg transition-all hover:border-[#9775fa]/50 overflow-hidden">
-                    <div className="absolute left-0 top-0 h-full w-1.5 bg-gradient-to-b from-[#9775fa] to-[#5538d1] rounded-r-full" />
-                    <CardHeader className="flex h-full flex-col space-y-3 pb-3 pl-5 overflow-visible">
-                      <div className="flex-shrink-0">
-                        <Badge className="w-fit bg-[#7c3aed] text-white border-[#7c3aed] font-semibold text-xs px-3 py-1.5">
-                          Competency
-                        </Badge>
+                  {/* Arrow Connection with Swap Button */}
+                  <div className="flex flex-col items-center justify-center z-10 px-4 gap-3">
+                    <div className="flex items-center gap-2">
+                      <div className="h-0.5 w-12 bg-gradient-to-r from-[#0a4da2] to-[#4263eb]" />
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#0a4da2] via-[#4263eb] to-[#9775fa] shadow-xl ring-3 ring-white">
+                        <ArrowRight
+                          className="h-6 w-6 text-white"
+                          aria-hidden="true"
+                        />
                       </div>
-                      <div className="flex flex-wrap gap-2 flex-shrink-0">
-                        {/* Placeholder badges; replace with competency metadata once available */}
-                        <Tooltip side="top">
-                          <TooltipTrigger asChild>
-                            <Badge
-                              tabIndex={0}
-                              className="bg-slate-100 text-slate-700 border border-slate-300 cursor-help hover:bg-slate-200 transition-colors"
-                            >
-                              Apply
-                              <Info className="h-3 w-3 ml-1.5" />
-                            </Badge>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>
-                              Bloom&apos;s Taxonomy categorizes learning
-                              objectives by cognitive level.
-                            </p>
-                            <p className="mt-1">
-                              → Apply: use knowledge in practice (implement,
-                              execute, solve).
-                            </p>
-                            <p className="mt-1 text-[11px] text-slate-200">
-                              Levels: Remember • Understand • Apply • Analyze •
-                              Evaluate • Create
-                            </p>
-                          </TooltipContent>
-                        </Tooltip>
-                        <Badge className="bg-slate-100 text-slate-700 border border-slate-300">
-                          Programming Fundamentals
-                        </Badge>
-                      </div>
-                      <div className="flex-1 flex flex-col min-h-0 space-y-2">
-                        <CardTitle className="text-lg font-bold text-slate-900 flex-shrink-0">
-                          {competencies[1]!.title}
+                      <div className="h-0.5 w-12 bg-gradient-to-l from-[#9775fa] to-[#5538d1]" />
+                    </div>
+                    {competencies && competencies.length >= 2 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={e => {
+                          if (competencies && competencies.length >= 2) {
+                            setCompetencies([
+                              competencies[1]!,
+                              competencies[0]!,
+                            ]);
+                          }
+                          // Remove focus after click
+                          (e.currentTarget as HTMLButtonElement).blur();
+                        }}
+                        className="text-slate-600 hover:text-slate-900 hover:bg-slate-100 focus:outline-none"
+                      >
+                        <ArrowLeftRight className="h-4 w-4 mr-1.5" />
+                        Swap Direction
+                      </Button>
+                    )}
+                  </div>
+
+                  {/* Destination Competency */}
+                  {isLoading || !competencies || !competencies[1] ? (
+                    <Card className="border border-slate-200 bg-slate-50/50">
+                      <CardHeader>
+                        <CardTitle className="text-slate-400">
+                          Loading...
                         </CardTitle>
-                        <div
-                          className="flex-1 overflow-y-scroll pr-2 scrollbar-thin"
-                          style={SCROLLBAR_STYLES}
-                        >
-                          <CardDescription className="text-base leading-relaxed text-slate-600">
-                            {competencies[1]!.description}
-                          </CardDescription>
+                      </CardHeader>
+                    </Card>
+                  ) : (
+                    <Card className="relative flex h-[300px] flex-col border-2 border-[#9775fa]/30 bg-gradient-to-br from-purple-50/80 to-white shadow-lg transition-all hover:border-[#9775fa]/50 overflow-hidden">
+                      <div className="absolute left-0 top-0 h-full w-1.5 bg-gradient-to-b from-[#9775fa] to-[#5538d1] rounded-r-full" />
+                      <CardHeader className="flex h-full flex-col space-y-3 pb-3 pl-5 overflow-visible">
+                        <div className="flex-shrink-0">
+                          <Badge className="w-fit bg-[#7c3aed] text-white border-[#7c3aed] font-semibold text-xs px-3 py-1.5">
+                            Competency
+                          </Badge>
                         </div>
-                      </div>
-                    </CardHeader>
-                  </Card>
-                )}
+                        <div className="flex flex-wrap gap-2 flex-shrink-0">
+                          {/* Placeholder badges; replace with competency metadata once available */}
+                          <Tooltip side="top">
+                            <TooltipTrigger asChild>
+                              <Badge
+                                tabIndex={0}
+                                className="bg-slate-100 text-slate-700 border border-slate-300 cursor-help hover:bg-slate-200 transition-colors"
+                              >
+                                Apply
+                                <Info className="h-3 w-3 ml-1.5" />
+                              </Badge>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>
+                                Bloom&apos;s Taxonomy categorizes learning
+                                objectives by cognitive level.
+                              </p>
+                              <p className="mt-1">
+                                → Apply: use knowledge in practice (implement,
+                                execute, solve).
+                              </p>
+                              <p className="mt-1 text-[11px] text-slate-200">
+                                Levels: Remember • Understand • Apply • Analyze
+                                • Evaluate • Create
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+                          <Badge className="bg-slate-100 text-slate-700 border border-slate-300">
+                            Programming Fundamentals
+                          </Badge>
+                        </div>
+                        <div className="flex-1 flex flex-col min-h-0 space-y-2">
+                          <CardTitle className="text-lg font-bold text-slate-900 flex-shrink-0">
+                            {competencies[1]!.title}
+                          </CardTitle>
+                          <div
+                            className="flex-1 overflow-y-scroll pr-2 scrollbar-thin"
+                            style={SCROLLBAR_STYLES}
+                          >
+                            <CardDescription className="text-base leading-relaxed text-slate-600">
+                              {competencies[1]!.description}
+                            </CardDescription>
+                          </div>
+                        </div>
+                      </CardHeader>
+                    </Card>
+                  )}
                 </div>
               </div>
 
@@ -786,7 +796,7 @@ function SessionPageContent() {
                     )}
                   </div>
                 )}
-                
+
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full">
                   {relationshipTypes.length > 0 ? (
                     relationshipTypes.map(({ value, label }) => {
@@ -888,7 +898,7 @@ function SessionPageContent() {
                       </Kbd>
                     </button>
                   </div>
-                  
+
                   {/* Primary Actions */}
                   <div className="flex-1" />
                   <div className="flex items-center gap-3">

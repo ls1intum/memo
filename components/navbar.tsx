@@ -77,7 +77,7 @@ export function Navbar() {
                     width: 'calc(50% - 1rem)',
                     left: activeIndex === 1 ? 'calc(50% + 0.5rem)' : '0.5rem',
                   }}
-                  aria-hidden
+                  aria-hidden="true"
                 />
               )}
               {navItems.map(item => (
