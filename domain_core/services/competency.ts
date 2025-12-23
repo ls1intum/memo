@@ -24,7 +24,7 @@ export class CompetencyService {
     return this.repository.findAll();
   }
 
-/**
+  /**
    * Returns a random subset of competencies, used for mapping sessions.
    * Business logic lives in the service layer (see DOMAIN_CORE.md).
    */
