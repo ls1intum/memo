@@ -1,12 +1,19 @@
 'use server';
 
-import { userService } from '@/lib/services/user';
+import { userService } from '@/domain_core/services/user';
 import { UserRole } from '@prisma/client';
 
 export async function createUserAction(formData: FormData) {
   try {
-    const name = formData.get('name') as string;
-    const email = formData.get('email') as string;
+    const name = formData.get('name') as string | null;
+    const email = formData.get('email') as string | null;
+
+    if (!name || !email) {
+      return {
+        success: false,
+        error: 'Name and email are required',
+      };
+    }
 
     const user = await userService.createUser({ name, email });
 
@@ -55,35 +62,6 @@ export async function deleteUserAction(id: string) {
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to delete user',
-    };
-  }
-}
-
-/**
- * Gets or creates the demo user for development/testing purposes.
- * Returns the demo user with email 'demo@memo.local'.
- */
-export async function getOrCreateDemoUserAction() {
-  try {
-    // Try to find existing demo user
-    let user = await userService.getUserByEmail('demo@memo.local');
-
-    // If not found, create it
-    if (!user) {
-      user = await userService.createUser({
-        name: 'Demo User',
-        email: 'demo@memo.local',
-      });
-    }
-
-    return { success: true, user };
-  } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : 'Failed to get or create demo user',
     };
   }
 }

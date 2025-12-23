@@ -1,6 +1,6 @@
 'use server';
 
-import { competencyService } from '@/lib/services/competency';
+import { competencyService } from '@/domain_core/services/competency';
 
 export async function createCompetencyAction(formData: FormData) {
   try {
@@ -47,21 +47,6 @@ export async function getAllCompetenciesAction() {
       success: false,
       error:
         error instanceof Error ? error.message : 'Failed to fetch competencies',
-    };
-  }
-}
-
-export async function getRandomCompetenciesAction(count: number = 2) {
-  try {
-    const competencies = await competencyService.getRandomCompetencies(count);
-    return { success: true, competencies };
-  } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : 'Failed to fetch random competencies',
     };
   }
 }

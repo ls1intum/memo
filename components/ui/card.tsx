@@ -1,4 +1,4 @@
-import { cn } from '../../lib/client/utils';
+import { cn } from '../../domain_core/infrastructure/utils';
 
 export const Card = ({
   className,

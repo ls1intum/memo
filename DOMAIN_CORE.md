@@ -10,20 +10,41 @@ Client Side
     ↓
 Server Actions (app/actions/)
     ↓
-Service Layer (lib/services/)
+Service Layer (domain_core/services/)
     ↓
-Repository Interface (lib/repositories/dc_interface.ts)
+Repository Interface (domain_core/repositories/dc_interface.ts)
     ↓
-Repository Implementation (lib/repositories/dc_repo.ts) ← ONLY layer that touches DB
+Repository Implementation (domain_core/repositories/dc_repo.ts) ← ONLY layer that touches DB
     ↓
-Prisma Client (lib/prisma.ts)
+Prisma Client (domain_core/infrastructure/prisma.ts)
     ↓
 PostgreSQL Database
 ```
 
+## Folder Structure
+
+```
+domain_core/
+├── infrastructure/          # External service clients & utilities
+│   ├── prisma.ts           # Prisma client singleton
+│   ├── run-migrations.ts   # Database migration runner
+│   └── utils.ts            # Utility functions (cn, etc.)
+├── model/                  # Domain entities & input types
+│   └── domain_model.ts     # Pure domain interfaces
+├── repositories/           # Data access layer
+│   ├── dc_interface.ts     # Repository contracts
+│   └── dc_repo.ts          # Prisma implementations
+└── services/               # Business logic layer
+    ├── user.ts
+    ├── competency.ts
+    ├── learning_resource.ts
+    ├── competency_relationship.ts
+    └── competency_resource_link.ts
+```
+
 ## How It Works
 
-### 1. Shared Domain Model (`lib/domain/domain_core.ts`)
+### 1. Shared Domain Model (`domain_core/model/domain_model.ts`)
 
 Pure entities and input types. No database dependencies.
 
@@ -41,7 +62,7 @@ export interface CreateCompetencyInput {
 }
 ```
 
-### 2. Repository Interface (`lib/repositories/dc_interface.ts`)
+### 2. Repository Interface (`domain_core/repositories/dc_interface.ts`)
 
 Contract definition. No implementation.
 
@@ -53,7 +74,7 @@ export interface CompetencyRepository {
 }
 ```
 
-### 3. Repository Implementation (`lib/repositories/dc_repo.ts`)
+### 3. Repository Implementation (`domain_core/repositories/dc_repo.ts`)
 
 Prisma implementation. **ONLY this layer touches the database.**
 
@@ -67,7 +88,7 @@ export class PrismaCompetencyRepository implements CompetencyRepository {
 export const competencyRepository = new PrismaCompetencyRepository();
 ```
 
-### 4. Service Layer (`lib/services/`)
+### 4. Service Layer (`domain_core/services/`)
 
 Business logic and validation.
 
@@ -90,7 +111,7 @@ Exposes operations to Client Side.
 ```typescript
 'use server';
 
-import { competencyService } from '@/lib/services/competency';
+import { competencyService } from '@/domain_core/services/competency';
 
 export async function createCompetencyAction(formData: FormData) {
   try {
@@ -161,7 +182,7 @@ To expose data through an API endpoint:
 
 ```typescript
 // app/api/competencies/route.ts
-import { competencyService } from '@/lib/services/competency';
+import { competencyService } from '@/domain_core/services/competency';
 import { NextResponse } from 'next/server';
 
 export async function GET() {

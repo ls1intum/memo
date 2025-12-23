@@ -1,7 +1,7 @@
 'use server';
 
-import { competencyRelationshipService } from '@/lib/services/competency_relationship';
-import { RelationshipType } from '@/lib/domain/domain_core';
+import { competencyRelationshipService } from '@/domain_core/services/competency_relationship';
+import { RelationshipType } from '@/domain_core/model/domain_model';
 
 export async function createCompetencyRelationshipAction(formData: FormData) {
   try {
@@ -113,43 +113,6 @@ export async function deleteCompetencyRelationshipAction(id: string) {
         error instanceof Error
           ? error.message
           : 'Failed to delete relationship',
-    };
-  }
-}
-
-/**
- * Returns all available RelationshipType enum values from Prisma schema.
- * This is a server action that can be called from client components.
- */
-export async function getRelationshipTypesAction() {
-  try {
-    // Import RelationshipType enum from Prisma client
-    const { RelationshipType } = await import('@prisma/client');
-
-    // Get all enum values
-    const types = Object.values(RelationshipType) as RelationshipType[];
-
-    // Map enum values to display labels
-    const typeLabels: Record<RelationshipType, string> = {
-      ASSUMES: 'Assumes',
-      EXTENDS: 'Extends',
-      MATCHES: 'Matches',
-    };
-
-    const typesWithLabels = types.map(type => ({
-      value: type,
-      label: typeLabels[type] || type,
-    }));
-
-    return { success: true, types: typesWithLabels };
-  } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : 'Failed to fetch relationship types',
-      types: [],
     };
   }
 }
