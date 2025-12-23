@@ -34,6 +34,31 @@ const competencies = [
   },
 ];
 
+// Define learning resources to seed into the database
+const learningResources = [
+  {
+    title:
+      'Cornell CS 3110: Data Structures and Functional Programming (OCaml) – Course Notes',
+    url: 'https://example.com/learning-resource-1',
+  },
+  {
+    title: 'Real World OCaml (2nd Edition)',
+    url: 'https://example.com/learning-resource-2',
+  },
+  {
+    title: 'Functional Programming in OCaml',
+    url: 'https://example.com/learning-resource-3',
+  },
+  {
+    title: 'OCaml Manual: The Module System and Functors',
+    url: 'https://example.com/learning-resource-4',
+  },
+  {
+    title: 'On Understanding Types, Data Abstraction, and Polymorphism',
+    url: 'https://example.com/learning-resource-5',
+  },
+];
+
 async function main() {
   if (!process.env.DATABASE_URL) {
     throw new Error(
@@ -56,14 +81,26 @@ async function main() {
   console.log(`[Seed] Demo user ready: ${user.email}`);
 
   // Seed competencies in bulk, skipping duplicates by title
-  const result = await prisma.competency.createMany({
+  const competencyResult = await prisma.competency.createMany({
     data: competencies,
     skipDuplicates: true,
   });
 
   console.log(
-    `[Seed] Seeding complete. Created ${result.count} new competencies (duplicates skipped).`
+    `[Seed] Created ${competencyResult.count} new competencies (duplicates skipped).`
   );
+
+  // Seed learning resources in bulk, skipping duplicates by title
+  const learningResourceResult = await prisma.learningResource.createMany({
+    data: learningResources,
+    skipDuplicates: true,
+  });
+
+  console.log(
+    `[Seed] Created ${learningResourceResult.count} new learning resources (duplicates skipped).`
+  );
+
+  console.log('[Seed] Seeding complete.');
 }
 
 // Execute main function and handle errors
