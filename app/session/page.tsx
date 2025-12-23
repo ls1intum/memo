@@ -28,6 +28,7 @@ import {
   Layers,
   TrendingUp,
   Equal,
+  Plus,
 } from 'lucide-react';
 import {
   Card,
@@ -398,6 +399,22 @@ function SessionPageContent() {
         return;
       }
 
+      // Shift+Z for Undo (only if there's history to undo, and NOT Cmd/Ctrl+Shift+Z)
+      // Check this early to prevent conflicts with other handlers
+      if (
+        event.key.toLowerCase() === 'z' &&
+        event.shiftKey &&
+        !event.metaKey &&
+        !event.ctrlKey &&
+        !event.altKey &&
+        history.length > 0
+      ) {
+        event.preventDefault();
+        event.stopPropagation();
+        handleUndo();
+        return;
+      }
+
       // If Enter is pressed on a relationship button, prevent default button behavior
       // and let the global handler manage it
       if (
@@ -408,14 +425,6 @@ function SessionPageContent() {
         event.preventDefault();
         event.stopPropagation();
         // Continue to global Enter handler below
-      }
-
-      // Shift+Z for Undo (only if there's history to undo)
-      if (event.key === 'z' && event.shiftKey && history.length > 0) {
-        event.preventDefault();
-        event.stopPropagation();
-        handleUndo();
-        return;
       }
 
       // Space for Skip (only if not loading and has competencies)
@@ -491,12 +500,21 @@ function SessionPageContent() {
         <div className="absolute right-[14%] top-[28%] h-[22rem] w-[22rem] rounded-[40%] bg-gradient-to-br from-[#ffdff3]/55 via-[#fff3f8]/35 to-transparent blur-[140px]" />
       </div>
 
-      <main className="relative z-10 mx-auto mt-20 flex w-full max-w-6xl flex-col gap-8 px-6 pb-28 lg:mt-24 lg:px-0">
-        <section className="space-y-8 rounded-[32px] border border-white/70 bg-white/85 p-8 shadow-[0_26px_90px_-55px_rgba(7,30,84,0.5)] backdrop-blur-xl">
-          <div className="flex flex-wrap items-center gap-3 text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">
-            <span>Mapping Session</span>
-            <span className="text-slate-300">•</span>
-            <span>Completed: {stats.completed}</span>
+      <main className="relative z-10 mx-auto mt-20 flex w-full max-w-6xl flex-col gap-6 px-6 pb-24 lg:mt-24 lg:px-0">
+        <section className="space-y-6 rounded-[24px] border border-white/70 bg-white/85 p-6 shadow-[0_26px_90px_-55px_rgba(7,30,84,0.5)] backdrop-blur-xl">
+          {/* Header Section */}
+          <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-200/60">
+            <div className="flex flex-wrap items-center gap-3">
+              <Badge className="bg-gradient-to-r from-[#0a4da2] to-[#7c6cff] text-white border-0 font-semibold text-xs px-4 py-1.5 shadow-md">
+                Mapping Session
+              </Badge>
+              <div className="flex items-center gap-2 text-sm font-medium text-slate-700">
+                <span className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-emerald-600" />
+                  <span>Completed: <span className="font-semibold text-slate-900">{stats.completed}</span></span>
+                </span>
+              </div>
+            </div>
           </div>
 
           {error && (
@@ -544,53 +562,30 @@ function SessionPageContent() {
 
           {!error && !noCompetencies && !notEnough && (
             <>
-              {/* Dynamic Title */}
-              <h2 className="text-2xl font-semibold text-slate-900 text-left mb-4">
-                {isLoading || !competencies || competencies.length < 2
-                  ? 'Loading competencies for this mapping session...'
-                  : `How does "${competencies[0]!.title}" relate to "${
-                      competencies[1]!.title
-                    }"?`}
-              </h2>
-
-              {/* Live Preview Sentence */}
-              {competencies && competencies.length >= 2 && (
-                <div className="text-center py-3 px-4 rounded-lg bg-slate-50 border border-slate-200 min-h-[48px] flex items-center justify-center mb-8">
-                  {relation ? (
-                    <p className="text-base text-slate-700">
-                      <span className="font-semibold text-slate-900">
-                        {competencies[0]!.title}
-                      </span>{' '}
-                      <span className="text-[#0a4da2] font-semibold bg-blue-50 px-1 py-0.5 rounded">
-                        {relationshipTypes
-                          .find(rt => rt.value === relation)
-                          ?.label.toLowerCase() || ''}
-                      </span>{' '}
-                      <span className="font-semibold text-slate-900">
-                        {competencies[1]!.title}
-                      </span>
-                    </p>
+              {/* Main Question */}
+              <div className="space-y-4">
+                <div>
+                  {isLoading || !competencies || competencies.length < 2 ? (
+                    <h1 className="text-xl font-bold text-slate-900 leading-tight">
+                      Loading competencies for this mapping session...
+                    </h1>
                   ) : (
-                    <p className="text-base font-semibold text-slate-700">
-                      Click or press{' '}
-                      <Kbd className="bg-slate-200 text-slate-700 border border-slate-300 text-sm">
-                        1
-                      </Kbd>{' '}
-                      –{' '}
-                      <Kbd className="bg-slate-200 text-slate-700 border border-slate-300 text-sm">
-                        3
-                      </Kbd>{' '}
-                      to select a relationship type
-                    </p>
+                    <h1 className="text-xl sm:text-2xl font-bold text-slate-900 leading-tight">
+                      How does{' '}
+                      <span className="text-[#0a4da2]">{competencies[0]!.title}</span>{' '}
+                      relate to{' '}
+                      <span className="text-[#7c3aed]">{competencies[1]!.title}</span>?
+                    </h1>
                   )}
                 </div>
-              )}
+              </div>
 
               {/* Competencies Side by Side for Comparison */}
-              <div
-                className="relative grid grid-cols-1 gap-6 lg:grid-cols-[1fr_auto_1fr]"
-                style={{ isolation: 'isolate' }}
-              >
+              <div className="py-4">
+                <div
+                  className="relative grid grid-cols-1 gap-6 lg:grid-cols-[1fr_auto_1fr]"
+                  style={{ isolation: 'isolate' }}
+                >
                 {/* Origin Competency */}
                 {isLoading || !competencies || !competencies[0] ? (
                   <Card className="border border-slate-200 bg-slate-50/50">
@@ -603,7 +598,7 @@ function SessionPageContent() {
                 ) : (
                   <Card className="relative flex h-[300px] flex-col border-2 border-[#0a4da2]/30 bg-gradient-to-br from-blue-50/80 to-white shadow-lg transition-all hover:border-[#0a4da2]/50 overflow-hidden">
                     <div className="absolute left-0 top-0 h-full w-1.5 bg-gradient-to-b from-[#0a4da2] to-[#4263eb] rounded-r-full" />
-                    <CardHeader className="flex h-full flex-col space-y-4 pb-4 pl-6 overflow-visible">
+                    <CardHeader className="flex h-full flex-col space-y-3 pb-3 pl-5 overflow-visible">
                       <div className="flex-shrink-0">
                         <Badge className="w-fit bg-[#0a4da2] text-white border-[#0a4da2] font-semibold text-xs px-3 py-1.5">
                           Competency
@@ -615,7 +610,7 @@ function SessionPageContent() {
                           <TooltipTrigger asChild>
                             <Badge
                               tabIndex={0}
-                              className="bg-slate-100 text-slate-700 border-slate-200 cursor-help hover:bg-slate-200 transition-colors"
+                              className="bg-slate-100 text-slate-700 border border-slate-300 cursor-help hover:bg-slate-200 transition-colors"
                             >
                               Apply
                               <Info className="h-3 w-3 ml-1.5" />
@@ -636,12 +631,12 @@ function SessionPageContent() {
                             </p>
                           </TooltipContent>
                         </Tooltip>
-                        <Badge className="bg-slate-100 text-slate-700 border-slate-200">
+                        <Badge className="bg-slate-100 text-slate-700 border border-slate-300">
                           Control Flow
                         </Badge>
                       </div>
                       <div className="flex-1 flex flex-col min-h-0 space-y-2">
-                        <CardTitle className="text-xl font-bold text-slate-900 flex-shrink-0">
+                        <CardTitle className="text-lg font-bold text-slate-900 flex-shrink-0">
                           {competencies[0]!.title}
                         </CardTitle>
                         <div
@@ -661,9 +656,9 @@ function SessionPageContent() {
                 <div className="flex flex-col items-center justify-center z-10 px-4 gap-3">
                   <div className="flex items-center gap-2">
                     <div className="h-0.5 w-12 bg-gradient-to-r from-[#0a4da2] to-[#4263eb]" />
-                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#0a4da2] via-[#4263eb] to-[#9775fa] shadow-xl ring-4 ring-white">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#0a4da2] via-[#4263eb] to-[#9775fa] shadow-xl ring-3 ring-white">
                       <ArrowRight
-                        className="h-7 w-7 text-white"
+                        className="h-6 w-6 text-white"
                         aria-hidden="true"
                       />
                     </div>
@@ -700,9 +695,9 @@ function SessionPageContent() {
                 ) : (
                   <Card className="relative flex h-[300px] flex-col border-2 border-[#9775fa]/30 bg-gradient-to-br from-purple-50/80 to-white shadow-lg transition-all hover:border-[#9775fa]/50 overflow-hidden">
                     <div className="absolute left-0 top-0 h-full w-1.5 bg-gradient-to-b from-[#9775fa] to-[#5538d1] rounded-r-full" />
-                    <CardHeader className="flex h-full flex-col space-y-4 pb-4 pl-6 overflow-visible">
+                    <CardHeader className="flex h-full flex-col space-y-3 pb-3 pl-5 overflow-visible">
                       <div className="flex-shrink-0">
-                        <Badge className="w-fit bg-[#9775fa] text-white border-[#9775fa] font-semibold text-xs px-3 py-1.5">
+                        <Badge className="w-fit bg-[#7c3aed] text-white border-[#7c3aed] font-semibold text-xs px-3 py-1.5">
                           Competency
                         </Badge>
                       </div>
@@ -712,7 +707,7 @@ function SessionPageContent() {
                           <TooltipTrigger asChild>
                             <Badge
                               tabIndex={0}
-                              className="bg-slate-100 text-slate-700 border-slate-200 cursor-help hover:bg-slate-200 transition-colors"
+                              className="bg-slate-100 text-slate-700 border border-slate-300 cursor-help hover:bg-slate-200 transition-colors"
                             >
                               Apply
                               <Info className="h-3 w-3 ml-1.5" />
@@ -733,12 +728,12 @@ function SessionPageContent() {
                             </p>
                           </TooltipContent>
                         </Tooltip>
-                        <Badge className="bg-slate-100 text-slate-700 border-slate-200">
+                        <Badge className="bg-slate-100 text-slate-700 border border-slate-300">
                           Programming Fundamentals
                         </Badge>
                       </div>
                       <div className="flex-1 flex flex-col min-h-0 space-y-2">
-                        <CardTitle className="text-xl font-bold text-slate-900 flex-shrink-0">
+                        <CardTitle className="text-lg font-bold text-slate-900 flex-shrink-0">
                           {competencies[1]!.title}
                         </CardTitle>
                         <div
@@ -753,10 +748,45 @@ function SessionPageContent() {
                     </CardHeader>
                   </Card>
                 )}
+                </div>
               </div>
 
-              {/* Relationship Selector - Prominent Below Competencies */}
-              <div className="space-y-4 px-6">
+              {/* Relationship Selector */}
+              <div className="space-y-4 pt-3">
+                {/* Live Preview Sentence */}
+                {competencies && competencies.length >= 2 && (
+                  <div className="rounded-lg bg-gradient-to-r from-blue-50/80 via-purple-50/60 to-blue-50/80 border-2 border-blue-200/50 py-3 px-4 shadow-sm">
+                    {relation ? (
+                      <p className="text-base text-center text-slate-800 leading-relaxed">
+                        <span className="font-bold text-slate-900">
+                          {competencies[0]!.title}
+                        </span>{' '}
+                        <span className="text-[#0a4da2] font-bold">
+                          {relationshipTypes
+                            .find(rt => rt.value === relation)
+                            ?.label.toLowerCase() || ''}
+                        </span>{' '}
+                        <span className="font-bold text-slate-900">
+                          {competencies[1]!.title}
+                        </span>
+                      </p>
+                    ) : (
+                      <p className="text-base text-center text-slate-800 leading-relaxed font-bold">
+                        Select a relationship type below or press{' '}
+                        <Kbd className="bg-slate-100 text-slate-700 border border-slate-300 text-xs font-semibold px-2 py-1">
+                          1
+                        </Kbd>{' '}
+                        <Kbd className="bg-slate-100 text-slate-700 border border-slate-300 text-xs font-semibold px-2 py-1">
+                          2
+                        </Kbd>{' '}
+                        <Kbd className="bg-slate-100 text-slate-700 border border-slate-300 text-xs font-semibold px-2 py-1">
+                          3
+                        </Kbd>
+                      </p>
+                    )}
+                  </div>
+                )}
+                
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full">
                   {relationshipTypes.length > 0 ? (
                     relationshipTypes.map(({ value, label }) => {
@@ -822,7 +852,7 @@ function SessionPageContent() {
                             )}
                             {shortcutKey && (
                               <Kbd
-                                className={`${isSelected ? 'bg-white/20 text-white border-white/30' : 'bg-slate-200 text-slate-700 border-slate-300'} text-xs`}
+                                className={`${isSelected ? 'bg-white/20 text-white border-white/30' : 'bg-slate-100 text-slate-700 border border-slate-300'} text-xs font-semibold px-2 py-1`}
                               >
                                 {shortcutKey}
                               </Kbd>
@@ -839,45 +869,58 @@ function SessionPageContent() {
                 </div>
               </div>
 
-              <div className="sticky bottom-0 mt-12 pt-8">
-                <div className="relative">
-                  <div className="absolute -top-12 left-0 right-0 h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent" />
-                </div>
-                <div className="flex flex-wrap items-center gap-3 px-6">
-                  <button
-                    type="button"
-                    onClick={handleUndo}
-                    disabled={history.length === 0}
-                    className="flex items-center gap-3 rounded-lg border-2 border-slate-300 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition-all duration-200 hover:bg-slate-50 hover:border-slate-400 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white"
-                  >
-                    Undo
-                    <Kbd className="shrink-0 bg-slate-200 text-slate-700 border border-slate-300 text-xs">
-                      ⇧ + Z
-                    </Kbd>
-                  </button>
+              {/* Action Buttons */}
+              <div className="sticky bottom-0 mt-10 pt-6 border-t border-slate-200/60">
+                <div className="flex flex-wrap items-center gap-4">
+                  {/* Secondary Actions */}
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={handleUndo}
+                      disabled={history.length === 0}
+                      className="flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition-all duration-200 hover:bg-slate-50 hover:border-slate-400 hover:shadow-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:shadow-none"
+                    >
+                      Undo
+                      <Kbd className="shrink-0 bg-slate-100 text-slate-700 border border-slate-300 text-xs font-semibold px-2 py-1 flex items-center gap-1">
+                        <span>⇧</span>
+                        <Plus className="h-3 w-3" />
+                        <span>Z</span>
+                      </Kbd>
+                    </button>
+                  </div>
+                  
+                  {/* Primary Actions */}
                   <div className="flex-1" />
-                  <button
-                    type="button"
-                    onClick={() => handleAction('skipped')}
-                    disabled={isLoading}
-                    className="flex items-center gap-3 rounded-lg border-2 border-slate-300 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition-all duration-200 hover:bg-slate-50 hover:border-slate-400 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    Skip
-                    <Kbd className="shrink-0 bg-slate-200 text-slate-700 border border-slate-300 text-xs">
-                      Space
-                    </Kbd>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleAction('completed')}
-                    disabled={isLoading || isCreating || !userId || !relation}
-                    className="flex items-center gap-3 rounded-lg border-2 border-[#0a4da2] bg-[#0a4da2] px-4 py-3 text-sm font-medium text-white transition-all duration-200 hover:bg-[#0d56b5] hover:border-[#0d56b5] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#0a4da2]"
-                  >
-                    {isCreating ? 'Creating...' : 'Add Relation'}
-                    <Kbd className="shrink-0 bg-white/20 text-white border border-white/30 text-xs">
-                      ⏎
-                    </Kbd>
-                  </button>
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => handleAction('skipped')}
+                      disabled={isLoading || isCreating}
+                      className="flex items-center gap-2 rounded-lg border-2 border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition-all duration-200 hover:bg-slate-50 hover:border-slate-400 hover:shadow-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:shadow-none"
+                    >
+                      Skip
+                      <Kbd className="shrink-0 bg-slate-100 text-slate-700 border border-slate-300 text-xs font-semibold px-2 py-1">
+                        Space
+                      </Kbd>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleAction('completed')}
+                      disabled={isLoading || isCreating || !userId || !relation}
+                      className="flex items-center gap-2 rounded-lg border-2 border-[#0a4da2] bg-gradient-to-r from-[#0a4da2] to-[#7c6cff] px-6 py-2.5 text-sm font-bold text-white shadow-lg transition-all duration-200 hover:from-[#0d56b5] hover:to-[#8a7aff] hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:from-[#0a4da2] disabled:hover:to-[#7c6cff] disabled:hover:shadow-lg"
+                    >
+                      {isCreating ? (
+                        <>Creating...</>
+                      ) : (
+                        <>
+                          Add Relation
+                          <Kbd className="shrink-0 bg-white/20 text-white border border-white/30 text-xs font-semibold px-2 py-1">
+                            ⏎
+                          </Kbd>
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </div>
               </div>
             </>
