@@ -859,7 +859,7 @@ function SessionPageContent() {
                       </p>
                     ) : relation ? (
                       <p className="text-base text-slate-800 leading-relaxed font-bold">
-                        <span className="font-medium text-slate-900">
+                        <span className="font-bold text-slate-900">
                           {competencies[0]!.title}
                         </span>{' '}
                         <span
@@ -871,7 +871,7 @@ function SessionPageContent() {
                                 .find(rt => rt.value === relation)
                                 ?.label.toLowerCase() || ''}
                         </span>{' '}
-                        <span className="font-medium text-slate-900">
+                        <span className="font-bold text-slate-900">
                           {competencies[1]!.title}
                         </span>
                       </p>
