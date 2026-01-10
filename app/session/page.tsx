@@ -21,14 +21,13 @@ import {
 import { Kbd } from '@/components/ui/kbd';
 import {
   ArrowRight,
-  ArrowDown,
   Info,
   ArrowLeftRight,
   Check,
   Layers,
   TrendingUp,
   Equal,
-  Plus,
+  Unlink,
 } from 'lucide-react';
 import {
   Card,
@@ -47,105 +46,64 @@ type RelationshipTypeOption = {
   label: string;
 };
 
-// Configuration mapping relationship types to their theme classes
-const RELATIONSHIP_TYPE_THEMES: Record<
-  RelationshipType,
-  {
-    colorClasses: {
-      selected: string;
-      unselected: string;
-    };
-    iconBgClasses: {
-      selected: string;
-      unselected: string;
-    };
-    iconColorClass: string;
-  }
-> = {
-  ASSUMES: {
-    colorClasses: {
-      selected:
-        'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-500/30',
-      unselected:
-        'bg-white border-blue-500/30 text-slate-700 hover:border-blue-500 hover:bg-blue-50',
-    },
-    iconBgClasses: {
-      selected: 'bg-white/20',
-      unselected: 'bg-blue-500/10 group-hover:bg-blue-500/20',
-    },
-    iconColorClass: 'text-blue-500',
-  },
-  EXTENDS: {
-    colorClasses: {
-      selected:
-        'bg-purple-600 border-purple-600 text-white shadow-lg shadow-purple-500/30',
-      unselected:
-        'bg-white border-purple-500/30 text-slate-700 hover:border-purple-500 hover:bg-purple-50',
-    },
-    iconBgClasses: {
-      selected: 'bg-white/20',
-      unselected: 'bg-purple-500/10 group-hover:bg-purple-500/20',
-    },
-    iconColorClass: 'text-purple-500',
-  },
-  MATCHES: {
-    colorClasses: {
-      selected:
-        'bg-emerald-600 border-emerald-600 text-white shadow-lg shadow-emerald-500/30',
-      unselected:
-        'bg-white border-emerald-500/30 text-slate-700 hover:border-emerald-500 hover:bg-emerald-50',
-    },
-    iconBgClasses: {
-      selected: 'bg-white/20',
-      unselected: 'bg-emerald-500/10 group-hover:bg-emerald-500/20',
-    },
-    iconColorClass: 'text-emerald-500',
-  },
+// Blue-Purple theme colors (hardcoded after user selection)
+const THEME_COLORS = {
+  source: { primary: '#0a4da2', secondary: '#4263eb' },
+  destination: { primary: '#7c3aed', secondary: '#9775fa' },
 };
 
-// Descriptions for relationship types (used in tooltips)
-const RELATIONSHIP_TYPE_DESCRIPTIONS: Record<RelationshipType, string> = {
-  ASSUMES: 'A requires B as prerequisite',
-  EXTENDS: 'A builds on / is a subset or advanced form of B',
-  MATCHES: 'A is equivalent / strongly overlaps with B',
+// Helper to get dynamic description for relationship types
+// Used in the live preview banner
+const getRelationshipDescription = (
+  type: RelationshipType,
+  titleA: string,
+  titleB: string
+) => {
+  switch (type) {
+    case 'ASSUMES':
+      return (
+        <>
+          <span className="font-medium text-slate-900">{titleA}</span> requires{' '}
+          <span className="font-medium text-slate-900">{titleB}</span> as
+          prerequisite
+        </>
+      );
+    case 'EXTENDS':
+      return (
+        <>
+          <span className="font-medium text-slate-900">{titleA}</span> builds on
+          / is a subset or advanced form of{' '}
+          <span className="font-medium text-slate-900">{titleB}</span>
+        </>
+      );
+    case 'MATCHES':
+      return (
+        <>
+          <span className="font-medium text-slate-900">{titleA}</span> is
+          equivalent / strongly overlaps with{' '}
+          <span className="font-medium text-slate-900">{titleB}</span>
+        </>
+      );
+    case 'UNRELATED':
+      return (
+        <>
+          <span className="font-medium text-slate-900">{titleA}</span> and{' '}
+          <span className="font-medium text-slate-900">{titleB}</span> have no
+          meaningful relationship
+        </>
+      );
+    default:
+      return '';
+  }
 };
 
-// Utility functions for relationship type styling
-function getColorClasses(
-  relationshipType: RelationshipType,
-  selected: boolean
-): string {
-  const theme = RELATIONSHIP_TYPE_THEMES[relationshipType];
-  if (!theme) {
-    return 'bg-white border-slate-300 text-slate-700';
-  }
-  return selected ? theme.colorClasses.selected : theme.colorClasses.unselected;
-}
-
-function getIconBgClasses(
-  relationshipType: RelationshipType,
-  selected: boolean
-): string {
-  const theme = RELATIONSHIP_TYPE_THEMES[relationshipType];
-  if (!theme) {
-    return 'bg-slate-500/10';
-  }
-  return selected
-    ? theme.iconBgClasses.selected
-    : theme.iconBgClasses.unselected;
-}
-
-function getIconColorClasses(
-  relationshipType: RelationshipType,
-  selected: boolean
-): string {
-  if (selected) return 'text-white';
-  const theme = RELATIONSHIP_TYPE_THEMES[relationshipType];
-  if (!theme) {
-    return 'text-slate-500';
-  }
-  return theme.iconColorClass;
-}
+// Text colors for relationship types (used in preview sentence)
+const RELATIONSHIP_TYPE_TEXT_COLORS: Record<RelationshipType, string> = {
+  ASSUMES: 'text-blue-600',
+  EXTENDS: 'text-purple-600',
+  MATCHES: 'text-emerald-600',
+  UNRELATED: 'text-slate-600',
+};
 
 // Shared scrollbar styles for competency description containers
 const SCROLLBAR_STYLES: {
@@ -182,6 +140,21 @@ function SessionPageContent() {
   const [error, setError] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [swapRotation, setSwapRotation] = useState(0);
+  const [hoveredRelation, setHoveredRelation] =
+    useState<RelationshipType | null>(null);
+  const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleMouseEnter = (val: RelationshipType) => {
+    if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+    hoverTimeoutRef.current = setTimeout(() => setHoveredRelation(val), 70);
+  };
+
+  const handleMouseLeave = () => {
+    if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+    hoverTimeoutRef.current = setTimeout(() => setHoveredRelation(null), 70);
+  };
   const [relationshipToDelete, setRelationshipToDelete] = useState<
     string | null
   >(null);
@@ -232,30 +205,43 @@ function SessionPageContent() {
     loadDemoUser();
   }, []);
 
-  const loadCompetencies = useCallback(async () => {
-    setError(null);
-    setCompetencies(null);
+  const loadCompetencies = useCallback(
+    async (isInitialLoad = false) => {
+      setError(null);
 
-    const result = await getRandomCompetenciesAction(count);
-    if (!result.success) {
-      setError(
-        result.error ??
-          'An unexpected error occurred while fetching competencies.'
-      );
-      setCompetencies([]);
-      return;
-    }
+      // Only set competencies to null on initial load, not during transitions
+      if (isInitialLoad) {
+        setCompetencies(null);
+      } else {
+        setIsTransitioning(true);
+      }
 
-    if (!result.competencies || result.competencies.length === 0) {
-      setCompetencies([]);
-      return;
-    }
+      const result = await getRandomCompetenciesAction(count);
 
-    setCompetencies(result.competencies);
-  }, [count]);
+      if (!result.success) {
+        setError(
+          result.error ??
+            'An unexpected error occurred while fetching competencies.'
+        );
+        setCompetencies([]);
+        setIsTransitioning(false);
+        return;
+      }
+
+      if (!result.competencies || result.competencies.length === 0) {
+        setCompetencies([]);
+        setIsTransitioning(false);
+        return;
+      }
+
+      setCompetencies(result.competencies);
+      setIsTransitioning(false);
+    },
+    [count]
+  );
 
   useEffect(() => {
-    loadCompetencies();
+    loadCompetencies(true);
   }, [loadCompetencies]);
 
   const handleAction = useCallback(
@@ -437,10 +423,10 @@ function SessionPageContent() {
         return;
       }
 
-      // 1, 2, 3 for relationship types (only if relationship types are loaded)
+      // 1, 2, 3, 4 for relationship types (only if relationship types are loaded)
       // Check this BEFORE Enter to prevent conflicts
       if (
-        ['1', '2', '3'].includes(event.key) &&
+        ['1', '2', '3', '4'].includes(event.key) &&
         relationshipTypes.length > 0 &&
         !isLoading &&
         !isCreating
@@ -500,7 +486,7 @@ function SessionPageContent() {
       <main className="relative z-10 mx-auto mt-20 flex w-full max-w-6xl flex-col gap-6 px-6 pb-24 lg:mt-24 lg:px-0">
         <section className="space-y-6 rounded-[24px] border border-white/70 bg-white/85 p-6 shadow-[0_26px_90px_-55px_rgba(7,30,84,0.5)] backdrop-blur-xl">
           {/* Header Section */}
-          <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-200/60">
+          <div className="flex flex-wrap items-center justify-center gap-3 pb-4 border-b border-slate-200/60">
             <div className="flex flex-wrap items-center gap-3">
               <Badge className="bg-gradient-to-r from-[#0a4da2] to-[#7c6cff] text-white border-0 font-semibold text-xs px-4 py-1.5 shadow-md">
                 Mapping Session
@@ -565,26 +551,44 @@ function SessionPageContent() {
           {!error && !noCompetencies && !notEnough && (
             <>
               {/* Main Question */}
-              <div className="space-y-4">
-                <div>
-                  {isLoading || !competencies || competencies.length < 2 ? (
-                    <h1 className="text-xl font-bold text-slate-900 leading-tight">
-                      Loading competencies for this mapping session...
-                    </h1>
-                  ) : (
-                    <h1 className="text-xl sm:text-2xl font-bold text-slate-900 leading-tight">
-                      How does{' '}
-                      <span className="text-[#0a4da2]">
-                        {competencies[0]!.title}
-                      </span>{' '}
-                      relate to{' '}
-                      <span className="text-[#7c3aed]">
-                        {competencies[1]!.title}
-                      </span>
+              <div className="flex flex-col items-center justify-center text-center space-y-2 mx-auto w-full">
+                {isLoading || !competencies || competencies.length < 2 ? (
+                  <div className="flex flex-wrap justify-center items-center gap-2">
+                    <span className="text-[1.35rem] sm:text-[1.7rem] font-bold text-slate-500">
+                      How does
+                    </span>
+                    <div className="h-7 w-40 rounded-md bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 animate-pulse" />
+                    <span className="text-[1.35rem] sm:text-[1.7rem] font-bold text-slate-500">
+                      relate to
+                    </span>
+                    <div className="h-7 w-36 rounded-md bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 animate-pulse" />
+                    <span className="text-[1.35rem] sm:text-[1.7rem] font-bold text-slate-500">
                       ?
-                    </h1>
-                  )}
-                </div>
+                    </span>
+                  </div>
+                ) : (
+                  <h1 className="text-[1.35rem] sm:text-[1.7rem] font-bold text-slate-800 leading-relaxed tracking-tight">
+                    How does{' '}
+                    <span
+                      className="bg-clip-text text-transparent"
+                      style={{
+                        backgroundImage: `linear-gradient(to right, ${THEME_COLORS.source.primary}, ${THEME_COLORS.source.secondary})`,
+                      }}
+                    >
+                      {competencies[0]!.title}
+                    </span>{' '}
+                    relate to{' '}
+                    <span
+                      className="bg-clip-text text-transparent"
+                      style={{
+                        backgroundImage: `linear-gradient(to right, ${THEME_COLORS.destination.primary}, ${THEME_COLORS.destination.secondary})`,
+                      }}
+                    >
+                      {competencies[1]!.title}
+                    </span>
+                    ?
+                  </h1>
+                )}
               </div>
 
               {/* Competencies Side by Side for Comparison */}
@@ -595,19 +599,41 @@ function SessionPageContent() {
                 >
                   {/* Origin Competency */}
                   {isLoading || !competencies || !competencies[0] ? (
-                    <Card className="border border-slate-200 bg-slate-50/50">
-                      <CardHeader>
-                        <CardTitle className="text-slate-400">
-                          Loading...
-                        </CardTitle>
+                    <Card className="relative flex h-[280px] flex-col border-2 border-slate-200/50 bg-gradient-to-br from-slate-50/80 to-white shadow-lg overflow-hidden">
+                      <div className="absolute left-0 top-0 h-full w-1.5 bg-gradient-to-b from-slate-300 to-slate-200 rounded-r-full" />
+                      <CardHeader className="flex h-full flex-col space-y-3 pb-3 pl-5">
+                        <div className="h-6 w-24 rounded-md bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 animate-pulse" />
+                        <div className="flex gap-2">
+                          <div className="h-5 w-16 rounded-full bg-slate-200 animate-pulse" />
+                          <div className="h-5 w-20 rounded-full bg-slate-200 animate-pulse" />
+                        </div>
+                        <div className="h-6 w-3/4 rounded-md bg-slate-200 animate-pulse mt-2" />
+                        <div className="space-y-2 mt-2">
+                          <div className="h-4 w-full rounded bg-slate-100 animate-pulse" />
+                          <div className="h-4 w-5/6 rounded bg-slate-100 animate-pulse" />
+                          <div className="h-4 w-4/6 rounded bg-slate-100 animate-pulse" />
+                        </div>
                       </CardHeader>
                     </Card>
                   ) : (
-                    <Card className="relative flex h-[300px] flex-col border-2 border-[#0a4da2]/30 bg-gradient-to-br from-blue-50/80 to-white shadow-lg transition-all hover:border-[#0a4da2]/50 overflow-hidden">
-                      <div className="absolute left-0 top-0 h-full w-1.5 bg-gradient-to-b from-[#0a4da2] to-[#4263eb] rounded-r-full" />
+                    <Card
+                      className={`relative flex h-[280px] flex-col border-2 border-[#0a4da2]/30 bg-gradient-to-br from-blue-50/80 to-white shadow-lg transition-all duration-300 overflow-hidden ${isTransitioning || isCreating ? 'opacity-60 scale-[0.99]' : 'opacity-100 scale-100'}`}
+                    >
+                      <div
+                        className="absolute left-0 top-0 h-full w-1.5 rounded-r-full"
+                        style={{
+                          backgroundImage: `linear-gradient(to bottom, ${THEME_COLORS.source.primary}, ${THEME_COLORS.source.secondary})`,
+                        }}
+                      />
                       <CardHeader className="flex h-full flex-col space-y-3 pb-3 pl-5 overflow-visible">
                         <div className="flex-shrink-0">
-                          <Badge className="w-fit bg-[#0a4da2] text-white border-[#0a4da2] font-semibold text-xs px-3 py-1.5">
+                          <Badge
+                            className="w-fit text-white font-semibold text-xs px-3 py-1.5"
+                            style={{
+                              backgroundColor: THEME_COLORS.source.primary,
+                              borderColor: THEME_COLORS.source.primary,
+                            }}
+                          >
                             Competency
                           </Badge>
                         </div>
@@ -662,32 +688,57 @@ function SessionPageContent() {
                   {/* Arrow Connection with Swap Button */}
                   <div className="flex flex-col items-center justify-center z-10 px-4 gap-3">
                     <div className="flex items-center gap-2">
-                      <div className="h-0.5 w-12 bg-gradient-to-r from-[#0a4da2] to-[#4263eb]" />
-                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#0a4da2] via-[#4263eb] to-[#9775fa] shadow-xl ring-3 ring-white">
+                      <div
+                        className="h-0.5 w-12"
+                        style={{
+                          backgroundImage: `linear-gradient(to right, ${THEME_COLORS.source.primary}, ${THEME_COLORS.source.secondary})`,
+                        }}
+                      />
+                      <div
+                        className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full shadow-xl ring-3 ring-white"
+                        style={{
+                          backgroundImage: `linear-gradient(to bottom right, ${THEME_COLORS.source.primary}, ${THEME_COLORS.source.secondary}, ${THEME_COLORS.destination.primary})`,
+                        }}
+                      >
                         <ArrowRight
                           className="h-6 w-6 text-white"
                           aria-hidden="true"
                         />
                       </div>
-                      <div className="h-0.5 w-12 bg-gradient-to-l from-[#9775fa] to-[#5538d1]" />
+                      <div
+                        className="h-0.5 w-12"
+                        style={{
+                          backgroundImage: `linear-gradient(to left, ${THEME_COLORS.destination.primary}, ${THEME_COLORS.destination.secondary})`,
+                        }}
+                      />
                     </div>
                     {competencies && competencies.length >= 2 && (
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={e => {
-                          if (competencies && competencies.length >= 2) {
-                            setCompetencies([
-                              competencies[1]!,
-                              competencies[0]!,
-                            ]);
-                          }
-                          // Remove focus after click
+                          setSwapRotation(prev => prev + 180);
+                          setIsTransitioning(true);
+
+                          // Wait for fade out before swapping
+                          setTimeout(() => {
+                            if (competencies && competencies.length >= 2) {
+                              setCompetencies([
+                                competencies[1]!,
+                                competencies[0]!,
+                              ]);
+                            }
+                            setIsTransitioning(false);
+                          }, 300);
+
                           (e.currentTarget as HTMLButtonElement).blur();
                         }}
-                        className="text-slate-600 hover:text-slate-900 hover:bg-slate-100 focus:outline-none"
+                        className="text-slate-700 border border-slate-300 hover:text-slate-900 hover:bg-slate-100 hover:border-slate-400 focus:outline-none focus:ring-0 focus-visible:ring-0"
                       >
-                        <ArrowLeftRight className="h-4 w-4 mr-1.5" />
+                        <ArrowLeftRight
+                          className="h-4 w-4 mr-1.5 transition-transform duration-500 will-change-transform"
+                          style={{ transform: `rotate(${swapRotation}deg)` }}
+                        />
                         Swap Direction
                       </Button>
                     )}
@@ -695,19 +746,41 @@ function SessionPageContent() {
 
                   {/* Destination Competency */}
                   {isLoading || !competencies || !competencies[1] ? (
-                    <Card className="border border-slate-200 bg-slate-50/50">
-                      <CardHeader>
-                        <CardTitle className="text-slate-400">
-                          Loading...
-                        </CardTitle>
+                    <Card className="relative flex h-[280px] flex-col border-2 border-slate-200/50 bg-gradient-to-br from-slate-50/80 to-white shadow-lg overflow-hidden">
+                      <div className="absolute left-0 top-0 h-full w-1.5 bg-gradient-to-b from-slate-300 to-slate-200 rounded-r-full" />
+                      <CardHeader className="flex h-full flex-col space-y-3 pb-3 pl-5">
+                        <div className="h-6 w-24 rounded-md bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 animate-pulse" />
+                        <div className="flex gap-2">
+                          <div className="h-5 w-16 rounded-full bg-slate-200 animate-pulse" />
+                          <div className="h-5 w-24 rounded-full bg-slate-200 animate-pulse" />
+                        </div>
+                        <div className="h-6 w-4/5 rounded-md bg-slate-200 animate-pulse mt-2" />
+                        <div className="space-y-2 mt-2">
+                          <div className="h-4 w-full rounded bg-slate-100 animate-pulse" />
+                          <div className="h-4 w-4/5 rounded bg-slate-100 animate-pulse" />
+                          <div className="h-4 w-3/5 rounded bg-slate-100 animate-pulse" />
+                        </div>
                       </CardHeader>
                     </Card>
                   ) : (
-                    <Card className="relative flex h-[300px] flex-col border-2 border-[#9775fa]/30 bg-gradient-to-br from-purple-50/80 to-white shadow-lg transition-all hover:border-[#9775fa]/50 overflow-hidden">
-                      <div className="absolute left-0 top-0 h-full w-1.5 bg-gradient-to-b from-[#9775fa] to-[#5538d1] rounded-r-full" />
+                    <Card
+                      className={`relative flex h-[280px] flex-col border-2 border-[#9775fa]/30 bg-gradient-to-br from-purple-50/80 to-white shadow-lg transition-all duration-300 overflow-hidden ${isTransitioning || isCreating ? 'opacity-60 scale-[0.99]' : 'opacity-100 scale-100'}`}
+                    >
+                      <div
+                        className="absolute left-0 top-0 h-full w-1.5 rounded-r-full"
+                        style={{
+                          backgroundImage: `linear-gradient(to bottom, ${THEME_COLORS.destination.primary}, ${THEME_COLORS.destination.secondary})`,
+                        }}
+                      />
                       <CardHeader className="flex h-full flex-col space-y-3 pb-3 pl-5 overflow-visible">
                         <div className="flex-shrink-0">
-                          <Badge className="w-fit bg-[#7c3aed] text-white border-[#7c3aed] font-semibold text-xs px-3 py-1.5">
+                          <Badge
+                            className="w-fit text-white font-semibold text-xs px-3 py-1.5"
+                            style={{
+                              backgroundColor: THEME_COLORS.destination.primary,
+                              borderColor: THEME_COLORS.destination.primary,
+                            }}
+                          >
                             Competency
                           </Badge>
                         </div>
@@ -761,52 +834,72 @@ function SessionPageContent() {
                 </div>
               </div>
 
-              {/* Relationship Selector */}
-              <div className="space-y-4 pt-3">
+              {/* Combined Relationship Selection Section */}
+              <div className="mx-auto max-w-5xl rounded-2xl border border-slate-200/80 p-5 shadow-sm space-y-5">
                 {/* Live Preview Sentence */}
                 {competencies && competencies.length >= 2 && (
-                  <div className="rounded-lg bg-gradient-to-r from-blue-50/80 via-purple-50/60 to-blue-50/80 border-2 border-blue-200/50 py-3 px-4 shadow-sm">
-                    {relation ? (
-                      <p className="text-base text-center text-slate-800 leading-relaxed">
-                        <span className="font-bold text-slate-900">
+                  <div className="rounded-xl bg-gradient-to-r from-blue-50/90 via-purple-50/70 to-blue-50/90 border border-blue-200/50 py-4 px-5 text-center">
+                    {hoveredRelation ? (
+                      <p className="text-base text-slate-800 leading-relaxed font-bold animate-in fade-in duration-200">
+                        <span
+                          className={`font-bold ${RELATIONSHIP_TYPE_TEXT_COLORS[hoveredRelation]}`}
+                        >
+                          {
+                            relationshipTypes.find(
+                              rt => rt.value === hoveredRelation
+                            )?.label
+                          }
+                          :
+                        </span>{' '}
+                        {getRelationshipDescription(
+                          hoveredRelation,
+                          competencies[0]!.title,
+                          competencies[1]!.title
+                        )}
+                      </p>
+                    ) : relation ? (
+                      <p className="text-base text-slate-800 leading-relaxed font-bold">
+                        <span className="font-medium text-slate-900">
                           {competencies[0]!.title}
                         </span>{' '}
-                        <span className="text-[#0a4da2] font-bold">
-                          {relationshipTypes
-                            .find(rt => rt.value === relation)
-                            ?.label.toLowerCase() || ''}
+                        <span
+                          className={`font-bold ${RELATIONSHIP_TYPE_TEXT_COLORS[relation] || 'text-slate-600'}`}
+                        >
+                          {relation === 'UNRELATED'
+                            ? 'is unrelated to'
+                            : relationshipTypes
+                                .find(rt => rt.value === relation)
+                                ?.label.toLowerCase() || ''}
                         </span>{' '}
-                        <span className="font-bold text-slate-900">
+                        <span className="font-medium text-slate-900">
                           {competencies[1]!.title}
                         </span>
                       </p>
                     ) : (
-                      <p className="text-base text-center text-slate-800 leading-relaxed font-bold">
+                      <p className="text-base text-slate-800 leading-relaxed font-bold">
                         Select a relationship type below or press{' '}
-                        <Kbd className="bg-slate-100 text-slate-700 border border-slate-300 text-xs font-semibold px-2 py-1">
+                        <Kbd className="bg-white text-slate-700 border border-slate-300 text-xs font-semibold px-2 py-1">
                           1
                         </Kbd>{' '}
-                        <Kbd className="bg-slate-100 text-slate-700 border border-slate-300 text-xs font-semibold px-2 py-1">
+                        <Kbd className="bg-white text-slate-700 border border-slate-300 text-xs font-semibold px-2 py-1">
                           2
                         </Kbd>{' '}
-                        <Kbd className="bg-slate-100 text-slate-700 border border-slate-300 text-xs font-semibold px-2 py-1">
+                        <Kbd className="bg-white text-slate-700 border border-slate-300 text-xs font-semibold px-2 py-1">
                           3
+                        </Kbd>{' '}
+                        <Kbd className="bg-white text-slate-700 border border-slate-300 text-xs font-semibold px-2 py-1">
+                          4
                         </Kbd>
                       </p>
                     )}
                   </div>
                 )}
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full">
-                  {relationshipTypes.length > 0 ? (
-                    relationshipTypes.map(({ value, label }) => {
+                {/* Relationship Type Buttons */}
+                {relationshipTypes.length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 w-full">
+                    {relationshipTypes.map(({ value, label }) => {
                       const isSelected = relation === value;
-                      const iconMap = {
-                        ASSUMES: Layers,
-                        EXTENDS: TrendingUp,
-                        MATCHES: Equal,
-                      };
-                      const Icon = iconMap[value] || ArrowDown;
                       const shortcutIndex = relationshipTypes.findIndex(
                         rt => rt.value === value
                       );
@@ -815,8 +908,39 @@ function SessionPageContent() {
                           ? (shortcutIndex + 1).toString()
                           : null;
 
-                      const description =
-                        RELATIONSHIP_TYPE_DESCRIPTIONS[value] || '';
+                      // Color mapping for selected state
+                      const selectedColors: Record<RelationshipType, string> = {
+                        ASSUMES:
+                          'bg-blue-600 text-white shadow-lg shadow-blue-500/25 border-blue-600',
+                        EXTENDS:
+                          'bg-purple-600 text-white shadow-lg shadow-purple-500/25 border-purple-600',
+                        MATCHES:
+                          'bg-emerald-600 text-white shadow-lg shadow-emerald-500/25 border-emerald-600',
+                        UNRELATED:
+                          'bg-slate-600 text-white shadow-lg shadow-slate-500/25 border-slate-600',
+                      };
+
+                      // Color mapping for unselected state - subtle color hints
+                      const unselectedColors: Record<RelationshipType, string> =
+                        {
+                          ASSUMES:
+                            'bg-white text-slate-800 border-blue-300 hover:border-blue-500 hover:bg-blue-50',
+                          EXTENDS:
+                            'bg-white text-slate-800 border-purple-300 hover:border-purple-500 hover:bg-purple-50',
+                          MATCHES:
+                            'bg-white text-slate-800 border-emerald-300 hover:border-emerald-500 hover:bg-emerald-50',
+                          UNRELATED:
+                            'bg-white text-slate-800 border-slate-300 hover:border-slate-500 hover:bg-slate-50',
+                        };
+
+                      // Icon mapping for relationship types
+                      const iconMap: Record<RelationshipType, React.ReactNode> =
+                        {
+                          ASSUMES: <Layers className="h-4 w-4" />,
+                          EXTENDS: <TrendingUp className="h-4 w-4" />,
+                          MATCHES: <Equal className="h-4 w-4" />,
+                          UNRELATED: <Unlink className="h-4 w-4" />,
+                        };
 
                       return (
                         <button
@@ -824,107 +948,108 @@ function SessionPageContent() {
                           type="button"
                           data-relationship-button
                           onClick={() => setRelation(isSelected ? '' : value)}
-                          className={`group relative flex items-center gap-3 rounded-lg border-2 px-4 py-3 transition-all duration-200 w-full ${
-                            isSelected ? 'scale-[1.02]' : ''
-                          } ${getColorClasses(value, isSelected)}`}
+                          onMouseEnter={() => handleMouseEnter(value)}
+                          onMouseLeave={handleMouseLeave}
+                          className={`
+                            relative flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 w-full
+                            font-medium text-sm transition-all duration-200 ease-out
+                            focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2
+                            ${
+                              isSelected
+                                ? `${selectedColors[value]} scale-[1.02]`
+                                : unselectedColors[value]
+                            }
+                          `}
                         >
-                          <div
-                            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-colors ${getIconBgClasses(value, isSelected)}`}
-                          >
-                            <Icon
-                              className={`h-5 w-5 ${getIconColorClasses(value, isSelected)}`}
-                            />
-                          </div>
-                          <div className="flex-1 text-left">
-                            <div className="font-semibold flex items-center gap-2">
-                              {label}
-                              <Tooltip side="top">
-                                <TooltipTrigger asChild>
-                                  <Info
-                                    className={`h-3.5 w-3.5 cursor-help ${
-                                      isSelected
-                                        ? 'text-white/70'
-                                        : 'text-slate-500'
-                                    }`}
-                                  />
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>{description}</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2 shrink-0">
-                            {isSelected && (
-                              <span className="text-xs opacity-90">
-                                Selected
-                              </span>
-                            )}
-                            {shortcutKey && (
-                              <Kbd
-                                className={`${isSelected ? 'bg-white/20 text-white border-white/30' : 'bg-slate-100 text-slate-700 border border-slate-300'} text-xs font-semibold px-2 py-1`}
-                              >
-                                {shortcutKey}
-                              </Kbd>
-                            )}
-                          </div>
+                          {iconMap[value]}
+                          <span>{label}</span>
+                          {shortcutKey && (
+                            <span
+                              className={`
+                                inline-flex items-center justify-center w-5 h-5 rounded text-xs font-bold
+                                ${
+                                  isSelected
+                                    ? 'bg-white/25 text-white'
+                                    : 'bg-slate-200/80 text-slate-500'
+                                }
+                              `}
+                            >
+                              {shortcutKey}
+                            </span>
+                          )}
                         </button>
                       );
-                    })
-                  ) : (
-                    <div className="col-span-3 rounded-xl border border-slate-200 bg-white p-6 text-center text-slate-400">
+                    })}
+                  </div>
+                ) : (
+                  <div className="flex justify-center p-4">
+                    <div className="text-slate-400 text-base font-bold">
                       Loading relationship types...
                     </div>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
 
-              {/* Action Buttons */}
-              <div className="sticky bottom-0 mt-10 pt-6 border-t border-slate-200/60">
-                <div className="flex flex-wrap items-center gap-4">
-                  {/* Secondary Actions */}
-                  <div className="flex items-center gap-3">
-                    <button
-                      type="button"
-                      onClick={handleUndo}
-                      disabled={history.length === 0}
-                      className="flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition-all duration-200 hover:bg-slate-50 hover:border-slate-400 hover:shadow-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:shadow-none"
-                    >
-                      Undo
-                      <Kbd className="shrink-0 bg-slate-100 text-slate-700 border border-slate-300 text-xs font-semibold px-2 py-1 flex items-center gap-1">
-                        <span>⇧</span>
-                        <Plus className="h-3 w-3" />
-                        <span>Z</span>
+              {/* Action Bar */}
+              <div className="mt-8 pt-6 border-t border-slate-200/40 mx-auto max-w-5xl">
+                <div className="flex items-center justify-between">
+                  {/* Left: Undo */}
+                  <button
+                    type="button"
+                    onClick={handleUndo}
+                    disabled={history.length === 0}
+                    className="flex items-center gap-2 px-3 py-2 text-sm text-slate-700 border border-slate-300 rounded-lg transition-all duration-200 hover:text-slate-900 hover:bg-slate-100 hover:border-slate-400 disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    <div className="flex items-center gap-1">
+                      <span className="mr-1">Undo</span>
+                      <Kbd className="bg-slate-100 text-slate-600 border border-slate-200 text-xs px-1.5 py-0.5">
+                        ⇧
                       </Kbd>
-                    </button>
-                  </div>
+                      <span className="text-slate-400 text-xs">+</span>
+                      <Kbd className="bg-slate-100 text-slate-600 border border-slate-200 text-xs px-1.5 py-0.5">
+                        Z
+                      </Kbd>
+                    </div>
+                  </button>
 
-                  {/* Primary Actions */}
-                  <div className="flex-1" />
+                  {/* Right: Primary Actions */}
                   <div className="flex items-center gap-3">
                     <button
                       type="button"
                       onClick={() => handleAction('skipped')}
                       disabled={isLoading || isCreating}
-                      className="flex items-center gap-2 rounded-lg border-2 border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition-all duration-200 hover:bg-slate-50 hover:border-slate-400 hover:shadow-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:shadow-none"
+                      className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-slate-700 border border-slate-300 rounded-lg transition-all duration-200 hover:text-slate-900 hover:bg-slate-100 hover:border-slate-400 disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                       Skip
-                      <Kbd className="shrink-0 bg-slate-100 text-slate-700 border border-slate-300 text-xs font-semibold px-2 py-1">
+                      <Kbd className="bg-slate-100 text-slate-600 border border-slate-200 text-xs px-1.5 py-0.5">
                         Space
                       </Kbd>
                     </button>
+
                     <button
                       type="button"
                       onClick={() => handleAction('completed')}
                       disabled={isLoading || isCreating || !userId || !relation}
-                      className="flex items-center gap-2 rounded-lg border-2 border-[#0a4da2] bg-gradient-to-r from-[#0a4da2] to-[#7c6cff] px-6 py-2.5 text-sm font-bold text-white shadow-lg transition-all duration-200 hover:from-[#0d56b5] hover:to-[#8a7aff] hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:from-[#0a4da2] disabled:hover:to-[#7c6cff] disabled:hover:shadow-lg"
+                      className={`
+                        relative flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white
+                        bg-gradient-to-r from-[#0a4da2] to-[#5538d1]
+                        shadow-lg shadow-blue-500/20
+                        transition-all duration-200 ease-out
+                        hover:shadow-xl hover:shadow-blue-500/30 hover:scale-[1.02]
+                        active:scale-[0.98]
+                        disabled:opacity-50 disabled:cursor-not-allowed 
+                        disabled:hover:shadow-lg disabled:hover:scale-100
+                      `}
                     >
                       {isCreating ? (
-                        <>Creating...</>
+                        <span className="flex items-center gap-2">
+                          <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                          Saving...
+                        </span>
                       ) : (
                         <>
                           Add Relation
-                          <Kbd className="shrink-0 bg-white/20 text-white border border-white/30 text-xs font-semibold px-2 py-1">
+                          <Kbd className="bg-white/20 text-white border border-white/30 text-xs px-1.5 py-0.5">
                             ⏎
                           </Kbd>
                         </>

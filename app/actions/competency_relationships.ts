@@ -134,6 +134,7 @@ export async function getRelationshipTypesAction() {
       ASSUMES: 'Assumes',
       EXTENDS: 'Extends',
       MATCHES: 'Matches',
+      UNRELATED: 'Unrelated',
     };
 
     const typesWithLabels = types.map(type => ({
