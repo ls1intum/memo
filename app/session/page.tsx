@@ -146,19 +146,18 @@ function SessionPageContent() {
     useState<RelationshipType | null>(null);
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const handleMouseEnter = (val: RelationshipType) => {
+  const handleMouseEnter = useCallback((val: RelationshipType) => {
     if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
-    hoverTimeoutRef.current = setTimeout(() => setHoveredRelation(val), 70);
-  };
+    hoverTimeoutRef.current = setTimeout(() => setHoveredRelation(val), 120);
+  }, []);
 
-  const handleMouseLeave = () => {
+  const handleMouseLeave = useCallback(() => {
     if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
     hoverTimeoutRef.current = setTimeout(() => setHoveredRelation(null), 70);
-  };
+  }, []);
   const [relationshipToDelete, setRelationshipToDelete] = useState<
     string | null
   >(null);
-  const isMountedRef = useRef(true);
 
   useEffect(() => {
     async function loadRelationshipTypes() {
@@ -366,12 +365,7 @@ function SessionPageContent() {
 
   // Keyboard shortcuts
   useEffect(() => {
-    isMountedRef.current = true;
-
     function handleKeyDown(event: KeyboardEvent) {
-      // Don't execute if component is unmounted
-      if (!isMountedRef.current) return;
-
       // Don't trigger shortcuts if user is typing in an input/textarea
       const target = event.target as HTMLElement;
       if (
@@ -460,7 +454,6 @@ function SessionPageContent() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => {
-      isMountedRef.current = false;
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [
@@ -730,8 +723,6 @@ function SessionPageContent() {
                             }
                             setIsTransitioning(false);
                           }, 300);
-
-                          (e.currentTarget as HTMLButtonElement).blur();
                         }}
                         className="text-slate-700 border border-slate-300 hover:text-slate-900 hover:bg-slate-100 hover:border-slate-400 focus:outline-none focus:ring-0 focus-visible:ring-0"
                       >
@@ -1044,7 +1035,7 @@ function SessionPageContent() {
                       {isCreating ? (
                         <span className="flex items-center gap-2">
                           <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                          Saving...
+                          Loading next pair...
                         </span>
                       ) : (
                         <>
