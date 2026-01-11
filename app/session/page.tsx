@@ -4,13 +4,12 @@ import { useEffect, useState, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { getRandomCompetenciesAction } from '@/app/actions/competencies';
 import {
-  getRelationshipTypesAction,
   createCompetencyRelationshipAction,
   deleteCompetencyRelationshipAction,
 } from '@/app/actions/competency_relationships';
 import { getOrCreateDemoUserAction } from '@/app/actions/users';
 import type { Competency } from '@/domain_core/model/domain_model';
-import type { RelationshipType } from '@/domain_core/model/domain_model';
+import { RelationshipType } from '@/domain_core/model/domain_model';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -39,6 +38,14 @@ type RelationshipTypeOption = {
   label: string;
 };
 
+// Define relationship types statically from the enum - no server call needed
+const RELATIONSHIP_TYPES: RelationshipTypeOption[] = (
+  Object.values(RelationshipType) as RelationshipType[]
+).map(type => ({
+  value: type,
+  label: type.charAt(0) + type.slice(1).toLowerCase(),
+}));
+
 function SessionPageContent() {
   const searchParams = useSearchParams();
   const countParam = searchParams.get('count');
@@ -46,10 +53,9 @@ function SessionPageContent() {
   const count =
     Number.isFinite(parsedCount) && parsedCount > 0 ? parsedCount : 2;
 
-  const [relationshipTypes, setRelationshipTypes] = useState<
-    RelationshipTypeOption[]
-  >([]);
-  const [relation, setRelation] = useState<RelationshipType | ''>('');
+  const [relation, setRelation] = useState<RelationshipType>(
+    RELATIONSHIP_TYPES[0]!.value
+  );
   const [stats, setStats] = useState<SessionStats>({
     completed: 0,
     skipped: 0,
@@ -70,28 +76,6 @@ function SessionPageContent() {
   >(null);
 
   useEffect(() => {
-    async function loadRelationshipTypes() {
-      try {
-        const result = await getRelationshipTypesAction();
-        if (result.success && result.types && result.types.length > 0) {
-          setRelationshipTypes(result.types);
-          // Set initial relation state if not already set
-          setRelation(prev => (prev === '' ? result.types[0]!.value : prev));
-        } else {
-          setError(
-            result.error ??
-              'Failed to load relationship types. Please try again later.'
-          );
-        }
-      } catch (err) {
-        setError(
-          err instanceof Error
-            ? err.message
-            : 'An unexpected error occurred while loading relationship types.'
-        );
-      }
-    }
-
     async function loadDemoUser() {
       try {
         const result = await getOrCreateDemoUserAction();
@@ -100,7 +84,7 @@ function SessionPageContent() {
         } else {
           setError(
             result.error ??
-              'Failed to load user information. Please try again later.'
+            'Failed to load user information. Please try again later.'
           );
         }
       } catch (err) {
@@ -112,7 +96,6 @@ function SessionPageContent() {
       }
     }
 
-    void loadRelationshipTypes();
     void loadDemoUser();
   }, []);
 
@@ -124,7 +107,7 @@ function SessionPageContent() {
     if (!result.success) {
       setError(
         result.error ??
-          'An unexpected error occurred while fetching competencies.'
+        'An unexpected error occurred while fetching competencies.'
       );
       setCompetencies([]);
       return;
@@ -398,9 +381,8 @@ function SessionPageContent() {
               <h2 className="text-2xl font-semibold text-slate-900">
                 {isLoading || !competencies || competencies.length < 2
                   ? 'Loading competencies for this mapping session...'
-                  : `How does "${competencies[0]!.title}" relate to "${
-                      competencies[1]!.title
-                    }"?`}
+                  : `How does "${competencies[0]!.title}" relate to "${competencies[1]!.title
+                  }"?`}
               </h2>
 
               <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-3">
@@ -476,27 +458,21 @@ function SessionPageContent() {
                       }
                       className="gap-4 items-start"
                     >
-                      {relationshipTypes.length > 0 ? (
-                        relationshipTypes.map(({ value, label }) => (
-                          <div key={value} className="flex items-center gap-3">
-                            <RadioGroupItem
-                              value={value}
-                              id={value}
-                              className="h-4 w-4"
-                            />
-                            <Label
-                              htmlFor={value}
-                              className="text-sm font-normal text-slate-800"
-                            >
-                              {label}
-                            </Label>
-                          </div>
-                        ))
-                      ) : (
-                        <div className="text-sm text-slate-400">
-                          Loading relationship types...
+                      {RELATIONSHIP_TYPES.map(({ value, label }) => (
+                        <div key={value} className="flex items-center gap-3">
+                          <RadioGroupItem
+                            value={value}
+                            id={value}
+                            className="h-4 w-4"
+                          />
+                          <Label
+                            htmlFor={value}
+                            className="text-sm font-normal text-slate-800"
+                          >
+                            {label}
+                          </Label>
                         </div>
-                      )}
+                      ))}
                     </RadioGroup>
                   </div>
                 </div>
