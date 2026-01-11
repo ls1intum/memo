@@ -84,7 +84,7 @@ function SessionPageContent() {
         } else {
           setError(
             result.error ??
-            'Failed to load user information. Please try again later.'
+              'Failed to load user information. Please try again later.'
           );
         }
       } catch (err) {
@@ -107,7 +107,7 @@ function SessionPageContent() {
     if (!result.success) {
       setError(
         result.error ??
-        'An unexpected error occurred while fetching competencies.'
+          'An unexpected error occurred while fetching competencies.'
       );
       setCompetencies([]);
       return;
@@ -381,8 +381,9 @@ function SessionPageContent() {
               <h2 className="text-2xl font-semibold text-slate-900">
                 {isLoading || !competencies || competencies.length < 2
                   ? 'Loading competencies for this mapping session...'
-                  : `How does "${competencies[0]!.title}" relate to "${competencies[1]!.title
-                  }"?`}
+                  : `How does "${competencies[0]!.title}" relate to "${
+                      competencies[1]!.title
+                    }"?`}
               </h2>
 
               <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-3">
