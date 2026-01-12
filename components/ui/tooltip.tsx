@@ -85,8 +85,10 @@ export function TooltipTrigger({
   );
 
   React.useEffect(() => {
-    return () => setTriggerElement(null);
-  }, [setTriggerElement]);
+    return () => {
+      setTriggerElement(null);
+    };
+  }, []);
 
   const clearTimer = () => {
     if (timerRef.current) {
@@ -168,12 +170,12 @@ export function TooltipContent({ children, className }: TooltipContentProps) {
     const handleScroll = () => updatePosition();
 
     window.addEventListener('resize', handleResize);
-    window.addEventListener('scroll', handleScroll, true);
+    window.addEventListener('scroll', handleScroll, { passive: true });
 
     return () => {
       cancelAnimationFrame(rafId);
       window.removeEventListener('resize', handleResize);
-      window.removeEventListener('scroll', handleScroll, true);
+      window.removeEventListener('scroll', handleScroll);
     };
   }, [open, triggerElement, isTop]);
 
