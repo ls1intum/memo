@@ -1,6 +1,6 @@
-import { CompetencyRelationshipRepository } from '@/lib/repositories/dc_interface';
-import { competencyRelationshipRepository } from '@/lib/repositories/dc_repo';
-import { CreateCompetencyRelationshipInput } from '@/lib/domain/domain_core';
+import { CompetencyRelationshipRepository } from '@/domain_core/repositories/dc_interface';
+import { competencyRelationshipRepository } from '@/domain_core/repositories/dc_repo';
+import { CreateCompetencyRelationshipInput } from '@/domain_core/model/domain_model';
 
 export class CompetencyRelationshipService {
   constructor(private readonly repository: CompetencyRelationshipRepository) {}

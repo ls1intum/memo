@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { createPortal } from 'react-dom';
 import { Slot } from '@radix-ui/react-slot';
-import { cn } from '@/lib/client/utils';
+import { cn } from '@/domain_core/infrastructure/utils';
 
 type TooltipProps = {
   children: React.ReactNode;
@@ -106,7 +106,6 @@ export function TooltipTrigger({
     clearTimer();
     setOpen(false);
   };
-
   const triggerProps = {
     onMouseEnter: handleOpen,
     onMouseLeave: handleClose,

@@ -46,7 +46,7 @@ export default function Page() {
                 <span className="bg-gradient-to-r from-[#0a4da2] via-[#5538d1] to-[#9b5dfa] bg-clip-text text-transparent">
                   transparent competency benchmark
                 </span>
-                . Let’s build it together.
+                . Let's build it together.
               </h1>
               <p className="max-w-4xl text-xl font-medium leading-relaxed text-slate-1000">
                 Memo turns collaborative competency mapping into an open

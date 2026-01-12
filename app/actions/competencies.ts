@@ -1,6 +1,6 @@
 'use server';
 
-import { competencyService } from '@/lib/services/competency';
+import { competencyService } from '@/domain_core/services/competency';
 
 export async function createCompetencyAction(formData: FormData) {
   try {

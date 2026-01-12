@@ -1,11 +1,23 @@
 'use server';
 
-import { learningResourceService } from '@/lib/services/learning_resource';
+import { learningResourceService } from '@/domain_core/services/learning_resource';
 
 export async function createLearningResourceAction(formData: FormData) {
   try {
-    const title = formData.get('title') as string;
-    const url = formData.get('url') as string;
+    const title = formData.get('title');
+    const url = formData.get('url');
+
+    if (
+      !title ||
+      !url ||
+      typeof title !== 'string' ||
+      typeof url !== 'string'
+    ) {
+      return {
+        success: false,
+        error: 'Title and URL are required',
+      };
+    }
 
     const resource = await learningResourceService.createLearningResource({
       title,

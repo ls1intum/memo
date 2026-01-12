@@ -13,7 +13,7 @@ const competencies = [
       'Utilize built-in data types, implement pattern matching to deconstruct complex types, and create user-defined data structures.',
   },
   {
-    title: 'Functional Programming',
+    title: 'Functional Programming Paradigms',
     description:
       'Implement solutions using pure functions without side effects, write recursive functions, and optimize through tail recursion.',
   },
