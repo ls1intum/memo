@@ -577,9 +577,9 @@ function SessionPageContent() {
               </div>
 
               {/* Competencies Side by Side for Comparison */}
-              <div className="py-4">
+              <div className="py-3">
                 <div
-                  className="relative grid grid-cols-1 gap-6 lg:grid-cols-[1fr_auto_1fr]"
+                  className="relative grid grid-cols-1 gap-4 lg:grid-cols-[1fr_auto_1fr]"
                   style={{ isolation: 'isolate' }}
                 >
                   {/* Origin Competency */}
@@ -654,7 +654,7 @@ function SessionPageContent() {
                           </Badge>
                         </div>
                         <div className="flex-1 flex flex-col min-h-0 space-y-2">
-                          <CardTitle className="text-lg font-bold text-slate-900 flex-shrink-0">
+                          <CardTitle className="text-xl font-bold text-slate-900 flex-shrink-0">
                             {competencies[0]!.title}
                           </CardTitle>
                           <div
@@ -671,7 +671,7 @@ function SessionPageContent() {
                   )}
 
                   {/* Arrow Connection with Swap Button */}
-                  <div className="flex flex-col items-center justify-center z-10 px-4 gap-3">
+                  <div className="flex flex-col items-center justify-center z-10 px-3 gap-2">
                     <div className="flex items-center gap-2">
                       <div
                         className="h-0.5 w-12"
@@ -799,7 +799,7 @@ function SessionPageContent() {
                           </Badge>
                         </div>
                         <div className="flex-1 flex flex-col min-h-0 space-y-2">
-                          <CardTitle className="text-lg font-bold text-slate-900 flex-shrink-0">
+                          <CardTitle className="text-xl font-bold text-slate-900 flex-shrink-0">
                             {competencies[1]!.title}
                           </CardTitle>
                           <div
