@@ -1,22 +1,31 @@
-import * as React from 'react';
+import {
+  createContext,
+  MutableRefObject,
+  ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { createPortal } from 'react-dom';
 import { Slot } from '@radix-ui/react-slot';
 import { cn } from '@/domain_core/infrastructure/utils';
 
 type TooltipProps = {
-  children: React.ReactNode;
+  children: ReactNode;
   className?: string;
   delayDuration?: number;
   side?: 'top' | 'bottom';
 };
 
 type TooltipContentProps = {
-  children: React.ReactNode;
+  children: ReactNode;
   className?: string;
 };
 
 type TooltipTriggerProps = {
-  children: React.ReactNode;
+  children: ReactNode;
   asChild?: boolean;
   className?: string;
 };
@@ -25,13 +34,13 @@ type TooltipContextValue = {
   open: boolean;
   setOpen: (open: boolean) => void;
   delayDuration: number;
-  timerRef: React.MutableRefObject<ReturnType<typeof setTimeout> | null>;
+  timerRef: MutableRefObject<ReturnType<typeof setTimeout> | null>;
   side: 'top' | 'bottom';
   triggerElement: HTMLElement | null;
   setTriggerElement: (element: HTMLElement | null) => void;
 };
 
-const TooltipContext = React.createContext<TooltipContextValue | null>(null);
+const TooltipContext = createContext<TooltipContextValue | null>(null);
 
 export function Tooltip({
   children,
@@ -39,10 +48,11 @@ export function Tooltip({
   delayDuration = 300,
   side = 'top',
 }: TooltipProps) {
-  const [open, setOpen] = React.useState(false);
-  const timerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [triggerElement, setTriggerElement] =
-    React.useState<HTMLElement | null>(null);
+  const [open, setOpen] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [triggerElement, setTriggerElement] = useState<HTMLElement | null>(
+    null
+  );
 
   return (
     <TooltipContext.Provider
@@ -66,8 +76,8 @@ export function TooltipTrigger({
   asChild,
   className,
 }: TooltipTriggerProps) {
-  const context = React.useContext(TooltipContext);
-  const triggerRef = React.useRef<HTMLElement | null>(null);
+  const context = useContext(TooltipContext);
+  const triggerRef = useRef<HTMLElement | null>(null);
 
   if (!context) {
     throw new Error('TooltipTrigger must be used within a Tooltip');
@@ -76,7 +86,7 @@ export function TooltipTrigger({
   const { setOpen, delayDuration, timerRef, setTriggerElement } = context;
 
   // Unified ref callback that handles both triggerRef and setTriggerElement
-  const handleRef = React.useCallback(
+  const handleRef = useCallback(
     (node: HTMLElement | null) => {
       triggerRef.current = node;
       setTriggerElement(node);
@@ -84,7 +94,7 @@ export function TooltipTrigger({
     [setTriggerElement]
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     return () => {
       setTriggerElement(null);
     };
@@ -129,12 +139,12 @@ export function TooltipTrigger({
 }
 
 export function TooltipContent({ children, className }: TooltipContentProps) {
-  const context = React.useContext(TooltipContext);
-  const [position, setPosition] = React.useState<{
+  const context = useContext(TooltipContext);
+  const [position, setPosition] = useState<{
     top: number;
     left: number;
   } | null>(null);
-  const [isVisible, setIsVisible] = React.useState(false);
+  const [isVisible, setIsVisible] = useState(false);
 
   if (!context) {
     throw new Error('TooltipContent must be used within a Tooltip');
@@ -143,7 +153,7 @@ export function TooltipContent({ children, className }: TooltipContentProps) {
   const { open, side, triggerElement } = context;
   const isTop = side === 'top';
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!open || !triggerElement) {
       setIsVisible(false);
       setPosition(null);
