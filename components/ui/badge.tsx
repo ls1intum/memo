@@ -1,8 +1,6 @@
 import { cn } from '../../domain_core/infrastructure/utils';
 
-export interface BadgeProps {
-  children?: React.ReactNode;
-  className?: string;
+export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
   variant?: 'default' | 'secondary' | 'outline' | 'destructive';
 }
 
@@ -10,6 +8,7 @@ export const Badge = ({
   children,
   className,
   variant = 'default',
+  ...props
 }: BadgeProps) => {
   const variants: Record<string, string> = {
     default: 'bg-primary text-primary-foreground',
@@ -25,6 +24,7 @@ export const Badge = ({
         variants[variant],
         className
       )}
+      {...props}
     >
       {children}
     </span>

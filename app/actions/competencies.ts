@@ -51,6 +51,21 @@ export async function getAllCompetenciesAction() {
   }
 }
 
+export async function getRandomCompetenciesAction(count: number = 2) {
+  try {
+    const competencies = await competencyService.getRandomCompetencies(count);
+    return { success: true, competencies };
+  } catch (error) {
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to fetch random competencies',
+    };
+  }
+}
+
 export async function updateCompetencyAction(
   id: string,
   title?: string,
