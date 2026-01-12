@@ -182,7 +182,7 @@ function SessionPageContent() {
         } else {
           setError(
             result.error ??
-            'Failed to load user information. Please try again later.'
+              'Failed to load user information. Please try again later.'
           );
         }
       } catch (err) {
@@ -213,7 +213,7 @@ function SessionPageContent() {
       if (!result.success) {
         setError(
           result.error ??
-          'An unexpected error occurred while fetching competencies.'
+            'An unexpected error occurred while fetching competencies.'
         );
         setCompetencies([]);
         setIsTransitioning(false);
@@ -423,9 +423,7 @@ function SessionPageContent() {
         const index = parseInt(event.key) - 1;
         if (RELATIONSHIP_TYPES[index]) {
           const selectedValue = RELATIONSHIP_TYPES[index]!.value;
-          setRelation(prev =>
-            prev === selectedValue ? null : selectedValue
-          );
+          setRelation(prev => (prev === selectedValue ? null : selectedValue));
         }
         return;
       }
@@ -853,8 +851,8 @@ function SessionPageContent() {
                           {relation === 'UNRELATED'
                             ? 'is unrelated to'
                             : RELATIONSHIP_TYPES.find(
-                              rt => rt.value === relation
-                            )?.label.toLowerCase() || ''}
+                                rt => rt.value === relation
+                              )?.label.toLowerCase() || ''}
                         </span>{' '}
                         <span className="font-bold text-slate-900">
                           {competencies[1]!.title}
@@ -907,45 +905,42 @@ function SessionPageContent() {
 
                       // Color mapping for unselected state - subtle color hints
                       const unselectedColors: Record<RelationshipType, string> =
-                      {
-                        ASSUMES:
-                          'bg-white text-slate-800 border-blue-300 hover:border-blue-500 hover:bg-blue-50',
-                        EXTENDS:
-                          'bg-white text-slate-800 border-purple-300 hover:border-purple-500 hover:bg-purple-50',
-                        MATCHES:
-                          'bg-white text-slate-800 border-emerald-300 hover:border-emerald-500 hover:bg-emerald-50',
-                        UNRELATED:
-                          'bg-white text-slate-800 border-slate-300 hover:border-slate-500 hover:bg-slate-50',
-                      };
+                        {
+                          ASSUMES:
+                            'bg-white text-slate-800 border-blue-300 hover:border-blue-500 hover:bg-blue-50',
+                          EXTENDS:
+                            'bg-white text-slate-800 border-purple-300 hover:border-purple-500 hover:bg-purple-50',
+                          MATCHES:
+                            'bg-white text-slate-800 border-emerald-300 hover:border-emerald-500 hover:bg-emerald-50',
+                          UNRELATED:
+                            'bg-white text-slate-800 border-slate-300 hover:border-slate-500 hover:bg-slate-50',
+                        };
 
                       // Icon mapping for relationship types
                       const iconMap: Record<RelationshipType, React.ReactNode> =
-                      {
-                        ASSUMES: <Layers className="h-4 w-4" />,
-                        EXTENDS: <TrendingUp className="h-4 w-4" />,
-                        MATCHES: <Equal className="h-4 w-4" />,
-                        UNRELATED: <Unlink className="h-4 w-4" />,
-                      };
+                        {
+                          ASSUMES: <Layers className="h-4 w-4" />,
+                          EXTENDS: <TrendingUp className="h-4 w-4" />,
+                          MATCHES: <Equal className="h-4 w-4" />,
+                          UNRELATED: <Unlink className="h-4 w-4" />,
+                        };
 
                       return (
                         <button
                           key={value}
                           type="button"
                           data-relationship-button
-                          onClick={() =>
-                            setRelation(
-                              isSelected ? null : value
-                            )
-                          }
+                          onClick={() => setRelation(isSelected ? null : value)}
                           onMouseEnter={() => handleMouseEnter(value)}
                           onMouseLeave={handleMouseLeave}
                           className={`
                             relative flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 w-full
                             font-medium text-sm transition-all duration-200 ease-out
                             focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2
-                            ${isSelected
-                              ? `${selectedColors[value]} scale-[1.02]`
-                              : unselectedColors[value]
+                            ${
+                              isSelected
+                                ? `${selectedColors[value]} scale-[1.02]`
+                                : unselectedColors[value]
                             }
                           `}
                         >
@@ -955,9 +950,10 @@ function SessionPageContent() {
                             <span
                               className={`
                                 inline-flex items-center justify-center w-5 h-5 rounded text-xs font-bold
-                                ${isSelected
-                                  ? 'bg-white/25 text-white'
-                                  : 'bg-slate-200/80 text-slate-500'
+                                ${
+                                  isSelected
+                                    ? 'bg-white/25 text-white'
+                                    : 'bg-slate-200/80 text-slate-500'
                                 }
                               `}
                             >
