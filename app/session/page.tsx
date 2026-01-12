@@ -4,13 +4,12 @@ import { useEffect, useState, useCallback, useRef, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { getRandomCompetenciesAction } from '@/app/actions/competencies';
 import {
-  getRelationshipTypesAction,
   createCompetencyRelationshipAction,
   deleteCompetencyRelationshipAction,
 } from '@/app/actions/competency_relationships';
 import { getOrCreateDemoUserAction } from '@/app/actions/users';
 import type { Competency } from '@/domain_core/model/domain_model';
-import type { RelationshipType } from '@/domain_core/model/domain_model';
+import { RelationshipType } from '@/domain_core/model/domain_model';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -45,6 +44,14 @@ type RelationshipTypeOption = {
   value: RelationshipType;
   label: string;
 };
+
+// Define relationship types statically from the enum - no server call needed
+const RELATIONSHIP_TYPES: RelationshipTypeOption[] = (
+  Object.values(RelationshipType) as RelationshipType[]
+).map(type => ({
+  value: type,
+  label: type.charAt(0) + type.slice(1).toLowerCase(),
+}));
 
 // Blue-Purple theme colors (hardcoded after user selection)
 const THEME_COLORS = {
@@ -121,10 +128,9 @@ function SessionPageContent() {
   const count =
     Number.isFinite(parsedCount) && parsedCount > 0 ? parsedCount : 2;
 
-  const [relationshipTypes, setRelationshipTypes] = useState<
-    RelationshipTypeOption[]
-  >([]);
-  const [relation, setRelation] = useState<RelationshipType | ''>('');
+  const [relation, setRelation] = useState<RelationshipType>(
+    RELATIONSHIP_TYPES[0]!.value
+  );
   const [stats, setStats] = useState<SessionStats>({
     completed: 0,
     skipped: 0,
@@ -160,26 +166,6 @@ function SessionPageContent() {
   >(null);
 
   useEffect(() => {
-    async function loadRelationshipTypes() {
-      try {
-        const result = await getRelationshipTypesAction();
-        if (result.success && result.types && result.types.length > 0) {
-          setRelationshipTypes(result.types);
-        } else {
-          setError(
-            result.error ??
-              'Failed to load relationship types. Please try again later.'
-          );
-        }
-      } catch (err) {
-        setError(
-          err instanceof Error
-            ? err.message
-            : 'An unexpected error occurred while loading relationship types.'
-        );
-      }
-    }
-
     async function loadDemoUser() {
       try {
         const result = await getOrCreateDemoUserAction();
@@ -200,7 +186,6 @@ function SessionPageContent() {
       }
     }
 
-    loadRelationshipTypes();
     loadDemoUser();
   }, []);
 
@@ -280,7 +265,7 @@ function SessionPageContent() {
               competencies: competencies ? [...competencies] : undefined,
             },
           ]);
-          setRelation(''); // Clear selection after adding relation
+          setRelation(RELATIONSHIP_TYPES[0]!.value); // Reset selection after adding relation
           await loadCompetencies();
         } catch (err) {
           setError(
@@ -299,7 +284,7 @@ function SessionPageContent() {
             competencies: competencies ? [...competencies] : undefined,
           },
         ]);
-        setRelation(''); // Reset relationship type selection
+        setRelation(RELATIONSHIP_TYPES[0]!.value); // Reset relationship type selection
         try {
           await loadCompetencies();
         } catch (err) {
@@ -421,16 +406,20 @@ function SessionPageContent() {
       // Check this BEFORE Enter to prevent conflicts
       if (
         ['1', '2', '3', '4'].includes(event.key) &&
-        relationshipTypes.length > 0 &&
+        RELATIONSHIP_TYPES.length > 0 &&
         !isLoading &&
         !isCreating
       ) {
         event.preventDefault();
         event.stopPropagation();
         const index = parseInt(event.key) - 1;
-        if (relationshipTypes[index]) {
-          const selectedValue = relationshipTypes[index]!.value;
-          setRelation(relation === selectedValue ? '' : selectedValue);
+        if (RELATIONSHIP_TYPES[index]) {
+          const selectedValue = RELATIONSHIP_TYPES[index]!.value;
+          setRelation(
+            relation === selectedValue
+              ? RELATIONSHIP_TYPES[0]!.value
+              : selectedValue
+          );
         }
         return;
       }
@@ -463,7 +452,6 @@ function SessionPageContent() {
     relation,
     competencies,
     history,
-    relationshipTypes,
     handleAction,
     handleUndo,
   ]);
@@ -836,7 +824,7 @@ function SessionPageContent() {
                           className={`font-bold ${RELATIONSHIP_TYPE_TEXT_COLORS[hoveredRelation]}`}
                         >
                           {
-                            relationshipTypes.find(
+                            RELATIONSHIP_TYPES.find(
                               rt => rt.value === hoveredRelation
                             )?.label
                           }
@@ -858,9 +846,9 @@ function SessionPageContent() {
                         >
                           {relation === 'UNRELATED'
                             ? 'is unrelated to'
-                            : relationshipTypes
-                                .find(rt => rt.value === relation)
-                                ?.label.toLowerCase() || ''}
+                            : RELATIONSHIP_TYPES.find(
+                                rt => rt.value === relation
+                              )?.label.toLowerCase() || ''}
                         </span>{' '}
                         <span className="font-bold text-slate-900">
                           {competencies[1]!.title}
@@ -887,11 +875,11 @@ function SessionPageContent() {
                 )}
 
                 {/* Relationship Type Buttons */}
-                {relationshipTypes.length > 0 ? (
+                {RELATIONSHIP_TYPES.length > 0 ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 w-full">
-                    {relationshipTypes.map(({ value, label }) => {
+                    {RELATIONSHIP_TYPES.map(({ value, label }) => {
                       const isSelected = relation === value;
-                      const shortcutIndex = relationshipTypes.findIndex(
+                      const shortcutIndex = RELATIONSHIP_TYPES.findIndex(
                         rt => rt.value === value
                       );
                       const shortcutKey =
@@ -938,7 +926,11 @@ function SessionPageContent() {
                           key={value}
                           type="button"
                           data-relationship-button
-                          onClick={() => setRelation(isSelected ? '' : value)}
+                          onClick={() =>
+                            setRelation(
+                              isSelected ? RELATIONSHIP_TYPES[0]!.value : value
+                            )
+                          }
                           onMouseEnter={() => handleMouseEnter(value)}
                           onMouseLeave={handleMouseLeave}
                           className={`
