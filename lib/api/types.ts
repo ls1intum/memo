@@ -35,6 +35,7 @@ export interface CompetencyResourceLink {
   competencyId: string;
   resourceId: string;
   userId: string;
+  matchType: 'ILLUSTRATIVE' | 'EXPLANATORY' | 'NECESSARY';
   createdAt: string;
 }
 
@@ -82,4 +83,5 @@ export interface CreateCompetencyResourceLinkRequest {
   competencyId: string;
   resourceId: string;
   userId: string;
+  matchType: 'ILLUSTRATIVE' | 'EXPLANATORY' | 'NECESSARY';
 }

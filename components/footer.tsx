@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+
 export function Footer() {
   return (
     <footer className="relative z-20 border-t border-slate-200/70 bg-white/80 text-sm text-slate-500 shadow-[0_-15px_60px_-45px_rgba(7,30,84,0.35)] backdrop-blur-xl">
@@ -8,12 +10,12 @@ export function Footer() {
           <span className="text-sm font-semibold">Memo Benchmark Platform</span>
         </div>
         <div className="flex flex-wrap gap-4 text-sm font-semibold text-slate-700">
-          <a className="transition hover:text-slate-900" href="#overview">
+          <Link className="transition hover:text-slate-900" href="/#overview">
             Overview
-          </a>
-          <a className="transition hover:text-slate-900" href="#challenges">
+          </Link>
+          <Link className="transition hover:text-slate-900" href="/#challenges">
             Challenges
-          </a>
+          </Link>
         </div>
         <div className="text-slate-400">© {new Date().getFullYear()} Memo</div>
       </div>

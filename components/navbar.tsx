@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+
 import { usePathname } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
@@ -18,10 +19,7 @@ export function Navbar() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const activeIndex =
-    navItems.findIndex(item => item.href === pathname) === -1
-      ? 0
-      : navItems.findIndex(item => item.href === pathname);
+  const activeIndex = navItems.findIndex(item => item.href === pathname);
 
   useEffect(() => {
     setMounted(true);
@@ -73,14 +71,16 @@ export function Navbar() {
           {/* Center - Sliding nav */}
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
             <div className="pointer-events-auto relative flex w-[16rem] max-w-full items-center justify-between rounded-full border border-slate-200/80 bg-white/70 px-[0px] py-[8px] shadow-inner backdrop-blur dark:border-slate-800/70 dark:bg-slate-900/70">
-              <div
-                className="absolute inset-y-1 rounded-full bg-gradient-to-r from-[#0a4da2] to-[#7c6cff] shadow-md transition-all duration-300 ease-out"
-                style={{
-                  width: 'calc(50% - 1rem)',
-                  left: activeIndex === 1 ? 'calc(50% + 0.5rem)' : '0.5rem',
-                }}
-                aria-hidden
-              />
+              {activeIndex >= 0 && (
+                <div
+                  className="absolute inset-y-1 rounded-full bg-gradient-to-r from-[#0a4da2] to-[#7c6cff] shadow-md transition-all duration-300 ease-out"
+                  style={{
+                    width: 'calc(50% - 1rem)',
+                    left: activeIndex === 1 ? 'calc(50% + 0.5rem)' : '0.5rem',
+                  }}
+                  aria-hidden="true"
+                />
+              )}
               {navItems.map(item => (
                 <Link
                   key={item.href}
@@ -149,14 +149,13 @@ export function Navbar() {
             </button>
 
             {/* Login button - last element per guidelines */}
-            <button
+            <Link
+              href="/session"
               className="hidden rounded-full bg-gradient-to-r from-[#0a4da2] to-[#7c6cff] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_30px_-12px_rgba(10,77,162,0.65)] transition hover:-translate-y-0.5 hover:shadow-[0_16px_40px_-20px_rgba(10,77,162,0.7)] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-white focus-visible:ring-[#0a4da2] dark:focus-visible:ring-offset-slate-900 sm:inline-flex"
-              aria-label="Start contributing"
+              aria-label="Start Contributing"
             >
-              <Link href="/onboarding" className="inline-flex items-center">
-                Start Contributing
-              </Link>
-            </button>
+              Start Contributing
+            </Link>
           </div>
         </nav>
       </div>
