@@ -78,10 +78,7 @@ export default function About() {
         </section>
 
         {/* The Problem Section */}
-        <section
-          id="problem"
-          className="card grid gap-6 p-8 scroll-mt-28"
-        >
+        <section id="problem" className="card grid gap-6 p-8 scroll-mt-28">
           <div className="stack-xs">
             <Badge className="badge-default text-label-caps w-fit">
               The Problem
@@ -323,9 +320,7 @@ export default function About() {
         {/* Impact Section */}
         <section className="section-gradient-primary">
           <div className="stack-md">
-            <Badge className="badge-light">
-              Impact
-            </Badge>
+            <Badge className="badge-light">Impact</Badge>
             <h2 className="heading-4">
               Advancing Educational Technology Research
             </h2>
@@ -457,9 +452,7 @@ export default function About() {
         {/* Team Section */}
         <section className="card stack-lg p-8">
           <div className="stack-xs">
-            <Badge className="badge-default text-label-caps w-fit">
-              Team
-            </Badge>
+            <Badge className="badge-default text-label-caps w-fit">Team</Badge>
             <h2 className="heading-4 text-slate-900">
               Bachelor&apos;s Thesis Project
             </h2>

@@ -1,24 +1,25 @@
 # Memo API - Spring Boot Backend
 
-Competency-Based Education Benchmark Platform API built with Spring Boot 4.0, Java 25, PostgreSQL, and Keycloak.
+Competency-Based Education Benchmark Platform API built with Spring Boot 3.4, Java 17, PostgreSQL,
+and Keycloak.
 
 ## Tech Stack
 
-- **Spring Boot 4.0.1** - Application framework
-- **Java 25** - Programming language
-- **PostgreSQL 18** - Database
+- **Spring Boot 3.4.1** - Application framework
+- **Java 17** - Programming language
+- **PostgreSQL 18.1** - Database
 - **Keycloak 26.4** - Authentication & Authorization (OAuth2/JWT)
 - **Flyway** - Database migrations
 - **Spring Data JPA** - Data access
 - **Lombok** - Boilerplate reduction
 - **SpringDoc OpenAPI** - API documentation
-- **Gradle 9.2.1** - Build tool
+- **Gradle 8.11.1** - Build tool
 
 ## Prerequisites
 
-- Java 25 JDK
+- Java 17 JDK
 - Docker & Docker Compose
-- Gradle 9.2.1 (or use the wrapper)
+- Gradle 8.11.1 (or use the wrapper)
 
 ## Quick Start
 
@@ -29,6 +30,7 @@ docker-compose up -d
 ```
 
 This starts:
+
 - PostgreSQL (port 5433)
 - Keycloak (port 8081)
 - Spring Boot API (port 8080)
@@ -52,11 +54,13 @@ The Keycloak realm comes with pre-configured users:
 ### Run locally (without Docker)
 
 1. Start PostgreSQL and Keycloak:
+
 ```bash
 docker-compose up postgres keycloak-postgres keycloak -d
 ```
 
 2. Run the Spring Boot application:
+
 ```bash
 ./gradlew bootRun
 ```
@@ -90,6 +94,7 @@ docker-compose up postgres keycloak-postgres keycloak -d
 All endpoints require JWT authentication (except Swagger UI and health checks).
 
 ### Users
+
 - `POST /api/users` - Create user
 - `GET /api/users/{id}` - Get user by ID
 - `GET /api/users/by-email?email=` - Get user by email
@@ -98,6 +103,7 @@ All endpoints require JWT authentication (except Swagger UI and health checks).
 - `DELETE /api/users/{id}` - Delete user
 
 ### Competencies
+
 - `POST /api/competencies` - Create competency
 - `GET /api/competencies/{id}` - Get competency by ID
 - `GET /api/competencies` - Get all competencies
@@ -106,6 +112,7 @@ All endpoints require JWT authentication (except Swagger UI and health checks).
 - `DELETE /api/competencies/{id}` - Delete competency
 
 ### Learning Resources
+
 - `POST /api/learning-resources` - Create learning resource
 - `GET /api/learning-resources/{id}` - Get resource by ID
 - `GET /api/learning-resources/by-url?url=` - Get resource by URL
@@ -114,12 +121,14 @@ All endpoints require JWT authentication (except Swagger UI and health checks).
 - `DELETE /api/learning-resources/{id}` - Delete resource
 
 ### Competency Relationships
+
 - `POST /api/competency-relationships` - Create relationship
 - `GET /api/competency-relationships/{id}` - Get relationship by ID
 - `GET /api/competency-relationships` - Get all relationships
 - `DELETE /api/competency-relationships/{id}` - Delete relationship
 
 ### Competency Resource Links
+
 - `POST /api/competency-resource-links` - Create link
 - `GET /api/competency-resource-links/{id}` - Get link by ID
 - `GET /api/competency-resource-links` - Get all links
@@ -130,6 +139,7 @@ All endpoints require JWT authentication (except Swagger UI and health checks).
 The API uses OAuth2/JWT via Keycloak. To authenticate:
 
 1. Obtain a token from Keycloak:
+
 ```bash
 curl -X POST http://localhost:8081/realms/memo/protocol/openid-connect/token \
   -H "Content-Type: application/x-www-form-urlencoded" \
@@ -140,6 +150,7 @@ curl -X POST http://localhost:8081/realms/memo/protocol/openid-connect/token \
 ```
 
 2. Use the `access_token` in API requests:
+
 ```bash
 curl -H "Authorization: Bearer YOUR_TOKEN" http://localhost:8080/api/competencies
 ```
@@ -192,16 +203,22 @@ server/
 ## Troubleshooting
 
 ### Port already in use
-If ports 5433, 8080, or 8081 are already in use, stop the conflicting services or modify the ports in `docker-compose.yml`.
+
+If ports 5433, 8080, or 8081 are already in use, stop the conflicting services or modify the ports
+in `docker-compose.yml`.
 
 ### Keycloak not starting
+
 Keycloak takes 30-40 seconds to fully start. Check logs:
+
 ```bash
 docker-compose logs keycloak
 ```
 
 ### Database migration errors
+
 If migrations fail, check Flyway status:
+
 ```bash
 docker-compose exec server ./gradlew flywayInfo
 ```

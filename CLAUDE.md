@@ -5,7 +5,8 @@ competency-based learning.
 
 ## Tech Stack
 
-**Frontend**: Next.js 15 (App Router) · React 19 · TypeScript · shadcn/ui · Tailwind CSS 4 · React Query · Axios
+**Frontend**: Next.js 15 (App Router) · React 19 · TypeScript · shadcn/ui · Tailwind CSS 4 · React
+Query · Axios
 
 **Backend**: Spring Boot 4.0 · Java 25 · PostgreSQL 16 · Flyway · JPA/Hibernate
 
@@ -50,17 +51,20 @@ PostgreSQL (port 5433)
 ## Quick Start
 
 **Backend:**
+
 ```bash
 cd server
 ./server-manage.sh up
 ```
 
 **Frontend:**
+
 ```bash
 npm run dev
 ```
 
 **Access:**
+
 - Frontend: http://localhost:3000
 - API: http://localhost:8080
 - Swagger UI: http://localhost:8080/swagger-ui.html
@@ -70,7 +74,8 @@ npm run dev
 
 Five specialized agents in `.claude/agents/`:
 
-1. **senior-architect** - Plans & orchestrates (NO implementation). Use proactively for new features.
+1. **senior-architect** - Plans & orchestrates (NO implementation). Use proactively for new
+   features.
 2. **nextjs-expert** - App Router, routing, React components
 3. **shadcn-expert** - UI components, Tailwind
 4. **database-expert** - PostgreSQL, JPA, Spring Data
@@ -78,14 +83,17 @@ Five specialized agents in `.claude/agents/`:
 
 ## Workflow
 
-For new features: senior-architect analyzes → designs → creates plan → gets approval → orchestrates specialized agents
+For new features: senior-architect analyzes → designs → creates plan → gets approval → orchestrates
+specialized agents
 
 **Frontend Commands:**
+
 - `npm run dev` - Development server
 - `npm run build` - Production build
 - `npm run quality` - Type-check + lint + format
 
 **Backend Commands:**
+
 - `cd server && ./server-manage.sh up` - Start all services
 - `./server-manage.sh logs` - View logs
 - `./server-manage.sh build` - Build Spring Boot app
@@ -101,5 +109,6 @@ For new features: senior-architect analyzes → designs → creates plan → get
 ## Authentication
 
 All API requests require JWT token from Keycloak. Default users:
+
 - **Demo**: `demo@memo.local` / `demo` (USER role)
 - **Admin**: `admin@memo.local` / `admin` (ADMIN role)

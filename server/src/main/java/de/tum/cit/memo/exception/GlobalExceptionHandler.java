@@ -72,5 +72,5 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
     }
 
-    public record ErrorResponse(int status, String message, Instant timestamp) {}
+    public record ErrorResponse(int status, String message, Instant timestamp) { }
 }

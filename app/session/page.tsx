@@ -81,9 +81,9 @@ function SessionPageContent() {
   // Create relationship mutation
   const createRelationshipMutation = useMutation({
     mutationFn: competencyRelationshipsApi.create,
-    onSuccess: (data) => {
-      setStats((prev) => ({ ...prev, completed: prev.completed + 1 }));
-      setHistory((prev) => [
+    onSuccess: data => {
+      setStats(prev => ({ ...prev, completed: prev.completed + 1 }));
+      setHistory(prev => [
         ...prev,
         {
           type: 'completed',
@@ -95,13 +95,11 @@ function SessionPageContent() {
       setError(null);
     },
     onError: (error: Error) => {
-      setError(
-        error.message || 'Failed to create relationship'
-      );
+      setError(error.message || 'Failed to create relationship');
     },
   });
 
-  // Delete relationship mutation  
+  // Delete relationship mutation
   const deleteRelationshipMutation = useMutation({
     mutationFn: competencyRelationshipsApi.delete,
     onSuccess: () => {
@@ -114,7 +112,12 @@ function SessionPageContent() {
 
   const handleAction = useCallback(
     (type: 'completed' | 'skipped') => {
-      if (type === 'completed' && user && competencies && competencies.length === 2) {
+      if (
+        type === 'completed' &&
+        user &&
+        competencies &&
+        competencies.length === 2
+      ) {
         createRelationshipMutation.mutate({
           relationshipType: relation,
           originId: competencies[0]!.id,
@@ -122,10 +125,13 @@ function SessionPageContent() {
           userId: user.preferred_username || 'guest',
         });
       } else if (type === 'skipped') {
-        setStats((prev) => ({ ...prev, skipped: prev.skipped + 1 }));
-        setHistory((prev) => [
+        setStats(prev => ({ ...prev, skipped: prev.skipped + 1 }));
+        setHistory(prev => [
           ...prev,
-          { type: 'skipped', competencies: competencies ? [...competencies] : undefined },
+          {
+            type: 'skipped',
+            competencies: competencies ? [...competencies] : undefined,
+          },
         ]);
         loadCompetencies();
       }
@@ -140,16 +146,16 @@ function SessionPageContent() {
     if (lastAction.type === 'completed' && lastAction.relationshipId) {
       deleteRelationshipMutation.mutate(lastAction.relationshipId, {
         onSuccess: () => {
-          setHistory((prev) => prev.slice(0, -1));
-          setStats((prev) => ({
+          setHistory(prev => prev.slice(0, -1));
+          setStats(prev => ({
             ...prev,
             completed: Math.max(0, prev.completed - 1),
           }));
         },
       });
     } else if (lastAction.type === 'skipped') {
-      setHistory((prev) => prev.slice(0, -1));
-      setStats((prev) => ({ ...prev, skipped: Math.max(0, prev.skipped - 1) }));
+      setHistory(prev => prev.slice(0, -1));
+      setStats(prev => ({ ...prev, skipped: Math.max(0, prev.skipped - 1) }));
     }
   }, [history, deleteRelationshipMutation]);
 
@@ -158,7 +164,11 @@ function SessionPageContent() {
       if (e.key === ' ' && !isLoading) {
         e.preventDefault();
         handleAction('skipped');
-      } else if (e.key === 'Enter' && !isLoading && !createRelationshipMutation.isPending) {
+      } else if (
+        e.key === 'Enter' &&
+        !isLoading &&
+        !createRelationshipMutation.isPending
+      ) {
         e.preventDefault();
         handleAction('completed');
       } else if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === 'z') {
@@ -169,7 +179,12 @@ function SessionPageContent() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleAction, handleUndo, isLoading, createRelationshipMutation.isPending]);
+  }, [
+    handleAction,
+    handleUndo,
+    isLoading,
+    createRelationshipMutation.isPending,
+  ]);
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#d7e3ff] via-[#f3f5ff] to-[#e8ecff] text-slate-900">
@@ -183,7 +198,10 @@ function SessionPageContent() {
         <section className="flex flex-col gap-6 rounded-3xl border border-white/70 bg-white/85 p-8 shadow-[0_20px_80px_-40px_rgba(7,30,84,0.45)] backdrop-blur-xl">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
-              <Badge variant="secondary" className="mb-2 w-fit rounded-full bg-blue-100 px-3 py-1 text-xs font-bold uppercase tracking-wider text-blue-900">
+              <Badge
+                variant="secondary"
+                className="mb-2 w-fit rounded-full bg-blue-100 px-3 py-1 text-xs font-bold uppercase tracking-wider text-blue-900"
+              >
                 Mapping Session
               </Badge>
               <h1 className="text-2xl font-semibold text-slate-900">
@@ -220,16 +238,13 @@ function SessionPageContent() {
                   </Label>
                   <RadioGroup
                     value={relation}
-                    onValueChange={(value) =>
+                    onValueChange={value =>
                       setRelation(value as RelationshipType)
                     }
                   >
-                    {RELATIONSHIP_TYPES.map((type) => (
+                    {RELATIONSHIP_TYPES.map(type => (
                       <div key={type.value} className="flex items-center gap-2">
-                        <RadioGroupItem
-                          value={type.value}
-                          id={type.value}
-                        />
+                        <RadioGroupItem value={type.value} id={type.value} />
                         <Label
                           htmlFor={type.value}
                           className="cursor-pointer text-sm font-normal text-slate-700"
@@ -246,7 +261,10 @@ function SessionPageContent() {
                     <Card className="flex-1 rounded-xl border border-white/80 bg-white/90 p-4 shadow-sm backdrop-blur-sm">
                       <CardHeader className="p-0">
                         <div className="space-y-2">
-                          <Badge variant="outline" className="w-fit rounded-md border-blue-200 bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">
+                          <Badge
+                            variant="outline"
+                            className="w-fit rounded-md border-blue-200 bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700"
+                          >
                             Origin
                           </Badge>
                           <CardTitle className="text-base font-semibold text-slate-900">
@@ -273,7 +291,10 @@ function SessionPageContent() {
                     <Card className="flex-1 rounded-xl border border-white/80 bg-white/90 p-4 shadow-sm backdrop-blur-sm">
                       <CardHeader className="p-0">
                         <div className="space-y-2">
-                          <Badge variant="outline" className="w-fit rounded-md border-purple-200 bg-purple-50 px-2 py-0.5 text-xs font-medium text-purple-700">
+                          <Badge
+                            variant="outline"
+                            className="w-fit rounded-md border-purple-200 bg-purple-50 px-2 py-0.5 text-xs font-medium text-purple-700"
+                          >
                             Destination
                           </Badge>
                           <CardTitle className="text-base font-semibold text-slate-900">

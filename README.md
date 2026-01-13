@@ -1,6 +1,7 @@
 # Memo - Competency-Based Education Benchmark Platform
 
-Platform for scientists and educators to collect and combine educational data into benchmarks for competency-based learning.
+Platform for scientists and educators to collect and combine educational data into benchmarks for
+competency-based learning.
 
 ## 🚀 Quick Start
 
@@ -14,19 +15,23 @@ Platform for scientists and educators to collect and combine educational data in
 ### Setup
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/ls1intum/memo.git
    cd memo
    ```
 
 2. **Start the Spring Boot backend**
+
    ```bash
    cd server
    ./server-manage.sh up
    ```
+
    Wait ~60 seconds for all services to start (PostgreSQL, Keycloak, Spring Boot)
 
 3. **Start the Next.js frontend** (in a new terminal)
+
    ```bash
    cd ..  # Back to root directory
    npm install
@@ -134,10 +139,10 @@ The application uses Keycloak for OAuth2/JWT authentication.
 
 ### Default Users
 
-| Email | Password | Role |
-|-------|----------|------|
-| `demo@memo.local` | `demo` | USER |
-| `admin@memo.local` | `admin` | ADMIN |
+| Email              | Password | Role  |
+| ------------------ | -------- | ----- |
+| `demo@memo.local`  | `demo`   | USER  |
+| `admin@memo.local` | `admin`  | ADMIN |
 
 ### Keycloak Admin Console
 
@@ -148,6 +153,7 @@ The application uses Keycloak for OAuth2/JWT authentication.
 ## 🛠 Tech Stack
 
 ### Frontend
+
 - **Framework**: Next.js 15 (App Router)
 - **UI**: React 19, shadcn/ui, Tailwind CSS 4
 - **State**: TanStack Query (React Query)
@@ -155,6 +161,7 @@ The application uses Keycloak for OAuth2/JWT authentication.
 - **Auth**: Keycloak JS
 
 ### Backend
+
 - **Framework**: Spring Boot 4.0
 - **Language**: Java 25
 - **Database**: PostgreSQL 16
@@ -165,6 +172,7 @@ The application uses Keycloak for OAuth2/JWT authentication.
 - **Build**: Gradle 9.2.1
 
 ### Infrastructure
+
 - **Authentication**: Keycloak 26.4
 - **Containerization**: Docker + Docker Compose
 - **Reverse Proxy**: Nginx (production)

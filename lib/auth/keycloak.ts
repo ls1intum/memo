@@ -26,12 +26,14 @@ export const initKeycloak = async (): Promise<boolean> => {
     setInterval(() => {
       keycloak
         .updateToken(70)
-        .then((refreshed) => {
+        .then(refreshed => {
           if (refreshed) {
+            // eslint-disable-next-line no-console
             console.log('Token refreshed');
           }
         })
         .catch(() => {
+          // eslint-disable-next-line no-console
           console.error('Failed to refresh token');
           keycloak.login();
         });

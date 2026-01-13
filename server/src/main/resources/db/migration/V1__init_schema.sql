@@ -4,6 +4,10 @@ CREATE TYPE "UserRole" AS ENUM ('USER', 'ADMIN');
 -- CreateEnum
 CREATE TYPE "RelationshipType" AS ENUM ('ASSUMES', 'EXTENDS', 'MATCHES');
 
+-- Note: All ID columns use VARCHAR(30) for CUID-like identifiers.
+-- The IdGenerator produces ~20 character IDs (prefix + base36 timestamp + counter + random).
+-- VARCHAR(30) provides sufficient headroom while being more efficient than TEXT for indexing.
+
 -- CreateTable
 CREATE TABLE "users" (
     "id" VARCHAR(30) NOT NULL,
@@ -62,7 +66,7 @@ CREATE TABLE "competency_resource_links" (
 CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "competency_relationships_unique" ON "competency_relationships"("origin_id", "destination_id", "relationship_type");
+CREATE UNIQUE INDEX "uk_competency_relationships_origin_dest_type" ON "competency_relationships"("origin_id", "destination_id", "relationship_type");
 
 -- CreateIndex
 CREATE INDEX "idx_competency_id" ON "competency_resource_links"("competency_id");

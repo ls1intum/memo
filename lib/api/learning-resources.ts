@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { apiClient } from './client';
 import type {
   LearningResource,
@@ -32,8 +33,8 @@ export const learningResourcesApi = {
         }
       );
       return response.data;
-    } catch (error: any) {
-      if (error.response?.status === 404) {
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.status === 404) {
         return null;
       }
       throw error;

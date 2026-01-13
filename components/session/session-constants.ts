@@ -8,10 +8,21 @@ import {
   ThumbsUp,
   Star,
 } from 'lucide-react';
-import {
-  RelationshipType,
-  ResourceMatchType,
-} from '@/domain_core/model/domain_model';
+
+// Define enums locally since the domain model module doesn't exist in this branch
+export enum RelationshipType {
+  ASSUMES = 'ASSUMES',
+  EXTENDS = 'EXTENDS',
+  MATCHES = 'MATCHES',
+  UNRELATED = 'UNRELATED',
+}
+
+export enum ResourceMatchType {
+  UNRELATED = 'UNRELATED',
+  WEAK = 'WEAK',
+  GOOD_FIT = 'GOOD_FIT',
+  PERFECT_MATCH = 'PERFECT_MATCH',
+}
 
 // Blue-Purple theme colors for competency mapping
 export const THEME_COLORS = {
@@ -98,19 +109,23 @@ export type ResourceMatchTypeOption = {
 };
 
 export const RESOURCE_MATCH_TYPES: ResourceMatchTypeOption[] = [
-  { value: 'UNRELATED', label: 'Unrelated', description: 'no edge / no link' },
   {
-    value: 'WEAK',
+    value: ResourceMatchType.UNRELATED,
+    label: 'Unrelated',
+    description: 'no edge / no link',
+  },
+  {
+    value: ResourceMatchType.WEAK,
     label: 'Weak',
     description: 'small connection / minor overlap',
   },
   {
-    value: 'GOOD_FIT',
+    value: ResourceMatchType.GOOD_FIT,
     label: 'Good Fit',
     description: 'generally relevant, needs tailored exercise',
   },
   {
-    value: 'PERFECT_MATCH',
+    value: ResourceMatchType.PERFECT_MATCH,
     label: 'Perfect Match',
     description: 'directly aligned / ideal relationship',
   },

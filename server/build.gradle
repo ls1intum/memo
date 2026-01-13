@@ -36,7 +36,10 @@ repositories {
 spotless {
     java {
         target "src/*/java/**/*.java"
-        removeUnusedImports()
+        cleanthat()
+            .sourceCompatibility("17")
+            .addMutator("SafeButNotConsensual")
+            .addMutator("SafeButControversial")
         trimTrailingWhitespace()
         endWithNewline()
     }

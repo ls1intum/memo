@@ -10,21 +10,21 @@ export const apiClient = axios.create({
 
 // Add auth token to all requests
 apiClient.interceptors.request.use(
-  (config) => {
+  config => {
     if (keycloak.token) {
       config.headers.Authorization = `Bearer ${keycloak.token}`;
     }
     return config;
   },
-  (error) => {
+  error => {
     return Promise.reject(error);
   }
 );
 
 // Handle token refresh on 401
 apiClient.interceptors.response.use(
-  (response) => response,
-  async (error) => {
+  response => response,
+  async error => {
     const originalRequest = error.config;
 
     if (error.response?.status === 401 && !originalRequest._retry) {
