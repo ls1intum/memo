@@ -1,4 +1,4 @@
-import { cn } from '../../domain_core/infrastructure/utils';
+import { cn } from '@/lib/utils';
 
 export const Avatar = ({
   initials,

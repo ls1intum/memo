@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Slot } from '@radix-ui/react-slot';
-import { cn } from '@/domain_core/infrastructure/utils';
+import { cn } from '@/lib/utils';
 
 type TooltipProps = {
   children: React.ReactNode;

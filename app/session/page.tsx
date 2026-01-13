@@ -2,14 +2,11 @@
 
 import { useEffect, useState, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { getRandomCompetenciesAction } from '@/app/actions/competencies';
-import {
-  createCompetencyRelationshipAction,
-  deleteCompetencyRelationshipAction,
-} from '@/app/actions/competency_relationships';
-import { getOrCreateDemoUserAction } from '@/app/actions/users';
-import type { Competency } from '@/domain_core/model/domain_model';
-import { RelationshipType } from '@/domain_core/model/domain_model';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { competenciesApi } from '@/lib/api/competencies';
+import { competencyRelationshipsApi } from '@/lib/api/competency-relationships';
+import { useAuth } from '@/lib/auth/AuthProvider';
+import type { Competency } from '@/lib/api/types';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -28,6 +25,8 @@ import {
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
+type RelationshipType = 'ASSUMES' | 'EXTENDS' | 'MATCHES';
+
 type SessionStats = {
   completed: number;
   skipped: number;
@@ -38,15 +37,14 @@ type RelationshipTypeOption = {
   label: string;
 };
 
-// Define relationship types statically from the enum - no server call needed
-const RELATIONSHIP_TYPES: RelationshipTypeOption[] = (
-  Object.values(RelationshipType) as RelationshipType[]
-).map(type => ({
-  value: type,
-  label: type.charAt(0) + type.slice(1).toLowerCase(),
-}));
+const RELATIONSHIP_TYPES: RelationshipTypeOption[] = [
+  { value: 'ASSUMES', label: 'Assumes' },
+  { value: 'EXTENDS', label: 'Extends' },
+  { value: 'MATCHES', label: 'Matches' },
+];
 
 function SessionPageContent() {
+  const { user } = useAuth();
   const searchParams = useSearchParams();
   const countParam = searchParams.get('count');
   const parsedCount = countParam ? Number(countParam) : NaN;
@@ -67,370 +65,191 @@ function SessionPageContent() {
       competencies?: Competency[];
     }>
   >([]);
-  const [competencies, setCompetencies] = useState<Competency[] | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [userId, setUserId] = useState<string | null>(null);
-  const [isCreating, setIsCreating] = useState(false);
-  const [relationshipToDelete, setRelationshipToDelete] = useState<
-    string | null
-  >(null);
 
-  useEffect(() => {
-    async function loadDemoUser() {
-      try {
-        const result = await getOrCreateDemoUserAction();
-        if (result.success && result.user) {
-          setUserId(result.user.id);
-        } else {
-          setError(
-            result.error ??
-              'Failed to load user information. Please try again later.'
-          );
-        }
-      } catch (err) {
-        setError(
-          err instanceof Error
-            ? err.message
-            : 'An unexpected error occurred while loading user information.'
-        );
-      }
-    }
+  // Fetch random competencies
+  const {
+    data: competencies,
+    isLoading,
+    refetch: loadCompetencies,
+  } = useQuery({
+    queryKey: ['random-competencies', count],
+    queryFn: () => competenciesApi.getRandom(count),
+    retry: 1,
+  });
 
-    void loadDemoUser();
-  }, []);
-
-  const loadCompetencies = useCallback(async () => {
-    setError(null);
-    setCompetencies(null);
-
-    const result = await getRandomCompetenciesAction(count);
-    if (!result.success) {
+  // Create relationship mutation
+  const createRelationshipMutation = useMutation({
+    mutationFn: competencyRelationshipsApi.create,
+    onSuccess: (data) => {
+      setStats((prev) => ({ ...prev, completed: prev.completed + 1 }));
+      setHistory((prev) => [
+        ...prev,
+        {
+          type: 'completed',
+          relationshipId: data.id,
+          competencies: competencies ? [...competencies] : undefined,
+        },
+      ]);
+      loadCompetencies();
+      setError(null);
+    },
+    onError: (error: Error) => {
       setError(
-        result.error ??
-          'An unexpected error occurred while fetching competencies.'
+        error.message || 'Failed to create relationship'
       );
-      setCompetencies([]);
-      return;
-    }
+    },
+  });
 
-    if (!result.competencies || result.competencies.length === 0) {
-      setCompetencies([]);
-      return;
-    }
-
-    setCompetencies(result.competencies);
-  }, [count]);
-
-  useEffect(() => {
-    void loadCompetencies();
-  }, [loadCompetencies]);
+  // Delete relationship mutation  
+  const deleteRelationshipMutation = useMutation({
+    mutationFn: competencyRelationshipsApi.delete,
+    onSuccess: () => {
+      setError(null);
+    },
+    onError: (error: Error) => {
+      setError(error.message || 'Failed to delete relationship');
+    },
+  });
 
   const handleAction = useCallback(
-    async (type: 'completed' | 'skipped') => {
-      if (type === 'completed') {
-        // Create relationship in database using FormData
-        if (!competencies || competencies.length < 2 || !relation || !userId) {
-          setError('Missing required data to create relationship');
-          return;
-        }
-
-        setIsCreating(true);
-        setError(null);
-
-        try {
-          const formData = new FormData();
-          formData.set('relationshipType', relation);
-          formData.set('originId', competencies[0]!.id);
-          formData.set('destinationId', competencies[1]!.id);
-          formData.set('userId', userId);
-
-          const result = await createCompetencyRelationshipAction(formData);
-
-          if (!result.success) {
-            setError(result.error ?? 'Failed to create relationship');
-            setIsCreating(false);
-            return;
-          }
-
-          // Success - update stats and reload new competencies
-          setStats(prev => ({ ...prev, completed: prev.completed + 1 }));
-          setHistory(prev => [
-            ...prev,
-            {
-              type: 'completed',
-              relationshipId: result.relationship?.id,
-              competencies: competencies ? [...competencies] : undefined,
-            },
-          ]);
-          await loadCompetencies();
-        } catch (err) {
-          setError(
-            err instanceof Error ? err.message : 'An unexpected error occurred'
-          );
-        } finally {
-          setIsCreating(false);
-        }
+    (type: 'completed' | 'skipped') => {
+      if (type === 'completed' && user && competencies && competencies.length === 2) {
+        createRelationshipMutation.mutate({
+          relationshipType: relation,
+          originId: competencies[0]!.id,
+          destinationId: competencies[1]!.id,
+          userId: user.preferred_username || 'guest',
+        });
       } else if (type === 'skipped') {
-        // When skipping, just update stats and reload
-        setStats(prev => ({ ...prev, skipped: prev.skipped + 1 }));
-        setHistory(prev => [
+        setStats((prev) => ({ ...prev, skipped: prev.skipped + 1 }));
+        setHistory((prev) => [
           ...prev,
-          {
-            type: 'skipped',
-            competencies: competencies ? [...competencies] : undefined,
-          },
+          { type: 'skipped', competencies: competencies ? [...competencies] : undefined },
         ]);
-        try {
-          await loadCompetencies();
-        } catch (err) {
-          setError(
-            err instanceof Error
-              ? err.message
-              : 'An unexpected error occurred while fetching competencies.'
-          );
-        }
+        loadCompetencies();
       }
     },
-    [competencies, relation, userId, loadCompetencies]
+    [relation, competencies, user, createRelationshipMutation, loadCompetencies]
   );
 
   const handleUndo = useCallback(() => {
-    setHistory(prev => {
-      const updated = [...prev];
-      const last = updated.pop();
-      if (last) {
-        setStats(prevStats => ({
-          ...prevStats,
-          [last.type]: Math.max(0, prevStats[last.type] - 1),
-        }));
+    const lastAction = history[history.length - 1];
+    if (!lastAction) return;
 
-        // If it was a completed action with a relationship, mark it for deletion
-        if (last.type === 'completed' && last.relationshipId) {
-          setRelationshipToDelete(last.relationshipId);
-        }
-
-        // Restore the competencies that were shown before this action
-        if (last.competencies && last.competencies.length >= 2) {
-          setCompetencies(last.competencies);
-        }
-      }
-      return updated;
-    });
-  }, []);
-
-  // Delete relationship from DB when relationshipToDelete is set
-  useEffect(() => {
-    if (relationshipToDelete) {
-      deleteCompetencyRelationshipAction(relationshipToDelete)
-        .then(result => {
-          if (!result.success) {
-            setError(result.error ?? 'Failed to delete relationship');
-          }
-        })
-        .catch(err => {
-          setError(
-            err instanceof Error ? err.message : 'Failed to delete relationship'
-          );
-        })
-        .finally(() => {
-          setRelationshipToDelete(null);
-        });
+    if (lastAction.type === 'completed' && lastAction.relationshipId) {
+      deleteRelationshipMutation.mutate(lastAction.relationshipId, {
+        onSuccess: () => {
+          setHistory((prev) => prev.slice(0, -1));
+          setStats((prev) => ({
+            ...prev,
+            completed: Math.max(0, prev.completed - 1),
+          }));
+        },
+      });
+    } else if (lastAction.type === 'skipped') {
+      setHistory((prev) => prev.slice(0, -1));
+      setStats((prev) => ({ ...prev, skipped: Math.max(0, prev.skipped - 1) }));
     }
-  }, [relationshipToDelete]);
+  }, [history, deleteRelationshipMutation]);
 
-  const isLoading = competencies === null && !error;
-  const noCompetencies = competencies !== null && competencies.length === 0;
-  const notEnough =
-    !!competencies && competencies.length > 0 && competencies.length < 2;
-
-  // Keyboard shortcuts
   useEffect(() => {
-    function handleKeyDown(event: KeyboardEvent) {
-      // Don't trigger shortcuts if user is typing in an input/textarea
-      const target = event.target as HTMLElement;
-      if (
-        target.tagName === 'INPUT' ||
-        target.tagName === 'TEXTAREA' ||
-        target.isContentEditable
-      ) {
-        return;
-      }
-
-      // ⌘+Shift+Z or Ctrl+Shift+Z for Undo (only if there's history to undo)
-      // Using Shift+Z to avoid browser's default undo behavior
-      if (
-        (event.metaKey || event.ctrlKey) &&
-        event.key === 'z' &&
-        event.shiftKey &&
-        history.length > 0
-      ) {
-        event.preventDefault();
-        event.stopPropagation();
-        handleUndo();
-        return;
-      }
-
-      // Space for Skip (only if not loading and has competencies)
-      if (
-        event.key === ' ' &&
-        !isLoading &&
-        !isCreating &&
-        competencies &&
-        competencies.length >= 2
-      ) {
-        event.preventDefault();
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === ' ' && !isLoading) {
+        e.preventDefault();
         handleAction('skipped');
-        return;
-      }
-
-      // Enter for Add Relation (only if not loading, not creating, has userId, relation, and competencies)
-      if (
-        event.key === 'Enter' &&
-        !isLoading &&
-        !isCreating &&
-        userId &&
-        relation &&
-        competencies &&
-        competencies.length >= 2
-      ) {
-        event.preventDefault();
+      } else if (e.key === 'Enter' && !isLoading && !createRelationshipMutation.isPending) {
+        e.preventDefault();
         handleAction('completed');
-        return;
+      } else if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === 'z') {
+        e.preventDefault();
+        handleUndo();
       }
-    }
+    };
 
     window.addEventListener('keydown', handleKeyDown);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [
-    isLoading,
-    isCreating,
-    userId,
-    relation,
-    competencies,
-    history,
-    handleAction,
-    handleUndo,
-  ]);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleAction, handleUndo, isLoading, createRelationshipMutation.isPending]);
 
   return (
-    <div
-      suppressHydrationWarning
-      className="relative overflow-hidden bg-gradient-to-br from-[#d7e3ff] via-[#f3f5ff] to-[#e8ecff] text-slate-900"
-    >
-      <div className="absolute inset-0 -z-10 opacity-70">
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#d7e3ff] via-[#f3f5ff] to-[#e8ecff] text-slate-900">
+      <div className="absolute inset-0 z-[-10] opacity-70">
         <div className="absolute left-1/2 top-[-6rem] h-[36rem] w-[36rem] -translate-x-1/2 rounded-full bg-white/80 blur-[140px]" />
-        <div className="absolute left-[10%] top-[22%] h-80 w-80 rounded-full bg-[#7fb0ff]/35 blur-[120px]" />
-        <div className="absolute right-[14%] top-[28%] h-[22rem] w-[22rem] rounded-[40%] bg-gradient-to-br from-[#ffdff3]/55 via-[#fff3f8]/35 to-transparent blur-[140px]" />
+        <div className="absolute left-[10%] top-[22%] h-[20rem] w-[20rem] rounded-full bg-[rgba(127,176,255,0.35)] blur-[140px]" />
+        <div className="absolute right-[14%] top-[28%] h-[22rem] w-[22rem] rounded-[40%] bg-gradient-to-br from-[rgba(255,223,243,0.55)] to-[rgba(255,243,248,0.35)] blur-[140px]" />
       </div>
 
-      <main className="relative z-10 mx-auto mt-24 flex w-full max-w-6xl flex-col gap-8 px-6 pb-60 lg:mt-32 lg:px-0">
-        <section className="space-y-8 rounded-[32px] border border-white/70 bg-white/85 p-8 shadow-[0_26px_90px_-55px_rgba(7,30,84,0.5)] backdrop-blur-xl">
-          <div className="flex flex-wrap items-center gap-3 text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">
-            <span>Mapping Session</span>
-            <span className="text-slate-300">•</span>
-            <span>Completed: {stats.completed}</span>
+      <main className="relative z-10 mx-auto flex w-full max-w-4xl flex-col gap-8 px-6 pb-20 pt-32 lg:px-0">
+        <section className="flex flex-col gap-6 rounded-3xl border border-white/70 bg-white/85 p-8 shadow-[0_20px_80px_-40px_rgba(7,30,84,0.45)] backdrop-blur-xl">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <Badge variant="secondary" className="mb-2 w-fit rounded-full bg-blue-100 px-3 py-1 text-xs font-bold uppercase tracking-wider text-blue-900">
+                Mapping Session
+              </Badge>
+              <h1 className="text-2xl font-semibold text-slate-900">
+                Competency Relations
+              </h1>
+              <p className="mt-1 text-sm text-slate-600">
+                {stats.completed} completed · {stats.skipped} skipped
+              </p>
+            </div>
           </div>
 
           {error && (
-            <Card className="border border-red-100 bg-red-50/80">
-              <CardHeader>
-                <CardTitle className="text-red-800">
-                  Failed to load competencies
-                </CardTitle>
-                <CardDescription className="text-red-700">
-                  {error}
-                </CardDescription>
-              </CardHeader>
-            </Card>
+            <div className="rounded-xl border border-red-200 bg-red-50/80 p-4">
+              <p className="text-sm font-medium text-red-800">{error}</p>
+            </div>
           )}
 
-          {noCompetencies && !error && (
-            <Card className="border border-red-100 bg-red-50/80">
-              <CardHeader>
-                <CardTitle className="text-red-800">
-                  No competencies available
-                </CardTitle>
-                <CardDescription className="text-red-700">
-                  There are currently no competencies in the database. Please
-                  run the seed script (e.g. <code>npm run db:seed</code>) or
-                  create competencies manually before starting a mapping
-                  session.
-                </CardDescription>
-              </CardHeader>
-            </Card>
-          )}
-
-          {notEnough && !error && (
-            <Card className="border border-amber-100 bg-amber-50/80">
-              <CardHeader>
-                <CardTitle className="text-amber-800">
-                  Not enough competencies
-                </CardTitle>
-                <CardDescription className="text-amber-700">
-                  At least two competencies are required to start a mapping
-                  session. Please add more competencies first.
-                </CardDescription>
-              </CardHeader>
-            </Card>
-          )}
-
-          {!error && !noCompetencies && !notEnough && (
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-blue-600" />
+            </div>
+          ) : !competencies || competencies.length === 0 ? (
+            <div className="rounded-xl border border-amber-200 bg-amber-50/80 p-6 text-center">
+              <p className="text-sm font-medium text-amber-800">
+                No competencies available. Please try again later.
+              </p>
+            </div>
+          ) : (
             <>
-              <h2 className="text-2xl font-semibold text-slate-900">
-                {isLoading || !competencies || competencies.length < 2
-                  ? 'Loading competencies for this mapping session...'
-                  : `How does "${competencies[0]!.title}" relate to "${
-                      competencies[1]!.title
-                    }"?`}
-              </h2>
+              <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-3">
+                  <Label className="text-sm font-medium text-slate-700">
+                    Relationship Type
+                  </Label>
+                  <RadioGroup
+                    value={relation}
+                    onValueChange={(value) =>
+                      setRelation(value as RelationshipType)
+                    }
+                  >
+                    {RELATIONSHIP_TYPES.map((type) => (
+                      <div key={type.value} className="flex items-center gap-2">
+                        <RadioGroupItem
+                          value={type.value}
+                          id={type.value}
+                        />
+                        <Label
+                          htmlFor={type.value}
+                          className="cursor-pointer text-sm font-normal text-slate-700"
+                        >
+                          {type.label}
+                        </Label>
+                      </div>
+                    ))}
+                  </RadioGroup>
+                </div>
 
-              <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-3">
-                <div className="col-span-1">
-                  {isLoading || !competencies || !competencies[0] ? (
-                    <Card className="border border-white/70 bg-white/60">
-                      <CardHeader>
-                        <CardTitle className="text-slate-400">
-                          Loading first competency...
-                        </CardTitle>
-                      </CardHeader>
-                    </Card>
-                  ) : (
-                    <Card className="border border-white/70 bg-white/85 shadow-[0_28px_80px_-42px_rgba(7,30,84,0.55)] backdrop-blur-lg">
-                      <CardHeader className="space-y-4 pb-4">
-                        <div className="flex flex-wrap gap-2">
-                          {/* Placeholder badges; replace with competency metadata once available */}
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Badge
-                                tabIndex={0}
-                                className="bg-slate-100 text-slate-700 border-slate-200"
-                              >
-                                Apply
-                              </Badge>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>
-                                Bloom&apos;s Taxonomy categorizes learning
-                                objectives by cognitive level.
-                              </p>
-                              <p className="mt-1">
-                                → Apply: use knowledge in practice (implement,
-                                execute, solve).
-                              </p>
-                              <p className="mt-1 text-[11px] text-slate-200">
-                                Levels: Remember • Understand • Apply • Analyze
-                                • Evaluate • Create
-                              </p>
-                            </TooltipContent>
-                          </Tooltip>
-                          <Badge className="bg-slate-100 text-slate-700 border-slate-200">
-                            Control Flow
-                          </Badge>
-                        </div>
+                <div className="flex items-center gap-2">
+                  {competencies[0] && (
+                    <Card className="flex-1 rounded-xl border border-white/80 bg-white/90 p-4 shadow-sm backdrop-blur-sm">
+                      <CardHeader className="p-0">
                         <div className="space-y-2">
-                          <CardTitle className="text-lg text-slate-900">
+                          <Badge variant="outline" className="w-fit rounded-md border-blue-200 bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">
+                            Origin
+                          </Badge>
+                          <CardTitle className="text-base font-semibold text-slate-900">
                             {competencies[0]!.title}
                           </CardTitle>
                           <CardDescription className="text-sm text-slate-600">
@@ -440,88 +259,24 @@ function SessionPageContent() {
                       </CardHeader>
                     </Card>
                   )}
-                </div>
 
-                <div className="col-span-1 flex flex-col items-center justify-center gap-6 text-center md:col-start-2">
-                  <div className="flex items-center justify-center gap-4 text-slate-500">
-                    <div className="h-px w-12 bg-slate-300" />
-                    <ArrowRight className="h-8 w-8" aria-hidden="true" />
-                    <div className="h-px w-12 bg-slate-300" />
-                  </div>
-                  <div className="text-sm font-semibold text-slate-800">
-                    Select Relation Type
-                  </div>
-                  <div className="w-full max-w-[260px] md:ml-40">
-                    <RadioGroup
-                      value={relation}
-                      onValueChange={value =>
-                        setRelation(value as RelationshipType)
-                      }
-                      className="gap-4 items-start"
-                    >
-                      {RELATIONSHIP_TYPES.map(({ value, label }) => (
-                        <div key={value} className="flex items-center gap-3">
-                          <RadioGroupItem
-                            value={value}
-                            id={value}
-                            className="h-4 w-4"
-                          />
-                          <Label
-                            htmlFor={value}
-                            className="text-sm font-normal text-slate-800"
-                          >
-                            {label}
-                          </Label>
-                        </div>
-                      ))}
-                    </RadioGroup>
-                  </div>
-                </div>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <ArrowRight className="h-5 w-5 flex-shrink-0 text-slate-400" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>From origin to destination</p>
+                    </TooltipContent>
+                  </Tooltip>
 
-                <div className="col-span-1">
-                  {isLoading || !competencies || !competencies[1] ? (
-                    <Card className="border border-white/70 bg-white/60">
-                      <CardHeader>
-                        <CardTitle className="text-slate-400">
-                          Loading second competency...
-                        </CardTitle>
-                      </CardHeader>
-                    </Card>
-                  ) : (
-                    <Card className="border border-white/70 bg-white/85 shadow-[0_28px_80px_-42px_rgba(7,30,84,0.55)] backdrop-blur-lg">
-                      <CardHeader className="space-y-4 pb-4">
-                        <div className="flex flex-wrap gap-2">
-                          {/* Placeholder badges; replace with competency metadata once available */}
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Badge
-                                tabIndex={0}
-                                className="bg-slate-100 text-slate-700 border-slate-200"
-                              >
-                                Apply
-                              </Badge>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>
-                                Bloom&apos;s Taxonomy categorizes learning
-                                objectives by cognitive level.
-                              </p>
-                              <p className="mt-1">
-                                → Apply: use knowledge in practice (implement,
-                                execute, solve).
-                              </p>
-                              <p className="mt-1 text-[11px] text-slate-200">
-                                Levels: Remember • Understand • Apply • Analyze
-                                • Evaluate • Create
-                              </p>
-                            </TooltipContent>
-                          </Tooltip>
-                          <Badge className="bg-slate-100 text-slate-700 border-slate-200">
-                            Programming Fundamentals
-                          </Badge>
-                        </div>
+                  {competencies[1] && (
+                    <Card className="flex-1 rounded-xl border border-white/80 bg-white/90 p-4 shadow-sm backdrop-blur-sm">
+                      <CardHeader className="p-0">
                         <div className="space-y-2">
-                          <CardTitle className="text-lg text-slate-900">
+                          <Badge variant="outline" className="w-fit rounded-md border-purple-200 bg-purple-50 px-2 py-0.5 text-xs font-medium text-purple-700">
+                            Destination
+                          </Badge>
+                          <CardTitle className="text-base font-semibold text-slate-900">
                             {competencies[1]!.title}
                           </CardTitle>
                           <CardDescription className="text-sm text-slate-600">
@@ -537,44 +292,47 @@ function SessionPageContent() {
               <div className="mt-2 flex flex-wrap items-center gap-3">
                 <Button
                   variant="ghost"
-                  size="sm"
-                  className="text-slate-700"
+                  className="rounded-md bg-transparent px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100"
                   onClick={handleUndo}
                   disabled={history.length === 0}
                 >
                   Undo{' '}
-                  <Kbd className="ml-2 bg-slate-200 text-slate-700 border border-slate-300">
+                  <Kbd className="ml-2 rounded border border-slate-300 bg-slate-200 px-1.5 py-0.5 text-xs text-slate-700">
                     ⌘
                   </Kbd>
-                  <Kbd className="ml-1 bg-slate-200 text-slate-700 border border-slate-300">
+                  <Kbd className="ml-1 rounded border border-slate-300 bg-slate-200 px-1.5 py-0.5 text-xs text-slate-700">
                     ⇧
                   </Kbd>
-                  <Kbd className="ml-1 bg-slate-200 text-slate-700 border border-slate-300">
+                  <Kbd className="ml-1 rounded border border-slate-300 bg-slate-200 px-1.5 py-0.5 text-xs text-slate-700">
                     Z
                   </Kbd>
                 </Button>
                 <div className="flex-1" />
                 <Button
                   variant="outline"
-                  size="sm"
-                  className="bg-slate-200 text-slate-700 hover:bg-slate-300 border-slate-300"
+                  className="rounded-md border border-slate-300 bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-200"
                   onClick={() => handleAction('skipped')}
                   disabled={isLoading}
                 >
                   Skip{' '}
-                  <Kbd className="ml-2 bg-slate-200 text-slate-700 border border-slate-300">
+                  <Kbd className="ml-2 rounded border border-slate-300 bg-slate-200 px-1.5 py-0.5 text-xs text-slate-700">
                     Space
                   </Kbd>
                 </Button>
                 <Button
-                  variant="default"
-                  size="sm"
-                  className="bg-[#0a4da2] text-white shadow-[0_18px_45px_-26px_rgba(7,30,84,0.75)] hover:bg-[#0d56b5]"
+                  className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-md transition-colors hover:bg-blue-700"
                   onClick={() => handleAction('completed')}
-                  disabled={isLoading || isCreating || !userId || !relation}
+                  disabled={
+                    isLoading ||
+                    createRelationshipMutation.isPending ||
+                    !user ||
+                    !relation
+                  }
                 >
-                  {isCreating ? 'Creating...' : 'Add Relation'}{' '}
-                  <Kbd className="ml-2 bg-slate-200 text-slate-700 border border-slate-300">
+                  {createRelationshipMutation.isPending
+                    ? 'Creating...'
+                    : 'Add Relation'}{' '}
+                  <Kbd className="ml-2 rounded border border-blue-400 bg-blue-500 px-1.5 py-0.5 text-xs text-white">
                     ⏎
                   </Kbd>
                 </Button>
@@ -592,7 +350,7 @@ export default function SessionPage() {
     <Suspense
       fallback={
         <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-[#d7e3ff] via-[#f3f5ff] to-[#e8ecff]">
-          <div className="text-slate-600">Loading session...</div>
+          <div className="text-slate-500">Loading session...</div>
         </div>
       }
     >

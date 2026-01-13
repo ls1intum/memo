@@ -1,0 +1,25 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5433/memo
+    username: postgres
+    password: memo
+
+  jpa:
+    show-sql: true
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8081/realms/memo
+          jwk-set-uri: http://localhost:8081/realms/memo/protocol/openid-connect/certs
+
+server:
+  port: 8080
+
+logging:
+  level:
+    root: INFO
+    de.tum.cit.memo: DEBUG
+    org.springframework.web: DEBUG
+    org.springframework.security: DEBUG
