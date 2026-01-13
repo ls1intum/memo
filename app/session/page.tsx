@@ -104,15 +104,6 @@ const getRelationshipDescription = (
   }
 };
 
-// Shared scrollbar styles for competency description containers
-const SCROLLBAR_STYLES: {
-  scrollbarWidth: 'thin';
-  scrollbarColor: string;
-} = {
-  scrollbarWidth: 'thin',
-  scrollbarColor: 'rgb(203 213 225) transparent',
-};
-
 function SessionPageContent() {
   const searchParams = useSearchParams();
   const countParam = searchParams.get('count');
