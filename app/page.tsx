@@ -46,7 +46,7 @@ export default function Page() {
                 <span className="bg-gradient-to-r from-[#0a4da2] via-[#5538d1] to-[#9b5dfa] bg-clip-text text-transparent">
                   transparent competency benchmark
                 </span>
-                . Let’s build it together.
+                . Let&apos;s build it together.
               </h1>
               <p className="max-w-4xl text-xl font-medium leading-relaxed text-slate-1000">
                 Memo turns collaborative competency mapping into an open
@@ -92,15 +92,7 @@ export default function Page() {
                 <br />
                 Competency-Based Recommenders
               </h2>
-              <p
-                className="text-lg leading-relaxed text-slate-700"
-                style={{
-                  display: '-webkit-box',
-                  WebkitLineClamp: 2,
-                  WebkitBoxOrient: 'vertical',
-                  overflow: 'hidden',
-                }}
-              >
+              <p className="text-lg leading-relaxed text-slate-700 line-clamp-2">
                 Competency-based recommenders use{' '}
                 <span className="font-semibold text-slate-900">
                   competency networks

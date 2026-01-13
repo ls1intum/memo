@@ -42,7 +42,9 @@ model CompetencyRelationship {
   destination      Competency     @relation("DestinationCompetency", fields: [destinationId], references: [id], onDelete: Cascade)
   user             User           @relation("RelationshipCreator", fields: [userId], references: [id])
 
-  @@unique([originId, destinationId, relationshipType])
+  @@index([originId])
+  @@index([destinationId])
+  @@index([userId])
   @@map("competency_relationships")
 }
 
@@ -81,5 +83,8 @@ enum RelationshipType {
   ASSUMES
   EXTENDS
   MATCHES
+  // Explicitly records that two competencies have been reviewed and found not to be related,
+  // as opposed to simply having no CompetencyRelationship row between them.
+  UNRELATED
 }
 

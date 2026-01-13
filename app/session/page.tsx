@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback, Suspense } from 'react';
+import { useEffect, useState, useCallback, useRef, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { getRandomCompetenciesAction } from '@/app/actions/competencies';
 import {
@@ -18,15 +18,22 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Kbd } from '@/components/ui/kbd';
-import { ArrowRight } from 'lucide-react';
+import {
+  ArrowRight,
+  Info,
+  ArrowLeftRight,
+  Check,
+  Layers,
+  TrendingUp,
+  Equal,
+  Unlink,
+} from 'lucide-react';
 import {
   Card,
   CardDescription,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 type SessionStats = {
   completed: number;
@@ -46,6 +53,74 @@ const RELATIONSHIP_TYPES: RelationshipTypeOption[] = (
   label: type.charAt(0) + type.slice(1).toLowerCase(),
 }));
 
+// Blue-Purple theme colors (hardcoded after user selection)
+const THEME_COLORS = {
+  source: { primary: '#0a4da2', secondary: '#4263eb' },
+  destination: { primary: '#7c3aed', secondary: '#9775fa' },
+};
+
+// Helper to get dynamic description for relationship types
+// Used in the live preview banner
+const getRelationshipDescription = (
+  type: RelationshipType,
+  titleA: string,
+  titleB: string
+) => {
+  switch (type) {
+    case 'ASSUMES':
+      return (
+        <>
+          <span className="font-medium text-slate-900">{titleA}</span> requires{' '}
+          <span className="font-medium text-slate-900">{titleB}</span> as
+          prerequisite
+        </>
+      );
+    case 'EXTENDS':
+      return (
+        <>
+          <span className="font-medium text-slate-900">{titleA}</span> builds on
+          / is a subset or advanced form of{' '}
+          <span className="font-medium text-slate-900">{titleB}</span>
+        </>
+      );
+    case 'MATCHES':
+      return (
+        <>
+          <span className="font-medium text-slate-900">{titleA}</span> is
+          equivalent / strongly overlaps with{' '}
+          <span className="font-medium text-slate-900">{titleB}</span>
+        </>
+      );
+    case 'UNRELATED':
+      return (
+        <>
+          <span className="font-medium text-slate-900">{titleA}</span> and{' '}
+          <span className="font-medium text-slate-900">{titleB}</span> have no
+          meaningful relationship
+        </>
+      );
+    default:
+      return '';
+  }
+};
+
+// Text colors for relationship types (used in preview sentence)
+const RELATIONSHIP_TYPE_TEXT_COLORS: Record<RelationshipType, string> = {
+  ASSUMES: 'text-blue-600',
+  EXTENDS: 'text-purple-600',
+  MATCHES: 'text-emerald-600',
+  UNRELATED: 'text-slate-600',
+};
+
+// Shared scrollbar styles for competency description containers
+const SCROLLBAR_STYLES: {
+  scrollbarWidth: 'thin';
+  scrollbarColor: string;
+} = {
+  scrollbarWidth: 'thin',
+  scrollbarColor: 'rgb(203 213 225) transparent',
+};
+
 function SessionPageContent() {
   const searchParams = useSearchParams();
   const countParam = searchParams.get('count');
@@ -53,9 +128,7 @@ function SessionPageContent() {
   const count =
     Number.isFinite(parsedCount) && parsedCount > 0 ? parsedCount : 2;
 
-  const [relation, setRelation] = useState<RelationshipType>(
-    RELATIONSHIP_TYPES[0]!.value
-  );
+  const [relation, setRelation] = useState<RelationshipType | null>(null);
   const [stats, setStats] = useState<SessionStats>({
     completed: 0,
     skipped: 0,
@@ -71,6 +144,31 @@ function SessionPageContent() {
   const [error, setError] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [swapRotation, setSwapRotation] = useState(0);
+  const [hoveredRelation, setHoveredRelation] =
+    useState<RelationshipType | null>(null);
+  const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleMouseEnter = useCallback((val: RelationshipType) => {
+    if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+    hoverTimeoutRef.current = setTimeout(() => setHoveredRelation(val), 120);
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+    hoverTimeoutRef.current = setTimeout(() => setHoveredRelation(null), 70);
+  }, []);
+
+  // Cleanup hover timeout on unmount to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      if (hoverTimeoutRef.current) {
+        clearTimeout(hoverTimeoutRef.current);
+        hoverTimeoutRef.current = null;
+      }
+    };
+  }, []);
   const [relationshipToDelete, setRelationshipToDelete] = useState<
     string | null
   >(null);
@@ -99,30 +197,43 @@ function SessionPageContent() {
     void loadDemoUser();
   }, []);
 
-  const loadCompetencies = useCallback(async () => {
-    setError(null);
-    setCompetencies(null);
+  const loadCompetencies = useCallback(
+    async (isInitialLoad = false) => {
+      setError(null);
 
-    const result = await getRandomCompetenciesAction(count);
-    if (!result.success) {
-      setError(
-        result.error ??
-          'An unexpected error occurred while fetching competencies.'
-      );
-      setCompetencies([]);
-      return;
-    }
+      // Only set competencies to null on initial load, not during transitions
+      if (isInitialLoad) {
+        setCompetencies(null);
+      } else {
+        setIsTransitioning(true);
+      }
 
-    if (!result.competencies || result.competencies.length === 0) {
-      setCompetencies([]);
-      return;
-    }
+      const result = await getRandomCompetenciesAction(count);
 
-    setCompetencies(result.competencies);
-  }, [count]);
+      if (!result.success) {
+        setError(
+          result.error ??
+            'An unexpected error occurred while fetching competencies.'
+        );
+        setCompetencies([]);
+        setIsTransitioning(false);
+        return;
+      }
+
+      if (!result.competencies || result.competencies.length === 0) {
+        setCompetencies([]);
+        setIsTransitioning(false);
+        return;
+      }
+
+      setCompetencies(result.competencies);
+      setIsTransitioning(false);
+    },
+    [count]
+  );
 
   useEffect(() => {
-    void loadCompetencies();
+    loadCompetencies(true);
   }, [loadCompetencies]);
 
   const handleAction = useCallback(
@@ -162,6 +273,7 @@ function SessionPageContent() {
               competencies: competencies ? [...competencies] : undefined,
             },
           ]);
+          setRelation(null); // Reset selection after adding relation
           await loadCompetencies();
         } catch (err) {
           setError(
@@ -180,6 +292,7 @@ function SessionPageContent() {
             competencies: competencies ? [...competencies] : undefined,
           },
         ]);
+        setRelation(null); // Reset relationship type selection
         try {
           await loadCompetencies();
         } catch (err) {
@@ -256,18 +369,32 @@ function SessionPageContent() {
         return;
       }
 
-      // ⌘+Shift+Z or Ctrl+Shift+Z for Undo (only if there's history to undo)
-      // Using Shift+Z to avoid browser's default undo behavior
+      // Shift+Z for Undo (only if there's history to undo, and NOT Cmd/Ctrl+Shift+Z)
+      // Check this early to prevent conflicts with other handlers
       if (
-        (event.metaKey || event.ctrlKey) &&
-        event.key === 'z' &&
+        event.key.toLowerCase() === 'z' &&
         event.shiftKey &&
+        !event.metaKey &&
+        !event.ctrlKey &&
+        !event.altKey &&
         history.length > 0
       ) {
         event.preventDefault();
         event.stopPropagation();
         handleUndo();
         return;
+      }
+
+      // If Enter is pressed on a relationship button, prevent default button behavior
+      // and let the global handler manage it
+      if (
+        event.key === 'Enter' &&
+        target.tagName === 'BUTTON' &&
+        target.closest('[data-relationship-button]')
+      ) {
+        event.preventDefault();
+        event.stopPropagation();
+        // Continue to global Enter handler below
       }
 
       // Space for Skip (only if not loading and has competencies)
@@ -283,6 +410,24 @@ function SessionPageContent() {
         return;
       }
 
+      // 1, 2, 3, 4 for relationship types (only if relationship types are loaded)
+      // Check this BEFORE Enter to prevent conflicts
+      if (
+        ['1', '2', '3', '4'].includes(event.key) &&
+        RELATIONSHIP_TYPES.length > 0 &&
+        !isLoading &&
+        !isCreating
+      ) {
+        event.preventDefault();
+        event.stopPropagation();
+        const index = parseInt(event.key) - 1;
+        if (RELATIONSHIP_TYPES[index]) {
+          const selectedValue = RELATIONSHIP_TYPES[index]!.value;
+          setRelation(prev => (prev === selectedValue ? null : selectedValue));
+        }
+        return;
+      }
+
       // Enter for Add Relation (only if not loading, not creating, has userId, relation, and competencies)
       if (
         event.key === 'Enter' &&
@@ -294,6 +439,7 @@ function SessionPageContent() {
         competencies.length >= 2
       ) {
         event.preventDefault();
+        event.stopPropagation();
         handleAction('completed');
         return;
       }
@@ -315,22 +461,33 @@ function SessionPageContent() {
   ]);
 
   return (
-    <div
-      suppressHydrationWarning
-      className="relative overflow-hidden bg-gradient-to-br from-[#d7e3ff] via-[#f3f5ff] to-[#e8ecff] text-slate-900"
-    >
+    <div className="relative overflow-hidden bg-gradient-to-br from-[#d7e3ff] via-[#f3f5ff] to-[#e8ecff] text-slate-900">
       <div className="absolute inset-0 -z-10 opacity-70">
         <div className="absolute left-1/2 top-[-6rem] h-[36rem] w-[36rem] -translate-x-1/2 rounded-full bg-white/80 blur-[140px]" />
         <div className="absolute left-[10%] top-[22%] h-80 w-80 rounded-full bg-[#7fb0ff]/35 blur-[120px]" />
         <div className="absolute right-[14%] top-[28%] h-[22rem] w-[22rem] rounded-[40%] bg-gradient-to-br from-[#ffdff3]/55 via-[#fff3f8]/35 to-transparent blur-[140px]" />
       </div>
 
-      <main className="relative z-10 mx-auto mt-24 flex w-full max-w-6xl flex-col gap-8 px-6 pb-60 lg:mt-32 lg:px-0">
-        <section className="space-y-8 rounded-[32px] border border-white/70 bg-white/85 p-8 shadow-[0_26px_90px_-55px_rgba(7,30,84,0.5)] backdrop-blur-xl">
-          <div className="flex flex-wrap items-center gap-3 text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">
-            <span>Mapping Session</span>
-            <span className="text-slate-300">•</span>
-            <span>Completed: {stats.completed}</span>
+      <main className="relative z-10 mx-auto mt-20 flex w-full max-w-6xl flex-col gap-6 px-6 pb-24 lg:mt-24 lg:px-0">
+        <section className="space-y-6 rounded-[24px] border border-white/70 bg-white/85 p-6 shadow-[0_26px_90px_-55px_rgba(7,30,84,0.5)] backdrop-blur-xl">
+          {/* Header Section */}
+          <div className="flex flex-wrap items-center justify-center gap-3 pb-4 border-b border-slate-200/60">
+            <div className="flex flex-wrap items-center gap-3">
+              <Badge className="bg-gradient-to-r from-[#0a4da2] to-[#7c6cff] text-white border-0 font-semibold text-xs px-4 py-1.5 shadow-md">
+                Mapping Session
+              </Badge>
+              <div className="flex items-center gap-2 text-sm font-medium text-slate-700">
+                <span className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-emerald-600" />
+                  <span>
+                    Completed:{' '}
+                    <span className="font-semibold text-slate-900">
+                      {stats.completed}
+                    </span>
+                  </span>
+                </span>
+              </div>
+            </div>
           </div>
 
           {error && (
@@ -378,36 +535,103 @@ function SessionPageContent() {
 
           {!error && !noCompetencies && !notEnough && (
             <>
-              <h2 className="text-2xl font-semibold text-slate-900">
-                {isLoading || !competencies || competencies.length < 2
-                  ? 'Loading competencies for this mapping session...'
-                  : `How does "${competencies[0]!.title}" relate to "${
-                      competencies[1]!.title
-                    }"?`}
-              </h2>
+              {/* Main Question */}
+              <div className="flex flex-col items-center justify-center text-center space-y-2 mx-auto w-full">
+                {isLoading || !competencies || competencies.length < 2 ? (
+                  <div className="flex flex-wrap justify-center items-center gap-2">
+                    <span className="text-[1.35rem] sm:text-[1.7rem] font-bold text-slate-500">
+                      How does
+                    </span>
+                    <div className="h-7 w-40 rounded-md bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 animate-pulse" />
+                    <span className="text-[1.35rem] sm:text-[1.7rem] font-bold text-slate-500">
+                      relate to
+                    </span>
+                    <div className="h-7 w-36 rounded-md bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 animate-pulse" />
+                    <span className="text-[1.35rem] sm:text-[1.7rem] font-bold text-slate-500">
+                      ?
+                    </span>
+                  </div>
+                ) : (
+                  <h1 className="text-[1.35rem] sm:text-[1.7rem] font-bold text-slate-800 leading-relaxed tracking-tight">
+                    How does{' '}
+                    <span
+                      className="bg-clip-text text-transparent"
+                      style={{
+                        backgroundImage: `linear-gradient(to right, ${THEME_COLORS.source.primary}, ${THEME_COLORS.source.secondary})`,
+                      }}
+                    >
+                      {competencies[0]!.title}
+                    </span>{' '}
+                    relate to{' '}
+                    <span
+                      className="bg-clip-text text-transparent"
+                      style={{
+                        backgroundImage: `linear-gradient(to right, ${THEME_COLORS.destination.primary}, ${THEME_COLORS.destination.secondary})`,
+                      }}
+                    >
+                      {competencies[1]!.title}
+                    </span>
+                    ?
+                  </h1>
+                )}
+              </div>
 
-              <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-3">
-                <div className="col-span-1">
+              {/* Competencies Side by Side for Comparison */}
+              <div className="py-3">
+                <div
+                  className="relative grid grid-cols-1 gap-4 lg:grid-cols-[1fr_auto_1fr]"
+                  style={{ isolation: 'isolate' }}
+                >
+                  {/* Origin Competency */}
                   {isLoading || !competencies || !competencies[0] ? (
-                    <Card className="border border-white/70 bg-white/60">
-                      <CardHeader>
-                        <CardTitle className="text-slate-400">
-                          Loading first competency...
-                        </CardTitle>
+                    <Card className="relative flex h-[280px] flex-col border-2 border-slate-200/50 bg-gradient-to-br from-slate-50/80 to-white shadow-lg overflow-hidden">
+                      <div className="absolute left-0 top-0 h-full w-1.5 bg-gradient-to-b from-slate-300 to-slate-200 rounded-r-full" />
+                      <CardHeader className="flex h-full flex-col space-y-3 pb-3 pl-5">
+                        <div className="h-6 w-24 rounded-md bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 animate-pulse" />
+                        <div className="flex gap-2">
+                          <div className="h-5 w-16 rounded-full bg-slate-200 animate-pulse" />
+                          <div className="h-5 w-20 rounded-full bg-slate-200 animate-pulse" />
+                        </div>
+                        <div className="h-6 w-3/4 rounded-md bg-slate-200 animate-pulse mt-2" />
+                        <div className="space-y-2 mt-2">
+                          <div className="h-4 w-full rounded bg-slate-100 animate-pulse" />
+                          <div className="h-4 w-5/6 rounded bg-slate-100 animate-pulse" />
+                          <div className="h-4 w-4/6 rounded bg-slate-100 animate-pulse" />
+                        </div>
                       </CardHeader>
                     </Card>
                   ) : (
-                    <Card className="border border-white/70 bg-white/85 shadow-[0_28px_80px_-42px_rgba(7,30,84,0.55)] backdrop-blur-lg">
-                      <CardHeader className="space-y-4 pb-4">
-                        <div className="flex flex-wrap gap-2">
+                    <Card
+                      className={`relative flex h-[280px] flex-col border-2 border-[#0a4da2]/30 bg-gradient-to-br from-blue-50/80 to-white shadow-lg transition-all duration-300 overflow-hidden ${isTransitioning || isCreating ? 'opacity-60 scale-[0.99]' : 'opacity-100 scale-100'}`}
+                    >
+                      <div
+                        className="absolute left-0 top-0 h-full w-1.5 rounded-r-full"
+                        style={{
+                          backgroundImage: `linear-gradient(to bottom, ${THEME_COLORS.source.primary}, ${THEME_COLORS.source.secondary})`,
+                        }}
+                      />
+                      <CardHeader className="flex h-full flex-col space-y-3 pb-3 pl-5 overflow-visible">
+                        <div className="flex-shrink-0">
+                          <Badge
+                            className="w-fit text-white font-semibold text-xs px-3 py-1.5"
+                            style={{
+                              backgroundColor: THEME_COLORS.source.primary,
+                              borderColor: THEME_COLORS.source.primary,
+                            }}
+                          >
+                            Competency
+                          </Badge>
+                        </div>
+                        <div className="flex flex-wrap gap-2 flex-shrink-0">
                           {/* Placeholder badges; replace with competency metadata once available */}
-                          <Tooltip>
+                          <Tooltip side="top">
                             <TooltipTrigger asChild>
                               <Badge
                                 tabIndex={0}
-                                className="bg-slate-100 text-slate-700 border-slate-200"
+                                className="bg-slate-100 text-slate-700 border border-slate-300 cursor-help hover:bg-slate-200 transition-colors"
                               >
                                 Apply
+                                <Info className="h-3 w-3 ml-1.5" />
                               </Badge>
                             </TooltipTrigger>
                             <TooltipContent>
@@ -425,80 +649,134 @@ function SessionPageContent() {
                               </p>
                             </TooltipContent>
                           </Tooltip>
-                          <Badge className="bg-slate-100 text-slate-700 border-slate-200">
+                          <Badge className="bg-slate-100 text-slate-700 border border-slate-300">
                             Control Flow
                           </Badge>
                         </div>
-                        <div className="space-y-2">
-                          <CardTitle className="text-lg text-slate-900">
+                        <div className="flex-1 flex flex-col min-h-0 space-y-2">
+                          <CardTitle className="text-xl font-bold text-slate-900 flex-shrink-0">
                             {competencies[0]!.title}
                           </CardTitle>
-                          <CardDescription className="text-sm text-slate-600">
-                            {competencies[0]!.description}
-                          </CardDescription>
+                          <div
+                            className="flex-1 overflow-y-scroll pr-2 scrollbar-thin"
+                            style={SCROLLBAR_STYLES}
+                          >
+                            <CardDescription className="text-base leading-relaxed text-slate-600">
+                              {competencies[0]!.description}
+                            </CardDescription>
+                          </div>
                         </div>
                       </CardHeader>
                     </Card>
                   )}
-                </div>
 
-                <div className="col-span-1 flex flex-col items-center justify-center gap-6 text-center md:col-start-2">
-                  <div className="flex items-center justify-center gap-4 text-slate-500">
-                    <div className="h-px w-12 bg-slate-300" />
-                    <ArrowRight className="h-8 w-8" aria-hidden="true" />
-                    <div className="h-px w-12 bg-slate-300" />
-                  </div>
-                  <div className="text-sm font-semibold text-slate-800">
-                    Select Relation Type
-                  </div>
-                  <div className="w-full max-w-[260px] md:ml-40">
-                    <RadioGroup
-                      value={relation}
-                      onValueChange={value =>
-                        setRelation(value as RelationshipType)
-                      }
-                      className="gap-4 items-start"
-                    >
-                      {RELATIONSHIP_TYPES.map(({ value, label }) => (
-                        <div key={value} className="flex items-center gap-3">
-                          <RadioGroupItem
-                            value={value}
-                            id={value}
-                            className="h-4 w-4"
-                          />
-                          <Label
-                            htmlFor={value}
-                            className="text-sm font-normal text-slate-800"
-                          >
-                            {label}
-                          </Label>
-                        </div>
-                      ))}
-                    </RadioGroup>
-                  </div>
-                </div>
+                  {/* Arrow Connection with Swap Button */}
+                  <div className="flex flex-col items-center justify-center z-10 px-3 gap-2">
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="h-0.5 w-12"
+                        style={{
+                          backgroundImage: `linear-gradient(to right, ${THEME_COLORS.source.primary}, ${THEME_COLORS.source.secondary})`,
+                        }}
+                      />
+                      <div
+                        className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full shadow-xl ring-3 ring-white"
+                        style={{
+                          backgroundImage: `linear-gradient(to bottom right, ${THEME_COLORS.source.primary}, ${THEME_COLORS.source.secondary}, ${THEME_COLORS.destination.primary})`,
+                        }}
+                      >
+                        <ArrowRight
+                          className="h-6 w-6 text-white"
+                          aria-hidden="true"
+                        />
+                      </div>
+                      <div
+                        className="h-0.5 w-12"
+                        style={{
+                          backgroundImage: `linear-gradient(to left, ${THEME_COLORS.destination.primary}, ${THEME_COLORS.destination.secondary})`,
+                        }}
+                      />
+                    </div>
+                    {competencies && competencies.length >= 2 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setSwapRotation(prev => prev + 180);
+                          setIsTransitioning(true);
 
-                <div className="col-span-1">
+                          // Wait for fade out before swapping
+                          setTimeout(() => {
+                            if (competencies && competencies.length >= 2) {
+                              setCompetencies([
+                                competencies[1]!,
+                                competencies[0]!,
+                              ]);
+                            }
+                            setIsTransitioning(false);
+                          }, 300);
+                        }}
+                        className="text-slate-700 border border-slate-300 hover:text-slate-900 hover:bg-slate-100 hover:border-slate-400 focus:outline-none focus:ring-0 focus-visible:ring-0"
+                      >
+                        <ArrowLeftRight
+                          className="h-4 w-4 mr-1.5 transition-transform duration-500 will-change-transform"
+                          style={{ transform: `rotate(${swapRotation}deg)` }}
+                        />
+                        Swap Direction
+                      </Button>
+                    )}
+                  </div>
+
+                  {/* Destination Competency */}
                   {isLoading || !competencies || !competencies[1] ? (
-                    <Card className="border border-white/70 bg-white/60">
-                      <CardHeader>
-                        <CardTitle className="text-slate-400">
-                          Loading second competency...
-                        </CardTitle>
+                    <Card className="relative flex h-[280px] flex-col border-2 border-slate-200/50 bg-gradient-to-br from-slate-50/80 to-white shadow-lg overflow-hidden">
+                      <div className="absolute left-0 top-0 h-full w-1.5 bg-gradient-to-b from-slate-300 to-slate-200 rounded-r-full" />
+                      <CardHeader className="flex h-full flex-col space-y-3 pb-3 pl-5">
+                        <div className="h-6 w-24 rounded-md bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 animate-pulse" />
+                        <div className="flex gap-2">
+                          <div className="h-5 w-16 rounded-full bg-slate-200 animate-pulse" />
+                          <div className="h-5 w-24 rounded-full bg-slate-200 animate-pulse" />
+                        </div>
+                        <div className="h-6 w-4/5 rounded-md bg-slate-200 animate-pulse mt-2" />
+                        <div className="space-y-2 mt-2">
+                          <div className="h-4 w-full rounded bg-slate-100 animate-pulse" />
+                          <div className="h-4 w-4/5 rounded bg-slate-100 animate-pulse" />
+                          <div className="h-4 w-3/5 rounded bg-slate-100 animate-pulse" />
+                        </div>
                       </CardHeader>
                     </Card>
                   ) : (
-                    <Card className="border border-white/70 bg-white/85 shadow-[0_28px_80px_-42px_rgba(7,30,84,0.55)] backdrop-blur-lg">
-                      <CardHeader className="space-y-4 pb-4">
-                        <div className="flex flex-wrap gap-2">
+                    <Card
+                      className={`relative flex h-[280px] flex-col border-2 border-[#9775fa]/30 bg-gradient-to-br from-purple-50/80 to-white shadow-lg transition-all duration-300 overflow-hidden ${isTransitioning || isCreating ? 'opacity-60 scale-[0.99]' : 'opacity-100 scale-100'}`}
+                    >
+                      <div
+                        className="absolute left-0 top-0 h-full w-1.5 rounded-r-full"
+                        style={{
+                          backgroundImage: `linear-gradient(to bottom, ${THEME_COLORS.destination.primary}, ${THEME_COLORS.destination.secondary})`,
+                        }}
+                      />
+                      <CardHeader className="flex h-full flex-col space-y-3 pb-3 pl-5 overflow-visible">
+                        <div className="flex-shrink-0">
+                          <Badge
+                            className="w-fit text-white font-semibold text-xs px-3 py-1.5"
+                            style={{
+                              backgroundColor: THEME_COLORS.destination.primary,
+                              borderColor: THEME_COLORS.destination.primary,
+                            }}
+                          >
+                            Competency
+                          </Badge>
+                        </div>
+                        <div className="flex flex-wrap gap-2 flex-shrink-0">
                           {/* Placeholder badges; replace with competency metadata once available */}
-                          <Tooltip>
+                          <Tooltip side="top">
                             <TooltipTrigger asChild>
                               <Badge
                                 tabIndex={0}
-                                className="bg-slate-100 text-slate-700 border-slate-200"
+                                className="bg-slate-100 text-slate-700 border border-slate-300 cursor-help hover:bg-slate-200 transition-colors"
                               >
                                 Apply
+                                <Info className="h-3 w-3 ml-1.5" />
                               </Badge>
                             </TooltipTrigger>
                             <TooltipContent>
@@ -516,17 +794,22 @@ function SessionPageContent() {
                               </p>
                             </TooltipContent>
                           </Tooltip>
-                          <Badge className="bg-slate-100 text-slate-700 border-slate-200">
+                          <Badge className="bg-slate-100 text-slate-700 border border-slate-300">
                             Programming Fundamentals
                           </Badge>
                         </div>
-                        <div className="space-y-2">
-                          <CardTitle className="text-lg text-slate-900">
+                        <div className="flex-1 flex flex-col min-h-0 space-y-2">
+                          <CardTitle className="text-xl font-bold text-slate-900 flex-shrink-0">
                             {competencies[1]!.title}
                           </CardTitle>
-                          <CardDescription className="text-sm text-slate-600">
-                            {competencies[1]!.description}
-                          </CardDescription>
+                          <div
+                            className="flex-1 overflow-y-scroll pr-2 scrollbar-thin"
+                            style={SCROLLBAR_STYLES}
+                          >
+                            <CardDescription className="text-base leading-relaxed text-slate-600">
+                              {competencies[1]!.description}
+                            </CardDescription>
+                          </div>
                         </div>
                       </CardHeader>
                     </Card>
@@ -534,50 +817,230 @@ function SessionPageContent() {
                 </div>
               </div>
 
-              <div className="mt-2 flex flex-wrap items-center gap-3">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-slate-700"
-                  onClick={handleUndo}
-                  disabled={history.length === 0}
-                >
-                  Undo{' '}
-                  <Kbd className="ml-2 bg-slate-200 text-slate-700 border border-slate-300">
-                    ⌘
-                  </Kbd>
-                  <Kbd className="ml-1 bg-slate-200 text-slate-700 border border-slate-300">
-                    ⇧
-                  </Kbd>
-                  <Kbd className="ml-1 bg-slate-200 text-slate-700 border border-slate-300">
-                    Z
-                  </Kbd>
-                </Button>
-                <div className="flex-1" />
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="bg-slate-200 text-slate-700 hover:bg-slate-300 border-slate-300"
-                  onClick={() => handleAction('skipped')}
-                  disabled={isLoading}
-                >
-                  Skip{' '}
-                  <Kbd className="ml-2 bg-slate-200 text-slate-700 border border-slate-300">
-                    Space
-                  </Kbd>
-                </Button>
-                <Button
-                  variant="default"
-                  size="sm"
-                  className="bg-[#0a4da2] text-white shadow-[0_18px_45px_-26px_rgba(7,30,84,0.75)] hover:bg-[#0d56b5]"
-                  onClick={() => handleAction('completed')}
-                  disabled={isLoading || isCreating || !userId || !relation}
-                >
-                  {isCreating ? 'Creating...' : 'Add Relation'}{' '}
-                  <Kbd className="ml-2 bg-slate-200 text-slate-700 border border-slate-300">
-                    ⏎
-                  </Kbd>
-                </Button>
+              {/* Combined Relationship Selection Section */}
+              <div className="mx-auto max-w-5xl rounded-2xl border border-slate-200/80 p-5 shadow-sm space-y-5">
+                {/* Live Preview Sentence */}
+                {competencies && competencies.length >= 2 && (
+                  <div className="rounded-xl bg-gradient-to-r from-blue-50/90 via-purple-50/70 to-blue-50/90 border border-blue-200/50 py-4 px-5 text-center">
+                    {hoveredRelation ? (
+                      <p className="text-base text-slate-800 leading-relaxed font-bold animate-in fade-in duration-200">
+                        <span
+                          className={`font-bold ${RELATIONSHIP_TYPE_TEXT_COLORS[hoveredRelation]}`}
+                        >
+                          {
+                            RELATIONSHIP_TYPES.find(
+                              rt => rt.value === hoveredRelation
+                            )?.label
+                          }
+                          :
+                        </span>{' '}
+                        {getRelationshipDescription(
+                          hoveredRelation,
+                          competencies[0]!.title,
+                          competencies[1]!.title
+                        )}
+                      </p>
+                    ) : relation ? (
+                      <p className="text-base text-slate-800 leading-relaxed font-bold">
+                        <span className="font-bold text-slate-900">
+                          {competencies[0]!.title}
+                        </span>{' '}
+                        <span
+                          className={`font-bold ${RELATIONSHIP_TYPE_TEXT_COLORS[relation] || 'text-slate-600'}`}
+                        >
+                          {relation === 'UNRELATED'
+                            ? 'is unrelated to'
+                            : RELATIONSHIP_TYPES.find(
+                                rt => rt.value === relation
+                              )?.label.toLowerCase() || ''}
+                        </span>{' '}
+                        <span className="font-bold text-slate-900">
+                          {competencies[1]!.title}
+                        </span>
+                      </p>
+                    ) : (
+                      <p className="text-base text-slate-800 leading-relaxed font-bold">
+                        Select a relationship type below or press{' '}
+                        <Kbd className="bg-white text-slate-700 border border-slate-300 text-xs font-semibold px-2 py-1">
+                          1
+                        </Kbd>{' '}
+                        <Kbd className="bg-white text-slate-700 border border-slate-300 text-xs font-semibold px-2 py-1">
+                          2
+                        </Kbd>{' '}
+                        <Kbd className="bg-white text-slate-700 border border-slate-300 text-xs font-semibold px-2 py-1">
+                          3
+                        </Kbd>{' '}
+                        <Kbd className="bg-white text-slate-700 border border-slate-300 text-xs font-semibold px-2 py-1">
+                          4
+                        </Kbd>
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {/* Relationship Type Buttons */}
+                {RELATIONSHIP_TYPES.length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 w-full">
+                    {RELATIONSHIP_TYPES.map(({ value, label }) => {
+                      const isSelected = relation === value;
+                      const shortcutIndex = RELATIONSHIP_TYPES.findIndex(
+                        rt => rt.value === value
+                      );
+                      const shortcutKey =
+                        shortcutIndex >= 0
+                          ? (shortcutIndex + 1).toString()
+                          : null;
+
+                      // Color mapping for selected state
+                      const selectedColors: Record<RelationshipType, string> = {
+                        ASSUMES:
+                          'bg-blue-600 text-white shadow-lg shadow-blue-500/25 border-blue-600',
+                        EXTENDS:
+                          'bg-purple-600 text-white shadow-lg shadow-purple-500/25 border-purple-600',
+                        MATCHES:
+                          'bg-emerald-600 text-white shadow-lg shadow-emerald-500/25 border-emerald-600',
+                        UNRELATED:
+                          'bg-slate-600 text-white shadow-lg shadow-slate-500/25 border-slate-600',
+                      };
+
+                      // Color mapping for unselected state - subtle color hints
+                      const unselectedColors: Record<RelationshipType, string> =
+                        {
+                          ASSUMES:
+                            'bg-white text-slate-800 border-blue-300 hover:border-blue-500 hover:bg-blue-50',
+                          EXTENDS:
+                            'bg-white text-slate-800 border-purple-300 hover:border-purple-500 hover:bg-purple-50',
+                          MATCHES:
+                            'bg-white text-slate-800 border-emerald-300 hover:border-emerald-500 hover:bg-emerald-50',
+                          UNRELATED:
+                            'bg-white text-slate-800 border-slate-300 hover:border-slate-500 hover:bg-slate-50',
+                        };
+
+                      // Icon mapping for relationship types
+                      const iconMap: Record<RelationshipType, React.ReactNode> =
+                        {
+                          ASSUMES: <Layers className="h-4 w-4" />,
+                          EXTENDS: <TrendingUp className="h-4 w-4" />,
+                          MATCHES: <Equal className="h-4 w-4" />,
+                          UNRELATED: <Unlink className="h-4 w-4" />,
+                        };
+
+                      return (
+                        <button
+                          key={value}
+                          type="button"
+                          data-relationship-button
+                          onClick={() => setRelation(isSelected ? null : value)}
+                          onMouseEnter={() => handleMouseEnter(value)}
+                          onMouseLeave={handleMouseLeave}
+                          className={`
+                            relative flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 w-full
+                            font-medium text-sm transition-all duration-200 ease-out
+                            focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2
+                            ${
+                              isSelected
+                                ? `${selectedColors[value]} scale-[1.02]`
+                                : unselectedColors[value]
+                            }
+                          `}
+                        >
+                          {iconMap[value]}
+                          <span>{label}</span>
+                          {shortcutKey && (
+                            <span
+                              className={`
+                                inline-flex items-center justify-center w-5 h-5 rounded text-xs font-bold
+                                ${
+                                  isSelected
+                                    ? 'bg-white/25 text-white'
+                                    : 'bg-slate-200/80 text-slate-500'
+                                }
+                              `}
+                            >
+                              {shortcutKey}
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="flex justify-center p-4">
+                    <div className="text-slate-400 text-base font-bold">
+                      Loading relationship types...
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Action Bar */}
+              <div className="mt-8 pt-6 border-t border-slate-200/40 mx-auto max-w-5xl">
+                <div className="flex items-center justify-between">
+                  {/* Left: Undo */}
+                  <button
+                    type="button"
+                    onClick={handleUndo}
+                    disabled={history.length === 0}
+                    className="flex items-center gap-2 px-3 py-2 text-sm text-slate-700 border border-slate-300 rounded-lg transition-all duration-200 hover:text-slate-900 hover:bg-slate-100 hover:border-slate-400 disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    <div className="flex items-center gap-1">
+                      <span className="mr-1">Undo</span>
+                      <Kbd className="bg-slate-100 text-slate-600 border border-slate-200 text-xs px-1.5 py-0.5">
+                        ⇧
+                      </Kbd>
+                      <span className="text-slate-400 text-xs">+</span>
+                      <Kbd className="bg-slate-100 text-slate-600 border border-slate-200 text-xs px-1.5 py-0.5">
+                        Z
+                      </Kbd>
+                    </div>
+                  </button>
+
+                  {/* Right: Primary Actions */}
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => handleAction('skipped')}
+                      disabled={isLoading || isCreating}
+                      className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-slate-700 border border-slate-300 rounded-lg transition-all duration-200 hover:text-slate-900 hover:bg-slate-100 hover:border-slate-400 disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      Skip
+                      <Kbd className="bg-slate-100 text-slate-600 border border-slate-200 text-xs px-1.5 py-0.5">
+                        Space
+                      </Kbd>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleAction('completed')}
+                      disabled={isLoading || isCreating || !userId || !relation}
+                      className={`
+                        relative flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white
+                        min-w-[180px]
+                        bg-gradient-to-r from-[#0a4da2] to-[#5538d1]
+                        shadow-lg shadow-blue-500/20
+                        transition-all duration-200 ease-out
+                        hover:shadow-xl hover:shadow-blue-500/30 hover:scale-[1.02]
+                        active:scale-[0.98]
+                        disabled:opacity-50 disabled:cursor-not-allowed 
+                        disabled:hover:shadow-lg disabled:hover:scale-100
+                      `}
+                    >
+                      {isCreating ? (
+                        <span className="flex items-center gap-2">
+                          <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                          Loading...
+                        </span>
+                      ) : (
+                        <>
+                          Add Relation
+                          <Kbd className="bg-white/20 text-white border border-white/30 text-xs px-1.5 py-0.5">
+                            ⏎
+                          </Kbd>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
               </div>
             </>
           )}
