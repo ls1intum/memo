@@ -100,3 +100,18 @@ export async function deleteLearningResourceAction(id: string) {
     };
   }
 }
+
+export async function getRandomLearningResourceAction() {
+  try {
+    const resource = await learningResourceService.getRandomLearningResource();
+    return { success: true, resource };
+  } catch (error) {
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to fetch random learning resource',
+    };
+  }
+}

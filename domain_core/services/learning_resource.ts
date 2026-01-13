@@ -41,6 +41,16 @@ export class LearningResourceService {
     await this.getLearningResourceById(id);
     await this.repository.delete(id);
   }
+
+  /**
+   * Returns a random learning resource, used for mapping sessions.
+   */
+  async getRandomLearningResource() {
+    const all = await this.repository.findAll();
+    if (all.length === 0) return null;
+    const randomIndex = Math.floor(Math.random() * all.length);
+    return all[randomIndex] ?? null;
+  }
 }
 
 export const learningResourceService = new LearningResourceService(

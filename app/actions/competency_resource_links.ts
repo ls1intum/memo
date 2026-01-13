@@ -1,21 +1,35 @@
 'use server';
 
 import { competencyResourceLinkService } from '@/domain_core/services/competency_resource_link';
+import { ResourceMatchType } from '@/domain_core/model/domain_model';
 
 export async function createCompetencyResourceLinkAction(formData: FormData) {
   try {
     const competencyId = formData.get('competencyId') as string | null;
     const resourceId = formData.get('resourceId') as string | null;
     const userId = formData.get('userId') as string | null;
+    const matchType = formData.get('matchType') as ResourceMatchType | null;
 
-    if (!competencyId || !resourceId || !userId) {
+    if (!competencyId || !resourceId || !userId || !matchType) {
       return { success: false, error: 'All fields are required' };
+    }
+
+    // Validate matchType is a valid enum value
+    const validMatchTypes: ResourceMatchType[] = [
+      'UNRELATED',
+      'WEAK',
+      'GOOD_FIT',
+      'PERFECT_MATCH',
+    ];
+    if (!validMatchTypes.includes(matchType)) {
+      return { success: false, error: 'Invalid match type' };
     }
 
     const link = await competencyResourceLinkService.createLink({
       competencyId,
       resourceId,
       userId,
+      matchType,
     });
 
     return { success: true, link };

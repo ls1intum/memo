@@ -1,7 +1,7 @@
-import { UserRole, RelationshipType } from '@prisma/client';
+import { UserRole, RelationshipType, ResourceMatchType } from '@prisma/client';
 
 // Re-export Prisma enums for use in other layers
-export { UserRole, RelationshipType };
+export { UserRole, RelationshipType, ResourceMatchType };
 
 export interface User {
   id: string;
@@ -78,6 +78,7 @@ export interface CompetencyResourceLink {
   competencyId: string;
   resourceId: string;
   userId: string;
+  matchType: ResourceMatchType;
   createdAt: Date;
 }
 
@@ -85,4 +86,5 @@ export interface CreateCompetencyResourceLinkInput {
   competencyId: string;
   resourceId: string;
   userId: string;
+  matchType: ResourceMatchType;
 }
