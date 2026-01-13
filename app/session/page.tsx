@@ -235,7 +235,7 @@ function SessionPageContent() {
         } else {
           setError(
             result.error ??
-            'Failed to load user information. Please try again later.'
+              'Failed to load user information. Please try again later.'
           );
         }
       } catch (err) {
@@ -270,7 +270,7 @@ function SessionPageContent() {
         if (!result.success) {
           setError(
             result.error ??
-            'An unexpected error occurred while fetching competencies.'
+              'An unexpected error occurred while fetching competencies.'
           );
           if (isInitialLoad) setCompetencies([]);
           setIsTransitioning(false);
@@ -302,7 +302,7 @@ function SessionPageContent() {
         if (!compResult.success || !compResult.competencies?.length) {
           setError(
             compResult.error ??
-            'Failed to fetch competency for resource mapping.'
+              'Failed to fetch competency for resource mapping.'
           );
           if (isInitialLoad) setCompetencies([]);
           setIsTransitioning(false);
@@ -312,7 +312,7 @@ function SessionPageContent() {
         if (!resourceResult.success || !resourceResult.resource) {
           setError(
             resourceResult.error ??
-            'Failed to fetch learning resource. Make sure resources are seeded.'
+              'Failed to fetch learning resource. Make sure resources are seeded.'
           );
           setCompetencies(compResult.competencies);
           setLearningResource(null);
@@ -739,9 +739,10 @@ function SessionPageContent() {
                 }}
                 className={`
                   px-3 py-1.5 text-xs font-semibold rounded-md transition-all duration-200
-                  ${mappingMode === 'competency'
-                    ? 'bg-white text-slate-900 shadow-sm'
-                    : 'text-slate-500 hover:text-slate-700'
+                  ${
+                    mappingMode === 'competency'
+                      ? 'bg-white text-slate-900 shadow-sm'
+                      : 'text-slate-500 hover:text-slate-700'
                   }
                 `}
               >
@@ -756,9 +757,10 @@ function SessionPageContent() {
                 }}
                 className={`
                   px-3 py-1.5 text-xs font-semibold rounded-md transition-all duration-200
-                  ${mappingMode === 'resource'
-                    ? 'bg-white text-slate-900 shadow-sm'
-                    : 'text-slate-500 hover:text-slate-700'
+                  ${
+                    mappingMode === 'resource'
+                      ? 'bg-white text-slate-900 shadow-sm'
+                      : 'text-slate-500 hover:text-slate-700'
                   }
                 `}
               >
@@ -1027,8 +1029,8 @@ function SessionPageContent() {
                             {relation === 'UNRELATED'
                               ? 'is unrelated to'
                               : RELATIONSHIP_TYPES.find(
-                                rt => rt.value === relation
-                              )?.label.toLowerCase() || ''}
+                                  rt => rt.value === relation
+                                )?.label.toLowerCase() || ''}
                           </span>{' '}
                           <span className="font-bold text-slate-900">
                             {competencies[1]!.title}
@@ -1210,9 +1212,10 @@ function SessionPageContent() {
                       className={`
                         relative flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm font-bold text-white
                         min-w-[180px]
-                        ${mappingMode === 'resource'
-                          ? 'bg-gradient-to-r from-pink-600 to-pink-500 shadow-lg shadow-pink-500/20 hover:shadow-xl hover:shadow-pink-500/30'
-                          : 'bg-gradient-to-r from-[#0a4da2] to-[#5538d1] shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/30'
+                        ${
+                          mappingMode === 'resource'
+                            ? 'bg-gradient-to-r from-pink-600 to-pink-500 shadow-lg shadow-pink-500/20 hover:shadow-xl hover:shadow-pink-500/30'
+                            : 'bg-gradient-to-r from-[#0a4da2] to-[#5538d1] shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/30'
                         }
                         transition-all duration-200 ease-out
                         hover:scale-[1.02]
