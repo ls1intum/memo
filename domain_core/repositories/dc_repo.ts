@@ -212,6 +212,7 @@ export class PrismaCompetencyResourceLinkRepository
         competencyId: data.competencyId,
         resourceId: data.resourceId,
         userId: data.userId,
+        matchType: data.matchType,
       },
     });
   }

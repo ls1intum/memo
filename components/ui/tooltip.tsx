@@ -98,7 +98,7 @@ export function TooltipTrigger({
     return () => {
       setTriggerElement(null);
     };
-  }, []);
+  }, [setTriggerElement]);
 
   const clearTimer = () => {
     if (timerRef.current) {
@@ -179,7 +179,7 @@ export function TooltipContent({ children, className }: TooltipContentProps) {
     const handleResize = () => updatePosition();
     const handleScroll = () => updatePosition();
 
-    window.addEventListener('resize', handleResize);
+    window.addEventListener('resize', handleResize, { passive: true });
     window.addEventListener('scroll', handleScroll, { passive: true });
 
     return () => {
