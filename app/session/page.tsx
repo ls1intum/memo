@@ -104,65 +104,6 @@ const getRelationshipDescription = (
   }
 };
 
-// Blue-Purple theme colors (hardcoded after user selection)
-const THEME_COLORS = {
-  source: { primary: '#0a4da2', secondary: '#4263eb' },
-  destination: { primary: '#7c3aed', secondary: '#9775fa' },
-};
-
-// Helper to get dynamic description for relationship types
-// Used in the live preview banner
-const getRelationshipDescription = (
-  type: RelationshipType,
-  titleA: string,
-  titleB: string
-) => {
-  switch (type) {
-    case 'ASSUMES':
-      return (
-        <>
-          <span className="font-medium text-slate-900">{titleA}</span> requires{' '}
-          <span className="font-medium text-slate-900">{titleB}</span> as
-          prerequisite
-        </>
-      );
-    case 'EXTENDS':
-      return (
-        <>
-          <span className="font-medium text-slate-900">{titleA}</span> builds on
-          / is a subset or advanced form of{' '}
-          <span className="font-medium text-slate-900">{titleB}</span>
-        </>
-      );
-    case 'MATCHES':
-      return (
-        <>
-          <span className="font-medium text-slate-900">{titleA}</span> is
-          equivalent / strongly overlaps with{' '}
-          <span className="font-medium text-slate-900">{titleB}</span>
-        </>
-      );
-    case 'UNRELATED':
-      return (
-        <>
-          <span className="font-medium text-slate-900">{titleA}</span> and{' '}
-          <span className="font-medium text-slate-900">{titleB}</span> have no
-          meaningful relationship
-        </>
-      );
-    default:
-      return '';
-  }
-};
-
-// Text colors for relationship types (used in preview sentence)
-const RELATIONSHIP_TYPE_TEXT_COLORS: Record<RelationshipType, string> = {
-  ASSUMES: 'text-blue-600',
-  EXTENDS: 'text-purple-600',
-  MATCHES: 'text-emerald-600',
-  UNRELATED: 'text-slate-600',
-};
-
 // Shared scrollbar styles for competency description containers
 const SCROLLBAR_STYLES: {
   scrollbarWidth: 'thin';
