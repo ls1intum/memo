@@ -32,7 +32,7 @@ export function TypeSelectionButton<T extends string>({
   return (
     <button
       type="button"
-      data-relationship-button
+      data-type-selection-button
       onClick={() => onSelect(isSelected ? null : value)}
       onMouseEnter={() => onHoverEnter(value)}
       onMouseLeave={onHoverLeave}
