@@ -48,6 +48,16 @@ export const learningResourcesApi = {
     return response.data;
   },
 
+  getRandom: async (count: number = 1): Promise<LearningResource[]> => {
+    const response = await apiClient.get<LearningResource[]>(
+      '/api/learning-resources/random',
+      {
+        params: { count },
+      }
+    );
+    return response.data;
+  },
+
   update: async (
     id: string,
     data: UpdateLearningResourceRequest

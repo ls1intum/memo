@@ -52,6 +52,14 @@ public class LearningResourceService {
         return learningResourceRepository.findAll();
     }
 
+    @Transactional(readOnly = true)
+    public List<LearningResource> getRandomLearningResources(int count) {
+        if (count <= 0) {
+            return List.of();
+        }
+        return learningResourceRepository.findRandomLearningResources(count);
+    }
+
     @Transactional
     public LearningResource updateLearningResource(String id, UpdateLearningResourceRequest request) {
         LearningResource resource = getLearningResourceById(id);

@@ -1,19 +1,14 @@
--- CreateEnum
-CREATE TYPE "UserRole" AS ENUM ('USER', 'ADMIN');
-
--- CreateEnum
-CREATE TYPE "RelationshipType" AS ENUM ('ASSUMES', 'EXTENDS', 'MATCHES');
-
 -- Note: All ID columns use VARCHAR(30) for CUID-like identifiers.
 -- The IdGenerator produces ~20 character IDs (prefix + base36 timestamp + counter + random).
 -- VARCHAR(30) provides sufficient headroom while being more efficient than TEXT for indexing.
+-- Enum values are stored as VARCHAR for JPA compatibility (no custom Hibernate type handlers needed).
 
 -- CreateTable
 CREATE TABLE "users" (
     "id" VARCHAR(30) NOT NULL,
     "name" TEXT NOT NULL,
     "email" TEXT NOT NULL,
-    "role" "UserRole" NOT NULL DEFAULT 'USER',
+    "role" VARCHAR(20) NOT NULL DEFAULT 'USER',
     "created_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "users_pkey" PRIMARY KEY ("id")
@@ -32,7 +27,7 @@ CREATE TABLE "competencies" (
 -- CreateTable
 CREATE TABLE "competency_relationships" (
     "id" VARCHAR(30) NOT NULL,
-    "relationship_type" "RelationshipType" NOT NULL,
+    "relationship_type" VARCHAR(20) NOT NULL,
     "origin_id" VARCHAR(30) NOT NULL,
     "destination_id" VARCHAR(30) NOT NULL,
     "user_id" VARCHAR(30) NOT NULL,

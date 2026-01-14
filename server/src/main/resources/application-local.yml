@@ -1,18 +1,11 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5433/memo
-    username: postgres
-    password: memo
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5433}/${DB_NAME:memo}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:memo}
 
   jpa:
     show-sql: true
-
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: http://localhost:8081/realms/memo
-          jwk-set-uri: http://localhost:8081/realms/memo/protocol/openid-connect/certs
 
 server:
   port: 8080

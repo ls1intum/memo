@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
-import { cn } from '../lib/utils';
+import { cn } from '@/lib/utils';
 
 const navItems = [
   { href: '/', label: 'Home' },

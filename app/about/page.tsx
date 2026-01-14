@@ -16,38 +16,38 @@ export const metadata = {
 
 export default function About() {
   return (
-    <div className="page-wrapper">
-      <div className="blur-orb-container">
-        <div className="blur-orb blur-orb-white" />
-        <div className="blur-orb blur-orb-blue" />
-        <div className="blur-orb blur-orb-pink" />
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#d7e3ff] via-[#f3f5ff] to-[#e8ecff] text-slate-900">
+      <div className="absolute inset-0 -z-10 opacity-70">
+        <div className="absolute left-1/2 top-[-6rem] h-[36rem] w-[36rem] -translate-x-1/2 rounded-full bg-white/80 blur-[140px]" />
+        <div className="absolute left-[10%] top-[22%] h-80 w-80 rounded-full bg-[#7fb0ff]/35 blur-[120px]" />
+        <div className="absolute right-[14%] top-[28%] h-[22rem] w-[22rem] rounded-[40%] bg-gradient-to-br from-[#ffdff3]/55 via-[#fff3f8]/35 to-transparent blur-[140px]" />
       </div>
 
-      <main className="container container-xl relative z-10 flex flex-col gap-16 pb-20 pt-32">
+      <main className="relative z-10 mx-auto flex w-full max-w-6xl flex-col gap-16 px-6 pb-20 pt-[8rem] lg:px-0">
         {/* Hero Section */}
-        <section className="stack-xl text-center animate-in fade-in slide-in-from-bottom-4 duration-700">
-          <div className="stack-lg">
-            <h1 className="hero-title">
+        <section className="space-y-12 text-center animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <div className="space-y-8">
+            <h1 className="text-balance text-[3.2rem] font-semibold leading-[1.04] tracking-tight text-slate-900 sm:text-[3.9rem] lg:text-[4.9rem]">
               Building the foundation for{' '}
-              <span className="text-gradient-primary">
+              <span className="bg-gradient-to-r from-[#0a4da2] via-[#5538d1] to-[#9b5dfa] bg-clip-text text-transparent">
                 competency-based recommender benchmarking
               </span>
             </h1>
-            <p className="text-lg mx-auto max-w-4xl font-medium leading-relaxed text-slate-1000">
+            <p className="mx-auto max-w-4xl text-xl font-medium leading-relaxed text-slate-1000">
               A collaborative platform for collecting high-quality competency
               relationship data, enabling systematic evaluation of educational
               recommender systems.
             </p>
           </div>
-          <div className="flex-center flex-wrap gap-3">
+          <div className="flex flex-wrap items-center justify-center gap-3">
             <Button
-              className="btn-primary h-12 rounded-full px-7 text-base"
+              className="h-12 rounded-full bg-[#0a4da2] px-7 text-base font-semibold text-white shadow-[0_18px_45px_-26px_rgba(7,30,84,0.75)] transition hover:bg-[#0d56b5]"
               asChild
             >
               <Link href="/session">Try the Platform</Link>
             </Button>
             <Button
-              className="btn-secondary h-12 rounded-full px-7 text-base"
+              className="h-12 rounded-full border border-white/70 bg-white/80 px-7 text-base font-semibold text-slate-900 shadow-sm transition hover:border-slate-200 hover:bg-white"
               asChild
             >
               <Link href="#problem">Learn More</Link>
@@ -57,43 +57,46 @@ export default function About() {
 
         {/* Quick Stats */}
         <section className="grid gap-4 sm:grid-cols-3">
-          <div className="card text-center p-6">
-            <div className="heading-3 text-[#0a4da2]">4 Months</div>
-            <div className="text-label mt-1 text-slate-600">
+          <div className="rounded-2xl border border-white/70 bg-white/80 p-6 text-center backdrop-blur-sm">
+            <div className="text-3xl font-bold text-[#0a4da2]">4 Months</div>
+            <div className="mt-1 text-sm font-medium text-slate-600">
               Development Timeline
             </div>
           </div>
-          <div className="card text-center p-6">
-            <div className="heading-3 text-[#0a4da2]">2 Students</div>
-            <div className="text-label mt-1 text-slate-600">
+          <div className="rounded-2xl border border-white/70 bg-white/80 p-6 text-center backdrop-blur-sm">
+            <div className="text-3xl font-bold text-[#0a4da2]">2 Students</div>
+            <div className="mt-1 text-sm font-medium text-slate-600">
               Collaborative Effort
             </div>
           </div>
-          <div className="card text-center p-6">
-            <div className="heading-3 text-[#0a4da2]">TUM</div>
-            <div className="text-label mt-1 text-slate-600">
+          <div className="rounded-2xl border border-white/70 bg-white/80 p-6 text-center backdrop-blur-sm">
+            <div className="text-3xl font-bold text-[#0a4da2]">TUM</div>
+            <div className="mt-1 text-sm font-medium text-slate-600">
               Technical University of Munich
             </div>
           </div>
         </section>
 
         {/* The Problem Section */}
-        <section id="problem" className="card grid gap-6 p-8 scroll-mt-28">
-          <div className="stack-xs">
-            <Badge className="badge-default text-label-caps w-fit">
+        <section
+          id="problem"
+          className="grid gap-6 rounded-[32px] border border-white/70 bg-white/85 p-8 shadow-[0_26px_90px_-55px_rgba(7,30,84,0.5)] backdrop-blur-xl scroll-mt-28"
+        >
+          <div className="space-y-3">
+            <Badge className="w-fit rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-600">
               The Problem
             </Badge>
-            <h2 className="heading-4 text-slate-900">
+            <h2 className="text-2xl font-semibold text-slate-900">
               Why We Need Standardized Benchmarks
             </h2>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <Card className="card-hover">
+            <Card className="border-white/70 bg-white/60 backdrop-blur-sm transition-all hover:bg-white/80">
               <CardHeader>
-                <div className="icon-container mb-3">
+                <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-[#0a4da2]/10">
                   <svg
-                    className="icon-primary"
+                    className="h-6 w-6 text-[#0a4da2]"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -106,7 +109,7 @@ export default function About() {
                     />
                   </svg>
                 </div>
-                <CardTitle className="heading-6">No Shared Datasets</CardTitle>
+                <CardTitle className="text-lg">No Shared Datasets</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-slate-600">
@@ -117,11 +120,11 @@ export default function About() {
               </CardContent>
             </Card>
 
-            <Card className="card-hover">
+            <Card className="border-white/70 bg-white/60 backdrop-blur-sm transition-all hover:bg-white/80">
               <CardHeader>
-                <div className="icon-container mb-3">
+                <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-[#0a4da2]/10">
                   <svg
-                    className="icon-primary"
+                    className="h-6 w-6 text-[#0a4da2]"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -134,7 +137,7 @@ export default function About() {
                     />
                   </svg>
                 </div>
-                <CardTitle className="heading-6">Data Quality Issues</CardTitle>
+                <CardTitle className="text-lg">Data Quality Issues</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-slate-600">
@@ -144,11 +147,11 @@ export default function About() {
               </CardContent>
             </Card>
 
-            <Card className="card-hover">
+            <Card className="border-white/70 bg-white/60 backdrop-blur-sm transition-all hover:bg-white/80">
               <CardHeader>
-                <div className="icon-container mb-3">
+                <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-[#0a4da2]/10">
                   <svg
-                    className="icon-primary"
+                    className="h-6 w-6 text-[#0a4da2]"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -161,7 +164,7 @@ export default function About() {
                     />
                   </svg>
                 </div>
-                <CardTitle className="heading-6">
+                <CardTitle className="text-lg">
                   Manual Curation Doesn&apos;t Scale
                 </CardTitle>
               </CardHeader>
@@ -176,15 +179,15 @@ export default function About() {
         </section>
 
         {/* Solution Section */}
-        <section className="card stack-lg p-8">
-          <div className="stack-xs">
-            <Badge className="badge-primary text-label-caps w-fit">
+        <section className="space-y-6 rounded-[32px] border border-white/70 bg-white/85 p-8 shadow-[0_26px_90px_-55px_rgba(7,30,84,0.5)] backdrop-blur-xl">
+          <div className="space-y-3">
+            <Badge className="w-fit rounded-full border border-[#0a4da2]/30 bg-[#0a4da2]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-[#0a4da2]">
               Our Solution
             </Badge>
-            <h2 className="heading-4 text-slate-900">
+            <h2 className="text-2xl font-semibold text-slate-900">
               Collaborative Data Collection Platform
             </h2>
-            <p className="text-base max-w-3xl leading-relaxed text-slate-700">
+            <p className="max-w-3xl text-base leading-relaxed text-slate-700">
               Memo enables educators and researchers to contribute competency
               mappings systematically, creating a high-quality benchmark dataset
               for evaluating educational recommender systems.
@@ -192,11 +195,11 @@ export default function About() {
           </div>
 
           <div className="grid gap-6 md:grid-cols-2">
-            <div className="feature-box">
+            <div className="space-y-4 rounded-2xl border border-slate-200 bg-slate-50/80 p-6">
               <div className="flex items-start gap-4">
-                <div className="icon-container-sm">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#0a4da2]">
                   <svg
-                    className="icon-white"
+                    className="h-5 w-5 text-white"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -213,7 +216,7 @@ export default function About() {
                   <h3 className="font-semibold text-slate-900">
                     Generalized Database Model
                   </h3>
-                  <p className="text-sm mt-1 text-slate-600">
+                  <p className="mt-1 text-sm text-slate-600">
                     Captures competency relationships independent of specific
                     LMS implementations, enabling universal benchmark dataset
                     creation.
@@ -222,11 +225,11 @@ export default function About() {
               </div>
             </div>
 
-            <div className="feature-box">
+            <div className="space-y-4 rounded-2xl border border-slate-200 bg-slate-50/80 p-6">
               <div className="flex items-start gap-4">
-                <div className="icon-container-sm">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#0a4da2]">
                   <svg
-                    className="icon-white"
+                    className="h-5 w-5 text-white"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -243,7 +246,7 @@ export default function About() {
                   <h3 className="font-semibold text-slate-900">
                     Verified Contributors
                   </h3>
-                  <p className="text-sm mt-1 text-slate-600">
+                  <p className="mt-1 text-sm text-slate-600">
                     Domain-based email verification and role-based access
                     control ensure contributions come from credible sources.
                   </p>
@@ -251,11 +254,11 @@ export default function About() {
               </div>
             </div>
 
-            <div className="feature-box">
+            <div className="space-y-4 rounded-2xl border border-slate-200 bg-slate-50/80 p-6">
               <div className="flex items-start gap-4">
-                <div className="icon-container-sm">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#0a4da2]">
                   <svg
-                    className="icon-white"
+                    className="h-5 w-5 text-white"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -278,7 +281,7 @@ export default function About() {
                   <h3 className="font-semibold text-slate-900">
                     Admin Interfaces
                   </h3>
-                  <p className="text-sm mt-1 text-slate-600">
+                  <p className="mt-1 text-sm text-slate-600">
                     Comprehensive tools for user management, dataset export, and
                     quality monitoring.
                   </p>
@@ -286,11 +289,11 @@ export default function About() {
               </div>
             </div>
 
-            <div className="feature-box">
+            <div className="space-y-4 rounded-2xl border border-slate-200 bg-slate-50/80 p-6">
               <div className="flex items-start gap-4">
-                <div className="icon-container-sm">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#0a4da2]">
                   <svg
-                    className="icon-white"
+                    className="h-5 w-5 text-white"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -307,7 +310,7 @@ export default function About() {
                   <h3 className="font-semibold text-slate-900">
                     Production Infrastructure
                   </h3>
-                  <p className="text-sm mt-1 text-slate-600">
+                  <p className="mt-1 text-sm text-slate-600">
                     Docker containerization and deployment pipelines enable
                     scalable, concurrent access across institutions.
                   </p>
@@ -318,14 +321,16 @@ export default function About() {
         </section>
 
         {/* Impact Section */}
-        <section className="section-gradient-primary">
-          <div className="stack-md">
-            <Badge className="badge-light">Impact</Badge>
-            <h2 className="heading-4">
+        <section className="rounded-[32px] border border-white/70 bg-gradient-to-br from-[#0a4da2] via-[#4263eb] to-[#9775fa] p-8 text-white shadow-[0_32px_110px_-55px_rgba(7,30,84,0.65)]">
+          <div className="space-y-4">
+            <Badge className="w-fit rounded-full border border-white/30 bg-white/20 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-white/90">
+              Impact
+            </Badge>
+            <h2 className="text-2xl font-semibold">
               Advancing Educational Technology Research
             </h2>
             <div className="grid gap-4 text-white/90 sm:grid-cols-2">
-              <div className="stack-sm">
+              <div className="space-y-2">
                 <div className="flex items-start gap-2">
                   <svg
                     className="mt-0.5 h-5 w-5 shrink-0"
@@ -364,7 +369,7 @@ export default function About() {
                   </p>
                 </div>
               </div>
-              <div className="stack-sm">
+              <div className="space-y-2">
                 <div className="flex items-start gap-2">
                   <svg
                     className="mt-0.5 h-5 w-5 shrink-0"
@@ -407,15 +412,15 @@ export default function About() {
         </section>
 
         {/* Tech Stack Section */}
-        <section className="card stack-lg p-8">
-          <div className="stack-xs">
-            <Badge className="badge-default text-label-caps w-fit">
+        <section className="space-y-8 rounded-[32px] border border-white/70 bg-white/85 p-8 shadow-[0_26px_90px_-55px_rgba(7,30,84,0.5)] backdrop-blur-xl">
+          <div className="space-y-3">
+            <Badge className="w-fit rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-600">
               Technology
             </Badge>
-            <h2 className="heading-4 text-slate-900">
+            <h2 className="text-2xl font-semibold text-slate-900">
               Built with Modern Web Technologies
             </h2>
-            <p className="text-base max-w-2xl leading-relaxed text-slate-700">
+            <p className="max-w-2xl text-base leading-relaxed text-slate-700">
               The platform leverages industry-standard tools to ensure
               reliability, scalability, and maintainability.
             </p>
@@ -431,29 +436,31 @@ export default function About() {
             ].map(tech => (
               <div
                 key={tech.name}
-                className="card-hover group relative overflow-hidden p-6"
+                className="group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-gradient-to-br from-white to-slate-50/50 p-6 shadow-sm transition-all duration-300 hover:scale-105 hover:border-[#0a4da2]/30 hover:shadow-lg hover:shadow-[#0a4da2]/10"
               >
                 <div className="relative z-10">
-                  <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-linear-to-br from-slate-100 to-slate-200/50 transition-all duration-300 group-hover:scale-110 group-hover:from-[#0a4da2]/10 group-hover:to-[#0a4da2]/5">
+                  <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-slate-100 to-slate-200/50 transition-all duration-300 group-hover:scale-110 group-hover:from-[#0a4da2]/10 group-hover:to-[#0a4da2]/5">
                     <div
-                      className={`h-6 w-6 rounded-lg bg-linear-to-br ${tech.color} opacity-80 group-hover:opacity-100`}
+                      className={`h-6 w-6 rounded-lg bg-gradient-to-br ${tech.color} opacity-80 group-hover:opacity-100`}
                     />
                   </div>
                   <h3 className="text-base font-semibold text-slate-900 transition-colors group-hover:text-[#0a4da2]">
                     {tech.name}
                   </h3>
                 </div>
-                <div className="absolute inset-0 z-0 bg-linear-to-br from-transparent via-transparent to-[#0a4da2]/5 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                <div className="absolute inset-0 -z-0 bg-gradient-to-br from-transparent via-transparent to-[#0a4da2]/5 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
               </div>
             ))}
           </div>
         </section>
 
         {/* Team Section */}
-        <section className="card stack-lg p-8">
-          <div className="stack-xs">
-            <Badge className="badge-default text-label-caps w-fit">Team</Badge>
-            <h2 className="heading-4 text-slate-900">
+        <section className="space-y-6 rounded-[32px] border border-white/70 bg-white/85 p-8 shadow-[0_26px_90px_-55px_rgba(7,30,84,0.5)] backdrop-blur-xl">
+          <div className="space-y-3">
+            <Badge className="w-fit rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-600">
+              Team
+            </Badge>
+            <h2 className="text-2xl font-semibold text-slate-900">
               Bachelor&apos;s Thesis Project
             </h2>
           </div>
@@ -509,7 +516,7 @@ export default function About() {
             </Card>
           </div>
 
-          <div className="info-box">
+          <div className="rounded-xl bg-slate-50/80 px-4 py-3 text-sm text-slate-600">
             <strong>Timeline:</strong> December 15, 2025 – April 15, 2026
           </div>
         </section>

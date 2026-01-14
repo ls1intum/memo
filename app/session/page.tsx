@@ -2,25 +2,20 @@
 
 import { useEffect, useState, useCallback, useRef, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { getRandomCompetenciesAction } from '@/app/actions/competencies';
 import {
+  getRandomCompetenciesAction,
   createCompetencyRelationshipAction,
   deleteCompetencyRelationshipAction,
-} from '@/app/actions/competency_relationships';
-import {
   createCompetencyResourceLinkAction,
   deleteCompetencyResourceLinkAction,
-} from '@/app/actions/competency_resource_links';
-import { getRandomLearningResourceAction } from '@/app/actions/learning_resources';
-import { getOrCreateDemoUserAction } from '@/app/actions/users';
-import type {
-  Competency,
-  LearningResource,
-} from '@/domain_core/model/domain_model';
+  getRandomLearningResourceAction,
+  getOrCreateDemoUserAction,
+} from '@/lib/api/session-helpers';
+import type { Competency, LearningResource } from '@/lib/api/types';
 import {
   RelationshipType,
   ResourceMatchType,
-} from '@/domain_core/model/domain_model';
+} from '@/components/session/session-constants';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Kbd } from '@/components/ui/kbd';

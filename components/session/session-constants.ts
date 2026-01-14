@@ -8,10 +8,14 @@ import {
   ThumbsUp,
   Star,
 } from 'lucide-react';
-import {
-  RelationshipType,
-  ResourceMatchType,
-} from '@/domain_core/model/domain_model';
+
+// Define enums locally for UI (matching what the session page uses)
+export type RelationshipType = 'ASSUMES' | 'EXTENDS' | 'MATCHES' | 'UNRELATED';
+export type ResourceMatchType =
+  | 'UNRELATED'
+  | 'WEAK'
+  | 'GOOD_FIT'
+  | 'PERFECT_MATCH';
 
 // Blue-Purple theme colors for competency mapping
 export const THEME_COLORS = {
@@ -26,12 +30,18 @@ export type RelationshipTypeOption = {
   label: string;
 };
 
-export const RELATIONSHIP_TYPES: RelationshipTypeOption[] = (
-  Object.values(RelationshipType) as RelationshipType[]
-).map(type => ({
-  value: type,
-  label: type.charAt(0) + type.slice(1).toLowerCase(),
-}));
+const RELATIONSHIP_TYPE_VALUES: RelationshipType[] = [
+  'ASSUMES',
+  'EXTENDS',
+  'MATCHES',
+  'UNRELATED',
+];
+
+export const RELATIONSHIP_TYPES: RelationshipTypeOption[] =
+  RELATIONSHIP_TYPE_VALUES.map(type => ({
+    value: type,
+    label: type.charAt(0) + type.slice(1).toLowerCase(),
+  }));
 
 // Color mappings for relationship types
 export const RELATIONSHIP_SELECTED_COLORS: Record<RelationshipType, string> = {

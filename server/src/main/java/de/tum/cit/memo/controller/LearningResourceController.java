@@ -60,6 +60,15 @@ public class LearningResourceController {
         return ResponseEntity.ok(resources);
     }
 
+    @GetMapping("/random")
+    @Operation(summary = "Get random learning resources")
+    public ResponseEntity<List<LearningResource>> getRandomLearningResources(
+        @RequestParam(defaultValue = "1") int count
+    ) {
+        List<LearningResource> resources = learningResourceService.getRandomLearningResources(count);
+        return ResponseEntity.ok(resources);
+    }
+
     @PutMapping("/{id}")
     @Operation(summary = "Update learning resource")
     public ResponseEntity<LearningResource> updateLearningResource(
