@@ -38,7 +38,6 @@ export async function getRandomCompetenciesAction(count: number): Promise<{
   try {
     const competencies = await competenciesApi.getRandom(count);
     if (!competencies || competencies.length === 0) {
-      console.warn('No competencies returned from API');
       return {
         success: false,
         error: 'No competencies available. Please seed the database.',
@@ -46,7 +45,6 @@ export async function getRandomCompetenciesAction(count: number): Promise<{
     }
     return { success: true, competencies };
   } catch (error) {
-    console.error('Error fetching competencies:', error);
     return {
       success: false,
       error:
