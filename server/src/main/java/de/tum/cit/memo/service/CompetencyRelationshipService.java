@@ -25,6 +25,15 @@ public class CompetencyRelationshipService {
             throw new InvalidOperationException("Cannot create relationship to itself");
         }
 
+        // Check if relationship already exists
+        if (relationshipRepository.existsByOriginIdAndDestinationIdAndRelationshipType(
+                request.getOriginId(),
+                request.getDestinationId(),
+                request.getRelationshipType())) {
+            throw new InvalidOperationException(
+                "Relationship already exists between these competencies with this type");
+        }
+
         CompetencyRelationship relationship = CompetencyRelationship.builder()
             .id(IdGenerator.generateCuid())
             .relationshipType(request.getRelationshipType())
