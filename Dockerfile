@@ -10,8 +10,8 @@ FROM base AS development
 COPY package.json package-lock.json ./
 RUN npm install --legacy-peer-deps
 COPY . .
-EXPOSE 3000
-CMD ["npm", "run", "dev"]
+EXPOSE 5173
+CMD ["npm", "run", "dev", "--", "--host"]
 
 # Dependencies stage (for production)
 FROM base AS deps
@@ -25,18 +25,15 @@ RUN npm install --legacy-peer-deps
 COPY . .
 RUN npm run build
 
-# Production stage
-FROM node:24.3-alpine AS production
-WORKDIR /app
-ENV NODE_ENV=production
+# Production stage - serve static files with nginx
+FROM nginx:alpine AS production
 
-# Copy production dependencies
-COPY --from=deps /app/node_modules ./node_modules
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/package.json ./package.json
-COPY --from=builder /app/next.config.ts ./next.config.ts
+# Copy built assets from builder
+COPY --from=builder /app/dist /usr/share/nginx/html
 
-EXPOSE 3000
-CMD ["npm", "start"]
+# Copy custom nginx config for SPA routing
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
 
