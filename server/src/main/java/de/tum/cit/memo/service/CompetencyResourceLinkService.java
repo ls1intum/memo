@@ -25,6 +25,7 @@ public class CompetencyResourceLinkService {
             .competencyId(request.getCompetencyId())
             .resourceId(request.getResourceId())
             .userId(request.getUserId())
+            .matchType(request.getMatchType())
             .build();
 
         return linkRepository.save(link);

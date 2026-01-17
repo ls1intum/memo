@@ -1,7 +1,10 @@
 package de.tum.cit.memo.entity;
 
+import de.tum.cit.memo.enums.ResourceMatchType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
@@ -9,6 +12,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -49,6 +53,11 @@ public class CompetencyResourceLink {
     @NotBlank
     @Column(name = "user_id", nullable = false, length = 30)
     private String userId;
+
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    @Column(name = "match_type", nullable = false, length = 20)
+    private ResourceMatchType matchType;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "competency_id", insertable = false, updatable = false)

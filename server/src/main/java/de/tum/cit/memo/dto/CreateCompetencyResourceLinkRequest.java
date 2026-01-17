@@ -1,6 +1,8 @@
 package de.tum.cit.memo.dto;
 
+import de.tum.cit.memo.enums.ResourceMatchType;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,4 +22,7 @@ public class CreateCompetencyResourceLinkRequest {
 
     @NotBlank(message = "User ID is required")
     private String userId;
+
+    @NotNull(message = "Match type is required")
+    private ResourceMatchType matchType;
 }

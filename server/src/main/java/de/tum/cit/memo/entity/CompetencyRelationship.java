@@ -10,7 +10,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -24,10 +23,7 @@ import org.hibernate.annotations.OnDeleteAction;
 import java.time.Instant;
 
 @Entity
-@Table(
-    name = "competency_relationships",
-    uniqueConstraints = @UniqueConstraint(columnNames = {"origin_id", "destination_id", "relationship_type"})
-)
+@Table(name = "competency_relationships")
 @Data
 @Builder
 @NoArgsConstructor

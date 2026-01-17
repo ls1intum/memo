@@ -7,8 +7,8 @@ competency-based learning.
 
 ### Prerequisites
 
-- **Java 25 JDK** (for Spring Boot backend)
-- **Node.js 24+** (for Next.js frontend)
+- **Java 17 JDK** (for Spring Boot backend)
+- **Node.js 20+** (for Vite frontend)
 - **Docker & Docker Compose**
 - **Git**
 
@@ -30,7 +30,7 @@ competency-based learning.
 
    Wait ~60 seconds for all services to start (PostgreSQL, Keycloak, Spring Boot)
 
-3. **Start the Next.js frontend** (in a new terminal)
+3. **Start the Vite frontend** (in a new terminal)
 
    ```bash
    cd ..  # Back to root directory
@@ -39,7 +39,7 @@ competency-based learning.
    ```
 
 4. **Access the application**
-   - **Frontend**: http://localhost:3000
+   - **Frontend**: http://localhost:5173
    - **Backend API**: http://localhost:8080
    - **Swagger UI**: http://localhost:8080/swagger-ui.html
    - **Keycloak Admin**: http://localhost:8081 (admin/admin)
@@ -51,21 +51,21 @@ competency-based learning.
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                    Next.js Frontend                     │
-│                    (Port 3000)                          │
-│  ┌─────────────┐  ┌──────────────┐  ┌───────────────┐ │
-│  │   React     │  │ React Query  │  │   Keycloak    │ │
-│  │ Components  │  │ + Axios API  │  │     Auth      │ │
-│  └─────────────┘  └──────────────┘  └───────────────┘ │
+│                  Vite + React Frontend                  │
+│                      (Port 5173)                        │
+│  ┌─────────────┐  ┌──────────────┐  ┌───────────────┐   │
+│  │   React     │  │ React Query  │  │   Keycloak    │   │
+│  │ Components  │  │ + Axios API  │  │     Auth      │   │
+│  └─────────────┘  └──────────────┘  └───────────────┘   │
 └───────────────────────┬─────────────────────────────────┘
                         │ REST API (JWT)
 ┌───────────────────────▼─────────────────────────────────┐
 │                 Spring Boot Backend                     │
 │                    (Port 8080)                          │
-│  ┌──────────────┐  ┌──────────┐  ┌──────────────────┐ │
-│  │     REST     │  │ Service  │  │  Spring Data JPA │ │
-│  │ Controllers  │  │  Layer   │  │  + PostgreSQL    │ │
-│  └──────────────┘  └──────────┘  └──────────────────┘ │
+│  ┌──────────────┐  ┌──────────┐  ┌──────────────────┐   │
+│  │     REST     │  │ Service  │  │  Spring Data JPA │   │
+│  │ Controllers  │  │  Layer   │  │  + PostgreSQL    │   │
+│  └──────────────┘  └──────────┘  └──────────────────┘   │
 └─────────────────────────────────────────────────────────┘
          │                                    │
          ▼                                    ▼
@@ -80,30 +80,41 @@ competency-based learning.
 
 ```
 memo/
-├── app/                    # Next.js pages and components
-│   ├── session/           # Mapping session page
-│   ├── about/             # About page
-│   └── layout.tsx         # Root layout with providers
-├── components/            # Reusable React components
-├── lib/                   # Frontend utilities
-│   ├── api/              # REST API client and services
-│   └── auth/             # Keycloak authentication
-├── server/                # Spring Boot backend
-│   ├── src/main/java/    # Java source code
+├── src/                       # Vite + React frontend
+│   ├── App.tsx               # Main app component
+│   ├── main.tsx              # Entry point
+│   ├── components/           # Reusable React components
+│   │   ├── ui/              # UI primitives (button, card, etc.)
+│   │   └── session/         # Session-specific components
+│   ├── pages/               # Page components
+│   │   ├── HomePage.tsx
+│   │   ├── SessionPage.tsx
+│   │   ├── AboutPage.tsx
+│   │   └── OnboardingPage.tsx
+│   ├── lib/                 # Frontend utilities
+│   │   ├── api/            # REST API client and services
+│   │   └── utils.ts        # Utility functions
+│   └── hooks/              # Custom React hooks
+├── server/                   # Spring Boot backend
+│   ├── src/main/java/       # Java source code
 │   │   └── de/tum/cit/memo/
-│   │       ├── controller/   # REST endpoints
-│   │       ├── service/      # Business logic
-│   │       ├── repository/   # Data access
-│   │       ├── entity/       # JPA entities
-│   │       └── security/     # OAuth2 config
+│   │       ├── controller/  # REST endpoints
+│   │       ├── service/     # Business logic
+│   │       ├── repository/  # Data access
+│   │       ├── entity/      # JPA entities
+│   │       ├── dto/         # Data transfer objects
+│   │       ├── security/    # OAuth2 config
+│   │       └── config/      # Application config
 │   ├── src/main/resources/
-│   │   ├── application.yml   # Spring config
-│   │   └── db/migration/     # Flyway migrations
-│   ├── docker-compose.yml    # Backend services
-│   └── server-manage.sh      # Management script
-├── .env.local             # Frontend environment variables
-├── QUICKSTART.md          # Detailed setup guide
-└── README.md              # This file
+│   │   ├── application.yml  # Spring config
+│   │   └── db/migration/    # Flyway migrations
+│   ├── docker-compose.yml   # Backend services
+│   └── server-manage.sh     # Management script
+├── public/                   # Static assets
+├── index.html               # HTML entry point
+├── vite.config.ts           # Vite configuration
+├── tsconfig.json            # TypeScript config
+└── README.md                # This file
 ```
 
 ## 🔧 Development
@@ -111,13 +122,15 @@ memo/
 ### Frontend Commands
 
 ```bash
-npm run dev          # Start development server
+npm run dev          # Start development server (Vite)
 npm run build        # Build for production
-npm run start        # Start production server
+npm run preview      # Preview production build
 npm run lint         # Run ESLint
+npm run lint:fix     # Fix ESLint issues
 npm run format       # Format code with Prettier
 npm run type-check   # TypeScript type checking
 npm run quality      # Run all checks
+npm run quality:fix  # Fix all auto-fixable issues
 ```
 
 ### Backend Commands
@@ -154,22 +167,23 @@ The application uses Keycloak for OAuth2/JWT authentication.
 
 ### Frontend
 
-- **Framework**: Next.js 15 (App Router)
+- **Build Tool**: Vite 6
 - **UI**: React 19, shadcn/ui, Tailwind CSS 4
 - **State**: TanStack Query (React Query)
+- **Routing**: React Router 7
 - **HTTP**: Axios
 - **Auth**: Keycloak JS
 
 ### Backend
 
-- **Framework**: Spring Boot 4.0
-- **Language**: Java 25
+- **Framework**: Spring Boot 3.4.1
+- **Language**: Java 17
 - **Database**: PostgreSQL 16
 - **ORM**: JPA/Hibernate
 - **Migrations**: Flyway
 - **Security**: Spring Security + OAuth2
 - **API Docs**: OpenAPI/Swagger
-- **Build**: Gradle 9.2.1
+- **Build**: Gradle 8.11.1
 
 ### Infrastructure
 
@@ -250,18 +264,17 @@ docker volume rm memo_postgres_data  # Warning: deletes all data
 
 ### Port conflicts
 
-If ports 3000, 5433, 8080, or 8081 are in use:
+If ports 5173, 5433, 8080, or 8081 are in use:
 
-- **Frontend**: `PORT=3001 npm run dev`
+- **Frontend**: `vite --port 3001` or edit `vite.config.ts`
 - **Backend**: Edit `server/docker-compose.yml` port mappings
 
 ## 📖 Documentation
 
-- **[QUICKSTART.md](QUICKSTART.md)** - Detailed setup and usage guide
-- **[MIGRATION_COMPLETE.md](MIGRATION_COMPLETE.md)** - Migration summary and architecture details
-- **[CLAUDE.md](CLAUDE.md)** - Project conventions and AI assistant usage
+- **[CLAUDE.md](CLAUDE.md)** - Project conventions and AI assistant guidelines
 - **[server/README.md](server/README.md)** - Backend-specific documentation
 - **[SECURITY.md](SECURITY.md)** - Security guidelines
+- **[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)** - Community guidelines
 
 ## 📄 License
 
@@ -269,7 +282,8 @@ This project is part of the ls1intum organization.
 
 ## 🔗 Resources
 
-- [Next.js Documentation](https://nextjs.org/docs)
+- [Vite Documentation](https://vite.dev/)
+- [React Documentation](https://react.dev/)
 - [Spring Boot Documentation](https://spring.io/projects/spring-boot)
 - [Keycloak Documentation](https://www.keycloak.org/documentation)
 - [TanStack Query](https://tanstack.com/query)
