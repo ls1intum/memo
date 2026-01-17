@@ -42,7 +42,9 @@ model CompetencyRelationship {
   destination      Competency     @relation("DestinationCompetency", fields: [destinationId], references: [id], onDelete: Cascade)
   user             User           @relation("RelationshipCreator", fields: [userId], references: [id])
 
-  @@unique([originId, destinationId, relationshipType])
+  @@index([originId])
+  @@index([destinationId])
+  @@index([userId])
   @@map("competency_relationships")
 }
 
@@ -57,14 +59,15 @@ model LearningResource {
 }
 
 model CompetencyResourceLink {
-  id            String          @id @default(cuid())
+  id            String            @id @default(cuid())
   competencyId  String
   resourceId    String
   userId        String
-  createdAt     DateTime        @default(now())
-  competency    Competency      @relation(fields: [competencyId], references: [id], onDelete: Cascade)
-  resource      LearningResource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
-  user          User            @relation("ResourceLinkCreator", fields: [userId], references: [id])
+  matchType     ResourceMatchType
+  createdAt     DateTime          @default(now())
+  competency    Competency        @relation(fields: [competencyId], references: [id], onDelete: Cascade)
+  resource      LearningResource  @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  user          User              @relation("ResourceLinkCreator", fields: [userId], references: [id])
 
   @@index([competencyId])
   @@index([resourceId])
@@ -81,5 +84,15 @@ enum RelationshipType {
   ASSUMES
   EXTENDS
   MATCHES
+  // Explicitly records that two competencies have been reviewed and found not to be related,
+  // as opposed to simply having no CompetencyRelationship row between them.
+  UNRELATED
 }
 
+// Match quality for competency-resource links (4 categorical levels)
+enum ResourceMatchType {
+  UNRELATED     // no edge / no link
+  WEAK          // small connection / minor overlap
+  GOOD_FIT      // generally relevant, needs tailored exercise
+  PERFECT_MATCH // directly aligned / ideal relationship
+}

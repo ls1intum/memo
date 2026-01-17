@@ -113,17 +113,26 @@ The project includes a convenient management script for all Docker operations:
 ```
 memo/
 ├── app/                          # Next.js app directory
+│   ├── actions/                 # Server Actions (API layer)
+│   ├── dashboard/               # Dashboard pages
+│   ├── session/                 # Session management pages
+│   └── onboarding/              # Onboarding flow
 ├── components/                   # React components
-├── lib/                         # Utility libraries
-├── docker/                      # Environment-specific configs
+├── domain_core/                  # Domain-Driven Design layers
+│   ├── infrastructure/          # External clients (Prisma, utilities)
+│   ├── model/                   # Domain entities & types
+│   ├── repositories/            # Data access layer
+│   └── services/                # Business logic layer
+├── prisma/                       # Database schema & migrations
+├── docker/                       # Environment-specific configs
 │   ├── development/             # Local development
 │   ├── staging/                 # Testing environment
 │   └── production/              # Production environment
-├── scripts/                     # Database initialization
+├── scripts/                      # Database initialization
 ├── .github/workflows/           # CI/CD workflows
-├── docker-manage.sh            # Docker management script
-├── Dockerfile                  # Multi-stage Docker build
-└── README.md                   # This file
+├── docker-manage.sh             # Docker management script
+├── Dockerfile                   # Multi-stage Docker build
+└── README.md                    # This file
 ```
 
 ## 🔧 Development Configuration

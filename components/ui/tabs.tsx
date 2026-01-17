@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { cn } from '../../lib/utils';
+import { cn } from '../../domain_core/infrastructure/utils';
 
 export function Tabs({
   items,
