@@ -143,7 +143,7 @@ export function HomePage() {
                 </div>
               </div>
               <div className="space-y-6">
-                {otherProblems.map((problem) => (
+                {otherProblems.map(problem => (
                   <div
                     key={problem.headline}
                     className="group relative overflow-hidden rounded-[32px] border border-white/70 bg-white/80 p-6 shadow-[0_26px_90px_-55px_rgba(7,30,84,0.5)] transition hover:-translate-y-1 hover:bg-white/90"

@@ -134,7 +134,11 @@ export async function createCompetencyResourceLinkAction(
       competencyId,
       resourceId,
       userId: GUEST_USER_ID,
-      matchType: matchType as 'UNRELATED' | 'WEAK' | 'GOOD_FIT' | 'PERFECT_MATCH',
+      matchType: matchType as
+        | 'UNRELATED'
+        | 'WEAK'
+        | 'GOOD_FIT'
+        | 'PERFECT_MATCH',
     });
     return { success: true, link };
   } catch (error) {

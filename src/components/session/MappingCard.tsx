@@ -140,8 +140,8 @@ export function MappingCard(props: MappingCardProps) {
             </TooltipTrigger>
             <TooltipContent>
               <p>
-                Bloom's Taxonomy categorizes learning objectives by
-                cognitive level.
+                Bloom's Taxonomy categorizes learning objectives by cognitive
+                level.
               </p>
               <p className="mt-1">
                 → {bloomLevel}: use knowledge in practice (implement, execute,
