@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { useTheme } from './theme-provider';
+import { useTheme } from './use-theme';
 import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 
