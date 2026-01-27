@@ -38,7 +38,7 @@ export function HomePage() {
         <section id="overview" className="grid items-center gap-16 pb-8">
           <div className="space-y-12">
             <div className="space-y-8">
-              <h1 className="text-balance text-[3.2rem] font-bold leading-[1.04] tracking-tight text-slate-900 sm:text-[3.9rem] lg:text-[4.9rem]">
+              <h1 className="text-balance text-[3.2rem] font-semibold leading-[1.04] tracking-tight text-slate-900 sm:text-[3.9rem] lg:text-[4.9rem]">
                 Personalized learning needs a{' '}
                 <span className="bg-gradient-to-r from-[#0a4da2] via-[#5538d1] to-[#9b5dfa] bg-clip-text text-transparent">
                   transparent competency benchmark
