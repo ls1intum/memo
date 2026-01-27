@@ -1,16 +1,18 @@
-# Memo
+# Memo - Competency-Based Education Benchmark Platform
 
-A Next.js application for memo management with Docker-based development and deployment.
+Platform for scientists and educators to collect and combine educational data into benchmarks for
+competency-based learning.
 
-## 🚀 Quick Start for Development
+## 🚀 Quick Start
 
 ### Prerequisites
 
-- [Docker](https://docs.docker.com/get-docker/) and
-  [Docker Compose](https://docs.docker.com/compose/install/)
-- [Git](https://git-scm.com/)
+- **Java 17 JDK** (for Spring Boot backend)
+- **Node.js 20+** (for Vite frontend)
+- **Docker & Docker Compose**
+- **Git**
 
-### Local Development Setup
+### Setup
 
 1. **Clone the repository**
 
@@ -19,235 +21,270 @@ A Next.js application for memo management with Docker-based development and depl
    cd memo
    ```
 
-2. **Start the development environment**
+2. **Start the Spring Boot backend**
 
    ```bash
-   ./docker-manage.sh up development
+   cd server
+   ./server-manage.sh up
    ```
 
-   This will:
-   - Build the Next.js application with hot reload
-   - Start a PostgreSQL database
-   - Set up the complete development environment
+   Wait ~60 seconds for all services to start (PostgreSQL, Keycloak, Spring Boot)
 
-3. **Access the application**
-   - **Web Application**: [http://localhost:3000](http://localhost:3000)
-   - **Database**: `localhost:5432` (for debugging tools)
-
-4. **Stop the development environment**
-   ```bash
-   ./docker-manage.sh down development
-   ```
-
-### Development Workflow
-
-- **Code changes** are automatically reflected (hot reload enabled)
-- **Database data** persists between restarts
-- **Logs**: View with `./docker-manage.sh logs development`
-- **Database shell**: Access with `./docker-manage.sh db-shell development`
-
-## 🛠 Alternative Development Methods
-
-### Using npm/yarn directly (without Docker)
-
-1. **Install dependencies**
+3. **Start the Vite frontend** (in a new terminal)
 
    ```bash
+   cd ..  # Back to root directory
    npm install
-   # or
-   yarn install
-   ```
-
-2. **Set up environment variables**
-
-   ```bash
-   cp docker/development/.env .env.local
-   # Edit .env.local to use localhost database connection
-   ```
-
-3. **Start a PostgreSQL database** (using Docker)
-
-   ```bash
-   docker run -d \
-     --name memo-postgres \
-     -e POSTGRES_DB=memo_dev \
-     -e POSTGRES_USER=memo_user \
-     -e POSTGRES_PASSWORD=memo_password \
-     -p 5432:5432 \
-     postgres:16-alpine
-   ```
-
-4. **Run the development server**
-   ```bash
    npm run dev
-   # or
-   yarn dev
    ```
 
-## 🐳 Docker Management
+4. **Access the application**
+   - **Frontend**: http://localhost:5173
+   - **Backend API**: http://localhost:8080
+   - **Swagger UI**: http://localhost:8080/swagger-ui.html
+   - **Keycloak Admin**: http://localhost:8081 (admin/admin)
 
-The project includes a convenient management script for all Docker operations:
+5. **Login**
+   - Use `demo@memo.local` / `demo` or `admin@memo.local` / `admin`
 
-```bash
-# Start development environment
-./docker-manage.sh up development
+## 🏗 Architecture
 
-# View logs
-./docker-manage.sh logs development
-
-# Restart services
-./docker-manage.sh restart development
-
-# Connect to database
-./docker-manage.sh db-shell development
-
-# Connect to app container
-./docker-manage.sh app-shell development
-
-# Clean up (removes containers and volumes)
-./docker-manage.sh clean development
+```
+┌─────────────────────────────────────────────────────────┐
+│                  Vite + React Frontend                  │
+│                      (Port 5173)                        │
+│  ┌─────────────┐  ┌──────────────┐  ┌───────────────┐   │
+│  │   React     │  │ React Query  │  │   Keycloak    │   │
+│  │ Components  │  │ + Axios API  │  │     Auth      │   │
+│  └─────────────┘  └──────────────┘  └───────────────┘   │
+└───────────────────────┬─────────────────────────────────┘
+                        │ REST API (JWT)
+┌───────────────────────▼─────────────────────────────────┐
+│                 Spring Boot Backend                     │
+│                    (Port 8080)                          │
+│  ┌──────────────┐  ┌──────────┐  ┌──────────────────┐   │
+│  │     REST     │  │ Service  │  │  Spring Data JPA │   │
+│  │ Controllers  │  │  Layer   │  │  + PostgreSQL    │   │
+│  └──────────────┘  └──────────┘  └──────────────────┘   │
+└─────────────────────────────────────────────────────────┘
+         │                                    │
+         ▼                                    ▼
+┌──────────────────┐              ┌─────────────────────┐
+│    Keycloak      │              │    PostgreSQL       │
+│   (Port 8081)    │              │    (Port 5433)      │
+│  OAuth2 + JWT    │              │  Application DB     │
+└──────────────────┘              └─────────────────────┘
 ```
 
 ## 📁 Project Structure
 
 ```
 memo/
-├── app/                          # Next.js app directory
-│   ├── actions/                 # Server Actions (API layer)
-│   ├── dashboard/               # Dashboard pages
-│   ├── session/                 # Session management pages
-│   └── onboarding/              # Onboarding flow
-├── components/                   # React components
-├── domain_core/                  # Domain-Driven Design layers
-│   ├── infrastructure/          # External clients (Prisma, utilities)
-│   ├── model/                   # Domain entities & types
-│   ├── repositories/            # Data access layer
-│   └── services/                # Business logic layer
-├── prisma/                       # Database schema & migrations
-├── docker/                       # Environment-specific configs
-│   ├── development/             # Local development
-│   ├── staging/                 # Testing environment
-│   └── production/              # Production environment
-├── scripts/                      # Database initialization
-├── .github/workflows/           # CI/CD workflows
-├── docker-manage.sh             # Docker management script
-├── Dockerfile                   # Multi-stage Docker build
-└── README.md                    # This file
+├── src/                       # Vite + React frontend
+│   ├── App.tsx               # Main app component
+│   ├── main.tsx              # Entry point
+│   ├── components/           # Reusable React components
+│   │   ├── ui/              # UI primitives (button, card, etc.)
+│   │   └── session/         # Session-specific components
+│   ├── pages/               # Page components
+│   │   ├── HomePage.tsx
+│   │   ├── SessionPage.tsx
+│   │   ├── AboutPage.tsx
+│   │   └── OnboardingPage.tsx
+│   ├── lib/                 # Frontend utilities
+│   │   ├── api/            # REST API client and services
+│   │   └── utils.ts        # Utility functions
+│   └── hooks/              # Custom React hooks
+├── server/                   # Spring Boot backend
+│   ├── src/main/java/       # Java source code
+│   │   └── de/tum/cit/memo/
+│   │       ├── controller/  # REST endpoints
+│   │       ├── service/     # Business logic
+│   │       ├── repository/  # Data access
+│   │       ├── entity/      # JPA entities
+│   │       ├── dto/         # Data transfer objects
+│   │       ├── security/    # OAuth2 config
+│   │       └── config/      # Application config
+│   ├── src/main/resources/
+│   │   ├── application.yml  # Spring config
+│   │   └── db/migration/    # Flyway migrations
+│   ├── docker-compose.yml   # Backend services
+│   └── server-manage.sh     # Management script
+├── public/                   # Static assets
+├── index.html               # HTML entry point
+├── vite.config.ts           # Vite configuration
+├── tsconfig.json            # TypeScript config
+└── README.md                # This file
 ```
 
-## 🔧 Development Configuration
+## 🔧 Development
 
-The development environment is configured with:
-
-- **Hot Reload**: Automatic code updates
-- **Volume Mounting**: Source code changes reflected immediately
-- **Database**: PostgreSQL with persistent data
-- **Port Mapping**: Direct access to app (3000) and database (5432)
-
-### Code Quality Tools
-
-The project includes automated code quality checks:
+### Frontend Commands
 
 ```bash
-# Run all quality checks
-npm run quality
-
-# Fix linting and formatting issues
-npm run quality:fix
-
-# Individual commands
-npm run type-check    # TypeScript type checking
-npm run lint         # ESLint linting
-npm run lint:fix     # Fix linting issues
+npm run dev          # Start development server (Vite)
+npm run build        # Build for production
+npm run preview      # Preview production build
+npm run lint         # Run ESLint
+npm run lint:fix     # Fix ESLint issues
 npm run format       # Format code with Prettier
-npm run format:check # Check code formatting
+npm run type-check   # TypeScript type checking
+npm run quality      # Run all checks
+npm run quality:fix  # Fix all auto-fixable issues
 ```
 
-### Pre-commit Checklist
+### Backend Commands
 
-Before submitting a PR, ensure:
+```bash
+cd server
 
-- [ ] `npm run quality` passes without errors
-- [ ] `npm run build` completes successfully
-- [ ] All tests pass (when implemented)
-- [ ] No TODO/FIXME comments in production code
+./server-manage.sh up        # Start all services
+./server-manage.sh down      # Stop all services
+./server-manage.sh logs      # View logs
+./server-manage.sh status    # Check service status
+./server-manage.sh build     # Build Spring Boot app
+./server-manage.sh test      # Run tests
+```
 
-### Environment Variables (Development)
+## 🔐 Authentication
 
-Located in `docker/development/.env`:
+The application uses Keycloak for OAuth2/JWT authentication.
 
-- `NODE_ENV=development`
-- `DATABASE_URL=postgresql://memo_user:memo_password@localhost:5432/memo_dev`
-- `NEXT_PUBLIC_API_URL=http://localhost:3000/api`
+### Default Users
 
-## 🚀 Deployment
+| Email              | Password | Role  |
+| ------------------ | -------- | ----- |
+| `demo@memo.local`  | `demo`   | USER  |
+| `admin@memo.local` | `admin`  | ADMIN |
 
-This project uses automated deployment via GitHub Actions:
+### Keycloak Admin Console
 
-- **Staging**: For testing features
-- **Production**: Live environment
+- **URL**: http://localhost:8081
+- **Username**: `admin`
+- **Password**: `admin`
 
-See [DOCKER.md](DOCKER.md) for detailed Docker setup information. See
-[GITHUB_ACTIONS.md](GITHUB_ACTIONS.md) for CI/CD setup information.
+## 🛠 Tech Stack
+
+### Frontend
+
+- **Build Tool**: Vite 6
+- **UI**: React 19, shadcn/ui, Tailwind CSS 4
+- **State**: TanStack Query (React Query)
+- **Routing**: React Router 7
+- **HTTP**: Axios
+- **Auth**: Keycloak JS
+
+### Backend
+
+- **Framework**: Spring Boot 3.4.1
+- **Language**: Java 17
+- **Database**: PostgreSQL 16
+- **ORM**: JPA/Hibernate
+- **Migrations**: Flyway
+- **Security**: Spring Security + OAuth2
+- **API Docs**: OpenAPI/Swagger
+- **Build**: Gradle 8.11.1
+
+### Infrastructure
+
+- **Authentication**: Keycloak 26.4
+- **Containerization**: Docker + Docker Compose
+- **Reverse Proxy**: Nginx (production)
+
+## 📚 API Documentation
+
+Full API documentation with interactive testing:
+
+- **Swagger UI**: http://localhost:8080/swagger-ui.html
+- **OpenAPI JSON**: http://localhost:8080/api-docs
+
+### Main Endpoints
+
+- `GET /api/competencies` - List all competencies
+- `GET /api/competencies/random?count=2` - Get random competencies
+- `POST /api/competencies` - Create competency
+- `POST /api/competency-relationships` - Create relationship
+- `GET /api/users` - List users
+- `GET /api/learning-resources` - List resources
+
+All endpoints require JWT authentication via Bearer token.
 
 ## 🤝 Contributing
 
 1. Fork the repository
 2. Create a feature branch: `git checkout -b feature/amazing-feature`
-3. Start development environment: `./docker-manage.sh up development`
-4. Make your changes
-5. Test thoroughly
-6. Commit your changes: `git commit -m 'Add amazing feature'`
-7. Push to the branch: `git push origin feature/amazing-feature`
+3. Make your changes
+4. Run quality checks: `npm run quality`
+5. Test thoroughly (backend and frontend)
+6. Commit: `git commit -m 'Add amazing feature'`
+7. Push: `git push origin feature/amazing-feature`
 8. Open a Pull Request
 
-## 📚 Documentation
+### Pre-commit Checklist
 
-### Project Documentation
-
-- [Database Setup & Migrations](DATABASE.md) - Database management, migrations, and Prisma scripts
-- [Docker Setup](DOCKER.md) - Detailed Docker configuration and deployment
-- [Claude Code Guide](CLAUDE.md) - Project conventions and AI assistant usage
-
-### External Resources
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API
-- [Docker Documentation](https://docs.docker.com/) - containerization platform
-- [PostgreSQL Documentation](https://www.postgresql.org/docs/) - database system
-- [Prisma Documentation](https://www.prisma.io/docs) - ORM and database toolkit
+- [ ] Frontend: `npm run quality` passes
+- [ ] Backend: `cd server && ./server-manage.sh test` passes
+- [ ] Code is properly formatted
+- [ ] No console.log statements in production code
+- [ ] API changes documented in Swagger
 
 ## 🆘 Troubleshooting
 
-### Common Issues
-
-**Port already in use**:
+### Backend won't start
 
 ```bash
-./docker-manage.sh down development  # Stop any running containers
+cd server
+./server-manage.sh down
+./server-manage.sh up
+./server-manage.sh logs  # Check for errors
 ```
 
-**Permission issues with docker-manage.sh**:
+### Frontend can't connect to backend
+
+1. Verify backend is running: http://localhost:8080/actuator/health
+2. Check `.env.local` has correct URLs
+3. Clear browser cache and cookies
+4. Restart frontend: `npm run dev`
+
+### Authentication errors
+
+1. Check Keycloak is running: http://localhost:8081
+2. Clear browser local storage and cookies
+3. Try incognito/private browsing mode
+4. Check `server/docker-compose.yml` for Keycloak config
+
+### Database issues
 
 ```bash
-chmod +x docker-manage.sh
+cd server
+./server-manage.sh down
+docker volume rm memo_postgres_data  # Warning: deletes all data
+./server-manage.sh up
 ```
 
-**Database connection issues**:
+### Port conflicts
 
-```bash
-./docker-manage.sh logs development  # Check if database is running
-./docker-manage.sh restart development  # Restart all services
-```
+If ports 5173, 5433, 8080, or 8081 are in use:
 
-**Fresh start**:
+- **Frontend**: `vite --port 3001` or edit `vite.config.ts`
+- **Backend**: Edit `server/docker-compose.yml` port mappings
 
-```bash
-./docker-manage.sh clean development  # Remove all containers and volumes
-./docker-manage.sh up development     # Start fresh
-```
+## 📖 Documentation
 
-For more detailed troubleshooting, see [DOCKER.md](DOCKER.md).
+- **[CLAUDE.md](CLAUDE.md)** - Project conventions and AI assistant guidelines
+- **[server/README.md](server/README.md)** - Backend-specific documentation
+- **[SECURITY.md](SECURITY.md)** - Security guidelines
+- **[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)** - Community guidelines
 
 ## 📄 License
 
 This project is part of the ls1intum organization.
+
+## 🔗 Resources
+
+- [Vite Documentation](https://vite.dev/)
+- [React Documentation](https://react.dev/)
+- [Spring Boot Documentation](https://spring.io/projects/spring-boot)
+- [Keycloak Documentation](https://www.keycloak.org/documentation)
+- [TanStack Query](https://tanstack.com/query)
+- [shadcn/ui](https://ui.shadcn.com/)
