@@ -26,8 +26,7 @@
   --color-foreground: var(--foreground);
   --font-sans: 'Geist', system-ui, -apple-system, sans-serif;
   --font-mono: 'Geist Mono', ui-monospace, monospace;
-  --font-geist-sans: 'Geist', system-ui, -apple-system, sans-serif;
-  --font-geist-mono: 'Geist Mono', ui-monospace, monospace;
+
   --color-ring: var(--ring);
   --color-border: var(--border);
   --color-accent: var(--accent);
@@ -100,7 +99,7 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: var(--font-geist-sans);
+    font-family: var(--font-sans);
   }
 }
 
