@@ -1,8 +1,10 @@
 package de.tum.cit.memo.controller;
 
 import de.tum.cit.memo.dto.CreateCompetencyRelationshipRequest;
+import de.tum.cit.memo.dto.VoteRequest;
 import de.tum.cit.memo.entity.CompetencyRelationship;
 import de.tum.cit.memo.service.CompetencyRelationshipService;
+import de.tum.cit.memo.service.SchedulingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -19,6 +21,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+/**
+ * Controller for competency relationship management.
+ * The POST endpoint creates a relationship and records a vote.
+ */
 @RestController
 @RequestMapping("/api/competency-relationships")
 @RequiredArgsConstructor
@@ -26,11 +32,26 @@ import java.util.List;
 public class CompetencyRelationshipController {
 
     private final CompetencyRelationshipService relationshipService;
+    private final SchedulingService schedulingService;
 
     @PostMapping
-    @Operation(summary = "Create a new competency relationship")
-    public ResponseEntity<CompetencyRelationship> createRelationship(@Valid @RequestBody CreateCompetencyRelationshipRequest request) {
-        CompetencyRelationship relationship = relationshipService.createRelationship(request);
+    @Operation(summary = "Create a competency relationship and record a vote")
+    public ResponseEntity<CompetencyRelationship> createRelationship(
+            @Valid @RequestBody CreateCompetencyRelationshipRequest request) {
+        // Create the relationship if it doesn't exist
+        CompetencyRelationship relationship = relationshipService.findOrCreateRelationship(
+                request.getOriginId(), request.getDestinationId());
+
+        // Record the vote via scheduling service
+        VoteRequest voteRequest = VoteRequest.builder()
+                .relationshipId(relationship.getId())
+                .relationshipType(request.getRelationshipType())
+                .build();
+        schedulingService.submitVote(request.getUserId(), voteRequest);
+
+        // Refresh to get updated counters
+        relationship = relationshipService.getRelationshipById(relationship.getId());
+
         return ResponseEntity.status(HttpStatus.CREATED).body(relationship);
     }
 
