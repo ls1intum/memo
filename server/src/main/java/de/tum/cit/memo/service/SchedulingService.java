@@ -182,9 +182,6 @@ public class SchedulingService {
                 .destinationId(destId)
                 .build();
 
-        // Critical: Maintain the denormalized degree count
-        // Critical: Maintain the denormalized degree count (Java-side update for
-        // reliability)
         List<Competency> competencies = competencyRepository.findAllById(List.of(originId, destId));
         competencies.forEach(c -> c.setDegree(c.getDegree() + 1));
         competencyRepository.saveAll(competencies);
