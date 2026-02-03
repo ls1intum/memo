@@ -35,4 +35,7 @@ public class Competency {
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
+
+    @Column(nullable = false)
+    private int degree;
 }

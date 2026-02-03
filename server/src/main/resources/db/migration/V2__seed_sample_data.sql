@@ -31,12 +31,6 @@ INSERT INTO learning_resources (id, title, url, created_at) VALUES
 ('res_types_001', 'On Understanding Types, Data Abstraction, and Polymorphism', 'https://dl.acm.org/doi/10.1145/6041.6042', CURRENT_TIMESTAMP)
 ON CONFLICT DO NOTHING;
 
--- Seed competency relationships (examples)
-INSERT INTO competency_relationships (id, relationship_type, origin_id, destination_id, user_id, created_at) VALUES
-('rel_ds_fp_001', 'ASSUMES', 'comp_fp_001', 'comp_ds_001', 'user_demo_001', CURRENT_TIMESTAMP),
-('rel_hof_fp_001', 'EXTENDS', 'comp_hof_001', 'comp_fp_001', 'user_demo_001', CURRENT_TIMESTAMP),
-('rel_mod_poly_001', 'ASSUMES', 'comp_mod_001', 'comp_poly_001', 'user_demo_001', CURRENT_TIMESTAMP)
-ON CONFLICT (origin_id, destination_id, relationship_type) DO NOTHING;
 
 -- Seed competency-resource links (examples)
 INSERT INTO competency_resource_links (id, competency_id, resource_id, user_id, created_at) VALUES
