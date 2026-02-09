@@ -56,7 +56,8 @@ public class CompetencyRelationshipService {
 
     /**
      * Find existing relationship or create a new one.
-     * When creating a new relationship, also updates the degree counter for both competencies.
+     * When creating a new relationship, also updates the degree counter for both
+     * competencies.
      */
     @Transactional
     public CompetencyRelationship findOrCreateRelationship(String originId, String destinationId) {
@@ -94,9 +95,15 @@ public class CompetencyRelationshipService {
 
     @Transactional
     public void deleteRelationship(String id) {
-        if (!relationshipRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Relationship not found");
-        }
+        CompetencyRelationship relationship = relationshipRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Relationship not found"));
+
+        // Decrement the denormalized degree counter for both competencies
+        List<Competency> competencies = competencyRepository
+                .findAllById(List.of(relationship.getOriginId(), relationship.getDestinationId()));
+        competencies.forEach(c -> c.setDegree(Math.max(0, c.getDegree() - 1)));
+        competencyRepository.saveAll(competencies);
+
         relationshipRepository.deleteById(id);
     }
 }

@@ -20,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -36,7 +36,7 @@ import java.util.Set;
 public class SchedulingService {
 
     private static final double COVERAGE_WEIGHT = 0.7;
-    private static final int LOW_DEGREE_POOL_SIZE = 30;
+    private static final int LOW_DEGREE_POOL_SIZE = 20;
     private static final int CONSENSUS_MIN_VOTES = 5;
     private static final int CONSENSUS_MAX_VOTES = 20;
     private static final double CONSENSUS_MIN_ENTROPY = 0.5;
@@ -107,8 +107,6 @@ public class SchedulingService {
             throw new InvalidOperationException("Not enough competencies to form pairs");
         }
 
-        Set<String> userVotedRelIds = getUserVotedRelationshipIds(userId);
-
         // Optimization: Batch fetch existing relationships to avoid N+1 queries in the
         // loop
         // We fetch ALL relationships involving ANY of the nodes in the low-degree pool
@@ -162,18 +160,13 @@ public class SchedulingService {
 
     private List<String> getLowDegreeCompetencyIds() {
         // Optimized: Uses denormalized degree index (single simple query) O(1)
-        List<Competency> nodes = competencyRepository.findTop30ByOrderByDegreeAsc();
+        List<Competency> nodes = competencyRepository.findTop20ByOrderByDegreeAsc();
 
         if (nodes.isEmpty()) {
             return competencyRepository.findRandomCompetencies(LOW_DEGREE_POOL_SIZE)
                     .stream().map(Competency::getId).toList();
         }
         return nodes.stream().map(Competency::getId).toList();
-    }
-
-    private Set<String> getUserVotedRelationshipIds(String userId) {
-        return new HashSet<>(voteRepository.findByUserId(userId).stream()
-                .map(CompetencyRelationshipVote::getRelationshipId).toList());
     }
 
     private CompetencyRelationship createRelationship(String originId, String destId) {
