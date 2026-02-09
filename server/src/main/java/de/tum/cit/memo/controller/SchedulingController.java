@@ -27,7 +27,7 @@ public class SchedulingController {
     @GetMapping("/next-relationship")
     @Operation(summary = "Get next relationship to vote on", description = "Returns a competency pair for the user to map. Uses coverage (70%) and consensus (30%) pipelines.")
     public ResponseEntity<RelationshipTaskResponse> getNextRelationship(
-            @RequestHeader(value = "X-User-Id", required = false, defaultValue = "anonymous") String userId) {
+            @RequestHeader("X-User-Id") String userId) {
         RelationshipTaskResponse task = schedulingService.getNextTask(userId);
         return ResponseEntity.ok(task);
     }
@@ -35,7 +35,7 @@ public class SchedulingController {
     @PostMapping("/vote")
     @Operation(summary = "Submit a vote on a relationship", description = "Records the user's vote on a competency relationship. MATCHES votes are bidirectional.")
     public ResponseEntity<VoteResponse> submitVote(
-            @RequestHeader(value = "X-User-Id", required = false, defaultValue = "anonymous") String userId,
+            @RequestHeader("X-User-Id") String userId,
             @Valid @RequestBody VoteRequest request) {
         VoteResponse response = schedulingService.submitVote(userId, request);
         return ResponseEntity.ok(response);

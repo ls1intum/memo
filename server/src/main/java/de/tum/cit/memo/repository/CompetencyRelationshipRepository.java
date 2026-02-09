@@ -58,19 +58,20 @@ public interface CompetencyRelationshipRepository extends JpaRepository<Competen
      * Find all relationships involving any of the given competency IDs.
      * Used for batch processing in Coverage Pipeline to avoid N+1 queries.
      */
-    @Query("SELECT r FROM CompetencyRelationship r WHERE r.origin.id IN :ids OR r.destination.id IN :ids")
+    @Query("SELECT r FROM CompetencyRelationship r WHERE r.originId IN :ids OR r.destinationId IN :ids")
     List<CompetencyRelationship> findAllByCompetencyIds(@Param("ids") List<String> ids);
 
     /**
-     * Find all relationships where user has NOT voted, for filtering.
-     * Optimized with NOT EXISTS
+     * Find a single relationship the user has NOT voted on.
+     * Uses LIMIT 1 to avoid loading the entire table.
      */
     @Query("""
-            SELECT r.id FROM CompetencyRelationship r
+            SELECT r FROM CompetencyRelationship r
             WHERE NOT EXISTS (
                 SELECT 1 FROM CompetencyRelationshipVote v
                 WHERE v.relationshipId = r.id AND v.userId = :userId
             )
             """)
-    List<String> findRelationshipIdsExcludingUser(@Param("userId") String userId);
+    Optional<CompetencyRelationship> findFirstUnvotedByUser(@Param("userId") String userId,
+            org.springframework.data.domain.Pageable pageable);
 }

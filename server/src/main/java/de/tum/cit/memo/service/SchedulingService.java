@@ -111,7 +111,8 @@ public class SchedulingService {
 
         // Optimization: Batch fetch existing relationships to avoid N+1 queries in the
         // loop
-        // We fetch ALL relationships involving ANY of these 50 nodes in one go.
+        // We fetch ALL relationships involving ANY of the nodes in the low-degree pool
+        // in one go.
         List<CompetencyRelationship> existingRels = relationshipRepository.findAllByCompetencyIds(poolIds);
 
         // Build a fast lookup set "A:B" and "B:A"
@@ -140,7 +141,7 @@ public class SchedulingService {
 
         // All pairs exist, find one user hasn't voted on
         log.debug("All candidate pairs exist, finding unvoted relationship");
-        return findUnvotedRelationship(userVotedRelIds);
+        return findUnvotedRelationship(userId);
     }
 
     private RelationshipTaskResponse consensusPipeline(String userId) {
@@ -189,13 +190,11 @@ public class SchedulingService {
         return relationshipRepository.save(rel);
     }
 
-    private RelationshipTaskResponse findUnvotedRelationship(Set<String> userVotedRelIds) {
-        for (CompetencyRelationship rel : relationshipRepository.findAll()) {
-            if (!userVotedRelIds.contains(rel.getId())) {
-                return buildTaskResponse(rel, "COVERAGE");
-            }
-        }
-        throw new InvalidOperationException("No available relationships for voting");
+    private RelationshipTaskResponse findUnvotedRelationship(String userId) {
+        return relationshipRepository
+                .findFirstUnvotedByUser(userId, org.springframework.data.domain.PageRequest.of(0, 1))
+                .map(rel -> buildTaskResponse(rel, "COVERAGE"))
+                .orElseThrow(() -> new InvalidOperationException("No available relationships for voting"));
     }
 
     private CompetencyRelationship selectByEntropyWeight(List<CompetencyRelationship> candidates) {
