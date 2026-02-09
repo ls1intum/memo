@@ -2,27 +2,27 @@ package de.tum.cit.memo.repository;
 
 import de.tum.cit.memo.entity.Competency;
 import de.tum.cit.memo.util.IdGenerator;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.jdbc.Sql;
 
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Sql(statements = {
+    "DELETE FROM competency_resource_links",
+    "DELETE FROM competency_relationships",
+    "DELETE FROM competencies"
+}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @SuppressWarnings("null")
 class CompetencyRepositoryTest extends AbstractRepositoryTest {
 
     @Autowired
     private CompetencyRepository competencyRepository;
-
-    @BeforeEach
-    void setUp() {
-        competencyRepository.deleteAll();
-    }
 
     private Competency createCompetency(String title, String description) {
         return Competency.builder()
