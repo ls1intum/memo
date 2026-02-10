@@ -25,11 +25,12 @@ public class SchedulingController {
     private final SchedulingService schedulingService;
 
     @GetMapping("/next-relationship")
-    @Operation(summary = "Get next relationship to vote on", description = "Returns a competency pair for the user to map. Uses coverage (70%) and consensus (30%) pipelines.")
+    @Operation(summary = "Get next relationship to vote on", description = "Returns a competency pair for the user to map. Uses coverage (70%) and consensus (30%) pipelines. Returns 204 if no tasks remain.")
     public ResponseEntity<RelationshipTaskResponse> getNextRelationship(
             @RequestHeader("X-User-Id") String userId) {
-        RelationshipTaskResponse task = schedulingService.getNextTask(userId);
-        return ResponseEntity.ok(task);
+        return schedulingService.getNextTask(userId)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.noContent().build());
     }
 
     @PostMapping("/vote")

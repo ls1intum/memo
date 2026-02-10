@@ -12,48 +12,48 @@ import java.util.Optional;
 @Repository
 public interface CompetencyRelationshipRepository extends JpaRepository<CompetencyRelationship, String> {
 
-    Optional<CompetencyRelationship> findByOriginIdAndDestinationId(String originId, String destinationId);
+        Optional<CompetencyRelationship> findByOriginIdAndDestinationId(String originId, String destinationId);
 
-    boolean existsByOriginIdAndDestinationId(String originId, String destinationId);
+        boolean existsByOriginIdAndDestinationId(String originId, String destinationId);
 
-    /**
-     * High-entropy relationships the user hasn't voted on yet (for consensus
-     * pipeline).
-     */
-    @Query("""
-            SELECT r FROM CompetencyRelationship r
-            WHERE r.totalVotes BETWEEN :minVotes AND :maxVotes
-              AND r.entropy > :minEntropy
-              AND NOT EXISTS (
-                  SELECT 1 FROM CompetencyRelationshipVote v
-                  WHERE v.relationshipId = r.id AND v.userId = :userId
-              )
-            ORDER BY r.entropy DESC
-            """)
-    List<CompetencyRelationship> findHighEntropyRelationshipsExcludingUser(
-            @Param("userId") String userId,
-            @Param("minVotes") int minVotes,
-            @Param("maxVotes") int maxVotes,
-            @Param("minEntropy") double minEntropy,
-            org.springframework.data.domain.Pageable pageable);
+        /**
+         * High-entropy relationships the user hasn't voted on yet (for consensus
+         * pipeline).
+         */
+        @Query("""
+                        SELECT r FROM CompetencyRelationship r
+                        WHERE r.totalVotes BETWEEN :minVotes AND :maxVotes
+                          AND r.entropy > :minEntropy
+                          AND NOT EXISTS (
+                              SELECT 1 FROM CompetencyRelationshipVote v
+                              WHERE v.relationshipId = r.id AND v.userId = :userId
+                          )
+                        ORDER BY r.entropy DESC
+                        """)
+        List<CompetencyRelationship> findHighEntropyRelationshipsExcludingUser(
+                        @Param("userId") String userId,
+                        @Param("minVotes") int minVotes,
+                        @Param("maxVotes") int maxVotes,
+                        @Param("minEntropy") double minEntropy,
+                        org.springframework.data.domain.Pageable pageable);
 
-    /**
-     * Relationships where both origin AND destination are in the given pool of IDs.
-     */
-    @Query("SELECT r FROM CompetencyRelationship r WHERE r.originId IN :ids AND r.destinationId IN :ids")
-    List<CompetencyRelationship> findIntraPoolRelationships(@Param("ids") List<String> ids);
+        /**
+         * Relationships where both origin AND destination are in the given pool of IDs.
+         */
+        @Query("SELECT r FROM CompetencyRelationship r WHERE r.originId IN :ids AND r.destinationId IN :ids")
+        List<CompetencyRelationship> findIntraPoolRelationships(@Param("ids") List<String> ids);
 
-    /**
-     * A single relationship the user hasn't voted on (use with PageRequest.of(0,
-     * 1)).
-     */
-    @Query("""
-            SELECT r FROM CompetencyRelationship r
-            WHERE NOT EXISTS (
-                SELECT 1 FROM CompetencyRelationshipVote v
-                WHERE v.relationshipId = r.id AND v.userId = :userId
-            )
-            """)
-    Optional<CompetencyRelationship> findFirstUnvotedByUser(@Param("userId") String userId,
-            org.springframework.data.domain.Pageable pageable);
+        /**
+         * Relationships the user hasn't voted on (use with PageRequest.of(0, 1) for a
+         * single result).
+         */
+        @Query("""
+                        SELECT r FROM CompetencyRelationship r
+                        WHERE NOT EXISTS (
+                            SELECT 1 FROM CompetencyRelationshipVote v
+                            WHERE v.relationshipId = r.id AND v.userId = :userId
+                        )
+                        """)
+        List<CompetencyRelationship> findUnvotedByUser(@Param("userId") String userId,
+                        org.springframework.data.domain.Pageable pageable);
 }

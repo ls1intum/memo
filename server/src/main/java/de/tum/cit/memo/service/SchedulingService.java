@@ -57,9 +57,10 @@ public class SchedulingService {
      * Get the next relationship task for a user.
      * Uses 70% coverage pipeline (new pairs) and 30% consensus pipeline
      * (high-entropy).
+     * Returns empty if the user has voted on every available relationship.
      */
     @Transactional
-    public RelationshipTaskResponse getNextTask(String userId) {
+    public Optional<RelationshipTaskResponse> getNextTask(String userId) {
         if (random.nextDouble() < COVERAGE_WEIGHT) {
             log.debug("Coverage pipeline for user {}", userId);
             return coveragePipeline(userId);
@@ -68,7 +69,7 @@ public class SchedulingService {
         log.debug("Consensus pipeline for user {}", userId);
         RelationshipTaskResponse task = consensusPipeline(userId);
         if (task != null) {
-            return task;
+            return Optional.of(task);
         }
 
         log.debug("No consensus candidates, falling back to coverage");
@@ -98,10 +99,11 @@ public class SchedulingService {
 
     // --- Pipelines ---
 
-    private RelationshipTaskResponse coveragePipeline(String userId) {
+    private Optional<RelationshipTaskResponse> coveragePipeline(String userId) {
         List<String> poolIds = getLowDegreeCompetencyIds();
         if (poolIds.size() < 2) {
-            throw new InvalidOperationException("Not enough competencies to form pairs");
+            log.debug("Not enough competencies to form pairs");
+            return Optional.empty();
         }
 
         Set<String> existingPairs = relationshipRepository.findIntraPoolRelationships(poolIds).stream()
@@ -115,16 +117,16 @@ public class SchedulingService {
         for (int i = 0; i < pool.size(); i++) {
             for (int j = i + 1; j < pool.size(); j++) {
                 if (!existingPairs.contains(pairKey(pool.get(i), pool.get(j)))) {
-                    return toTaskResponse(createRelationship(pool.get(i), pool.get(j)), "COVERAGE");
+                    return Optional.of(toTaskResponse(createRelationship(pool.get(i), pool.get(j)), "COVERAGE"));
                 }
             }
         }
 
         log.debug("Pool fully connected, finding any unvoted relationship");
         return relationshipRepository
-                .findFirstUnvotedByUser(userId, PageRequest.of(0, 1))
-                .map(rel -> toTaskResponse(rel, "COVERAGE"))
-                .orElseThrow(() -> new InvalidOperationException("No available relationships for voting"));
+                .findUnvotedByUser(userId, PageRequest.of(0, 1))
+                .stream().findFirst()
+                .map(rel -> toTaskResponse(rel, "COVERAGE"));
     }
 
     private RelationshipTaskResponse consensusPipeline(String userId) {

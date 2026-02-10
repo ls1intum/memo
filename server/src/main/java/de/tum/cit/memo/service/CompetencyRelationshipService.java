@@ -35,14 +35,6 @@ public class CompetencyRelationshipService {
         return buildAndSave(originId, destinationId);
     }
 
-    @Transactional
-    public CompetencyRelationship findOrCreateRelationship(String originId, String destinationId) {
-        validateDistinctIds(originId, destinationId);
-
-        return relationshipRepository.findByOriginIdAndDestinationId(originId, destinationId)
-                .orElseGet(() -> buildAndSave(originId, destinationId));
-    }
-
     @Transactional(readOnly = true)
     public CompetencyRelationship getRelationshipById(String id) {
         return relationshipRepository.findById(id)
