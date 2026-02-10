@@ -42,32 +42,23 @@ public class CompetencyRelationship {
 
     // Aggregated vote counters
     @Column(name = "vote_assumes", nullable = false)
-    @Builder.Default
-    private Integer voteAssumes = 0;
+    private int voteAssumes;
 
     @Column(name = "vote_extends", nullable = false)
-    @Builder.Default
-    private Integer voteExtends = 0;
+    private int voteExtends;
 
     @Column(name = "vote_matches", nullable = false)
-    @Builder.Default
-    private Integer voteMatches = 0;
+    private int voteMatches;
 
     @Column(name = "vote_unrelated", nullable = false)
-    @Builder.Default
-    private Integer voteUnrelated = 0;
+    private int voteUnrelated;
 
-    // Precomputed entropy for consensus scheduling
     @Column(name = "entropy", nullable = false)
-    @Builder.Default
-    private Double entropy = 0.0;
+    private double entropy;
 
-    // Total votes (denormalized for convenience)
     @Column(name = "total_votes", nullable = false)
-    @Builder.Default
-    private Integer totalVotes = 0;
+    private int totalVotes;
 
-    // Relationships (ignored in JSON to avoid proxy serialization issues)
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "origin_id", insertable = false, updatable = false)
@@ -102,11 +93,7 @@ public class CompetencyRelationship {
         }
 
         double ent = 0.0;
-        int[] counts = new int[4];
-        counts[0] = voteAssumes;
-        counts[1] = voteExtends;
-        counts[2] = voteMatches;
-        counts[3] = voteUnrelated;
+        int[] counts = { voteAssumes, voteExtends, voteMatches, voteUnrelated };
         for (int count : counts) {
             if (count > 0) {
                 double p = (double) count / total;

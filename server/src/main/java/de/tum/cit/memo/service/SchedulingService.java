@@ -1,6 +1,7 @@
 package de.tum.cit.memo.service;
 
 import de.tum.cit.memo.dto.RelationshipTaskResponse;
+import de.tum.cit.memo.dto.VoteCounts;
 import de.tum.cit.memo.dto.VoteRequest;
 import de.tum.cit.memo.dto.VoteResponse;
 import de.tum.cit.memo.entity.Competency;
@@ -78,7 +79,6 @@ public class SchedulingService {
     public VoteResponse submitVote(String userId, VoteRequest request) {
         CompetencyRelationship rel = findRelationshipOrThrow(request.getRelationshipId());
 
-        // Already voted? Return current state (idempotent)
         if (voteRepository.existsByRelationshipIdAndUserId(rel.getId(), userId)) {
             log.debug("User {} already voted on {}", userId, rel.getId());
             return toVoteResponse(rel);
@@ -102,13 +102,11 @@ public class SchedulingService {
             throw new InvalidOperationException("Not enough competencies to form pairs");
         }
 
-        // Fetch only intra-pool relationships (both nodes in pool)
         Set<String> existingPairs = relationshipRepository.findIntraPoolRelationships(poolIds).stream()
                 .flatMap(r -> Stream.of(pairKey(r.getOriginId(), r.getDestinationId()),
                         pairKey(r.getDestinationId(), r.getOriginId())))
                 .collect(Collectors.toSet());
 
-        // Shuffle and find the first pair that doesn't exist yet
         List<String> pool = new ArrayList<>(poolIds);
         Collections.shuffle(pool, random);
 
@@ -120,7 +118,6 @@ public class SchedulingService {
             }
         }
 
-        // All pool pairs already exist — fall back to any unvoted relationship
         log.debug("Pool fully connected, finding any unvoted relationship");
         return relationshipRepository
                 .findFirstUnvotedByUser(userId, PageRequest.of(0, 1))
@@ -146,9 +143,7 @@ public class SchedulingService {
     private List<String> getLowDegreeCompetencyIds() {
         List<String> ids = competencyRepository.findTop20IdsByDegreeAsc(PageRequest.of(0, LOW_DEGREE_POOL_SIZE));
         if (ids.isEmpty()) {
-            // No degree data yet — pick random competencies
-            return competencyRepository.findRandomCompetencies(LOW_DEGREE_POOL_SIZE)
-                    .stream().map(Competency::getId).toList();
+            return competencyRepository.findRandomCompetencyIds(LOW_DEGREE_POOL_SIZE);
         }
         return ids;
     }
@@ -164,10 +159,6 @@ public class SchedulingService {
         return relationshipRepository.save(rel);
     }
 
-    /**
-     * Entropy-weighted roulette selection, biased toward low-vote high-entropy
-     * items.
-     */
     private CompetencyRelationship pickWeightedByEntropy(List<CompetencyRelationship> candidates) {
         double totalWeight = candidates.stream()
                 .mapToDouble(this::entropyWeight)
@@ -224,17 +215,13 @@ public class SchedulingService {
         }
     }
 
-    // --- Lookups & response builders ---
+    // --- Response builders ---
 
     private CompetencyRelationship findRelationshipOrThrow(String id) {
         return relationshipRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Relationship not found: " + id));
     }
 
-    /**
-     * Fetches both competencies in one query instead of two separate findById
-     * calls.
-     */
     private RelationshipTaskResponse toTaskResponse(CompetencyRelationship rel, String pipeline) {
         Map<String, Competency> byId = competencyRepository
                 .findAllById(List.of(rel.getOriginId(), rel.getDestinationId()))
@@ -251,14 +238,14 @@ public class SchedulingService {
                 .origin(toCompetencyInfo(origin))
                 .destination(toCompetencyInfo(destination))
                 .pipeline(pipeline)
-                .currentVotes(toTaskVoteCounts(rel))
+                .currentVotes(toVoteCounts(rel))
                 .build();
     }
 
     private VoteResponse toVoteResponse(CompetencyRelationship rel) {
         return VoteResponse.builder()
                 .success(true)
-                .updatedVotes(toResponseVoteCounts(rel))
+                .updatedVotes(toVoteCounts(rel))
                 .newEntropy(rel.getEntropy())
                 .build();
     }
@@ -271,17 +258,8 @@ public class SchedulingService {
                 .build();
     }
 
-    private static RelationshipTaskResponse.VoteCounts toTaskVoteCounts(CompetencyRelationship rel) {
-        return RelationshipTaskResponse.VoteCounts.builder()
-                .assumes(rel.getVoteAssumes())
-                .extendsRelation(rel.getVoteExtends())
-                .matches(rel.getVoteMatches())
-                .unrelated(rel.getVoteUnrelated())
-                .build();
-    }
-
-    private static VoteResponse.VoteCounts toResponseVoteCounts(CompetencyRelationship rel) {
-        return VoteResponse.VoteCounts.builder()
+    private static VoteCounts toVoteCounts(CompetencyRelationship rel) {
+        return VoteCounts.builder()
                 .assumes(rel.getVoteAssumes())
                 .extendsRelation(rel.getVoteExtends())
                 .matches(rel.getVoteMatches())

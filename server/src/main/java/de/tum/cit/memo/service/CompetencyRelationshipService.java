@@ -24,50 +24,23 @@ public class CompetencyRelationshipService {
     private final CompetencyRelationshipRepository relationshipRepository;
     private final CompetencyRepository competencyRepository;
 
-    /**
-     * Creates a new empty relationship (admin use).
-     * For the normal user voting flow, use SchedulingService.
-     */
     @Transactional
     public CompetencyRelationship createRelationship(String originId, String destinationId) {
-        if (originId.equals(destinationId)) {
-            throw new InvalidOperationException("Cannot create relationship to itself");
-        }
+        validateDistinctIds(originId, destinationId);
 
         if (relationshipRepository.existsByOriginIdAndDestinationId(originId, destinationId)) {
             throw new InvalidOperationException("Relationship already exists");
         }
 
-        CompetencyRelationship relationship = CompetencyRelationship.builder()
-                .id(IdGenerator.generateCuid())
-                .originId(originId)
-                .destinationId(destinationId)
-                .build();
-
-        competencyRepository.incrementDegree(List.of(originId, destinationId));
-        return relationshipRepository.save(relationship);
+        return buildAndSave(originId, destinationId);
     }
 
-    /**
-     * Finds an existing relationship or creates a new one.
-     */
     @Transactional
     public CompetencyRelationship findOrCreateRelationship(String originId, String destinationId) {
-        if (originId.equals(destinationId)) {
-            throw new InvalidOperationException("Cannot create relationship to itself");
-        }
+        validateDistinctIds(originId, destinationId);
 
         return relationshipRepository.findByOriginIdAndDestinationId(originId, destinationId)
-                .orElseGet(() -> {
-                    CompetencyRelationship relationship = CompetencyRelationship.builder()
-                            .id(IdGenerator.generateCuid())
-                            .originId(originId)
-                            .destinationId(destinationId)
-                            .build();
-
-                    competencyRepository.incrementDegree(List.of(originId, destinationId));
-                    return relationshipRepository.save(relationship);
-                });
+                .orElseGet(() -> buildAndSave(originId, destinationId));
     }
 
     @Transactional(readOnly = true)
@@ -88,5 +61,22 @@ public class CompetencyRelationshipService {
 
         competencyRepository.decrementDegree(List.of(relationship.getOriginId(), relationship.getDestinationId()));
         relationshipRepository.deleteById(id);
+    }
+
+    private CompetencyRelationship buildAndSave(String originId, String destinationId) {
+        CompetencyRelationship relationship = CompetencyRelationship.builder()
+                .id(IdGenerator.generateCuid())
+                .originId(originId)
+                .destinationId(destinationId)
+                .build();
+
+        competencyRepository.incrementDegree(List.of(originId, destinationId));
+        return relationshipRepository.save(relationship);
+    }
+
+    private static void validateDistinctIds(String originId, String destinationId) {
+        if (originId.equals(destinationId)) {
+            throw new InvalidOperationException("Cannot create relationship to itself");
+        }
     }
 }

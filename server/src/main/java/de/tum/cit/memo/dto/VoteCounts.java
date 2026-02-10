@@ -9,9 +9,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class VoteResponse {
+public class VoteCounts {
 
-    private boolean success;
-    private VoteCounts updatedVotes;
-    private double newEntropy;
+    private int assumes;
+    private int extendsRelation;
+    private int matches;
+    private int unrelated;
 }
