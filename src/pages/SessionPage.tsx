@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { useSearchParams } from 'react-router-dom';
+
 import {
   getRandomCompetenciesAction,
   getNextRelationshipTaskAction,
@@ -97,12 +97,6 @@ const getRelationshipDescription = (
 };
 
 export function SessionPage() {
-  const [searchParams] = useSearchParams();
-  const countParam = searchParams.get('count');
-  const parsedCount = countParam ? Number(countParam) : NaN;
-  const count =
-    Number.isFinite(parsedCount) && parsedCount > 0 ? parsedCount : 2;
-
   const [relation, setRelation] = useState<RelationshipType | null>(null);
   const [resourceMatchType, setResourceMatchType] =
     useState<ResourceMatchType | null>(null);
@@ -130,7 +124,9 @@ export function SessionPage() {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [swapRotation, setSwapRotation] = useState(0);
   const [allDone, setAllDone] = useState(false);
-  const [currentRelationshipId, setCurrentRelationshipId] = useState<string | null>(null);
+  const [currentRelationshipId, setCurrentRelationshipId] = useState<
+    string | null
+  >(null);
 
   const {
     hoveredValue: hoveredRelation,
@@ -160,7 +156,7 @@ export function SessionPage() {
         } else {
           setError(
             result.error ??
-            'Failed to load user information. Please try again later.'
+              'Failed to load user information. Please try again later.'
           );
         }
       } catch (err) {
@@ -200,7 +196,7 @@ export function SessionPage() {
         if (!result.success) {
           setError(
             result.error ??
-            'An unexpected error occurred while fetching the next task.'
+              'An unexpected error occurred while fetching the next task.'
           );
           if (isInitialLoad) setCompetencies([]);
           setIsTransitioning(false);
@@ -224,8 +220,16 @@ export function SessionPage() {
         setAllDone(false);
         setCurrentRelationshipId(result.task.relationshipId);
         setCompetencies([
-          { id: result.task.origin.id, title: result.task.origin.title, description: result.task.origin.description },
-          { id: result.task.destination.id, title: result.task.destination.title, description: result.task.destination.description },
+          {
+            id: result.task.origin.id,
+            title: result.task.origin.title,
+            description: result.task.origin.description,
+          },
+          {
+            id: result.task.destination.id,
+            title: result.task.destination.title,
+            description: result.task.destination.description,
+          },
         ] as Competency[]);
         setLearningResource(null);
       } else {
@@ -237,7 +241,7 @@ export function SessionPage() {
         if (!compResult.success || !compResult.competencies?.length) {
           setError(
             compResult.error ??
-            'Failed to fetch competency for resource mapping.'
+              'Failed to fetch competency for resource mapping.'
           );
           if (isInitialLoad) setCompetencies([]);
           setIsTransitioning(false);
@@ -247,7 +251,7 @@ export function SessionPage() {
         if (!resourceResult.success || !resourceResult.resource) {
           setError(
             resourceResult.error ??
-            'Failed to fetch learning resource. Make sure resources are seeded.'
+              'Failed to fetch learning resource. Make sure resources are seeded.'
           );
           setCompetencies(compResult.competencies);
           setLearningResource(null);
@@ -261,7 +265,7 @@ export function SessionPage() {
 
       setIsTransitioning(false);
     },
-    [count, mappingMode, userId]
+    [mappingMode, userId]
   );
 
   const prevModeRef = useRef<MappingMode | null>(null);
@@ -276,11 +280,7 @@ export function SessionPage() {
     async (type: 'completed' | 'skipped') => {
       if (type === 'completed') {
         if (mappingMode === 'competency') {
-          if (
-            !currentRelationshipId ||
-            !relation ||
-            !userId
-          ) {
+          if (!currentRelationshipId || !relation || !userId) {
             setError('Missing required data to submit vote');
             return;
           }
@@ -665,9 +665,10 @@ export function SessionPage() {
                 }}
                 className={`
                   px-3 py-1.5 text-xs font-semibold rounded-md transition-all duration-200
-                  ${mappingMode === 'competency'
-                    ? 'bg-white text-slate-900 shadow-sm'
-                    : 'text-slate-500 hover:text-slate-700'
+                  ${
+                    mappingMode === 'competency'
+                      ? 'bg-white text-slate-900 shadow-sm'
+                      : 'text-slate-500 hover:text-slate-700'
                   }
                 `}
               >
@@ -682,9 +683,10 @@ export function SessionPage() {
                 }}
                 className={`
                   px-3 py-1.5 text-xs font-semibold rounded-md transition-all duration-200
-                  ${mappingMode === 'resource'
-                    ? 'bg-white text-slate-900 shadow-sm'
-                    : 'text-slate-500 hover:text-slate-700'
+                  ${
+                    mappingMode === 'resource'
+                      ? 'bg-white text-slate-900 shadow-sm'
+                      : 'text-slate-500 hover:text-slate-700'
                   }
                 `}
               >
@@ -709,9 +711,7 @@ export function SessionPage() {
           {allDone && !error && (
             <Card className="border border-emerald-200 bg-emerald-50/80">
               <CardHeader>
-                <CardTitle className="text-emerald-800">
-                  🎉 All done!
-                </CardTitle>
+                <CardTitle className="text-emerald-800">🎉 All done!</CardTitle>
                 <CardDescription className="text-emerald-700">
                   You've voted on every available competency pair. Great work!
                   Check back later when more competencies have been added.
@@ -959,8 +959,8 @@ export function SessionPage() {
                             {relation === 'UNRELATED'
                               ? 'is unrelated to'
                               : RELATIONSHIP_TYPES.find(
-                                rt => rt.value === relation
-                              )?.label.toLowerCase() || ''}
+                                  rt => rt.value === relation
+                                )?.label.toLowerCase() || ''}
                           </span>{' '}
                           <span className="font-bold text-slate-900">
                             {competencies[1]!.title}
@@ -1136,9 +1136,10 @@ export function SessionPage() {
                       className={`
                         relative flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm font-bold text-white
                         min-w-[180px]
-                        ${mappingMode === 'resource'
-                          ? 'bg-gradient-to-r from-pink-600 to-pink-500 shadow-lg shadow-pink-500/20 hover:shadow-xl hover:shadow-pink-500/30'
-                          : 'bg-gradient-to-r from-[#0a4da2] to-[#5538d1] shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/30'
+                        ${
+                          mappingMode === 'resource'
+                            ? 'bg-gradient-to-r from-pink-600 to-pink-500 shadow-lg shadow-pink-500/20 hover:shadow-xl hover:shadow-pink-500/30'
+                            : 'bg-gradient-to-r from-[#0a4da2] to-[#5538d1] shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/30'
                         }
                         transition-all duration-200 ease-out
                         hover:scale-[1.02]

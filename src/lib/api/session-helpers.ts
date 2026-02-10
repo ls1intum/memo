@@ -7,11 +7,13 @@ import { competencyRelationshipsApi } from './competency-relationships';
 import { competencyResourceLinksApi } from './competency-resource-links';
 import { learningResourcesApi } from './learning-resources';
 import { schedulingApi } from './scheduling';
-import type { RelationshipTask, VoteResponse as SchedulingVoteResponse } from './scheduling';
+import type {
+  RelationshipTask,
+  VoteResponse as SchedulingVoteResponse,
+} from './scheduling';
 import type {
   Competency,
   LearningResource,
-  CompetencyRelationship,
   CompetencyResourceLink,
 } from './types';
 
@@ -100,14 +102,10 @@ export async function submitCompetencyVoteAction(
   } catch (error) {
     return {
       success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : 'Failed to submit vote',
+      error: error instanceof Error ? error.message : 'Failed to submit vote',
     };
   }
 }
-
 
 export async function getRandomLearningResourceAction(): Promise<{
   success: boolean;
@@ -130,7 +128,6 @@ export async function getRandomLearningResourceAction(): Promise<{
     };
   }
 }
-
 
 export async function deleteCompetencyRelationshipAction(
   id: string
