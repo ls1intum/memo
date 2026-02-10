@@ -87,8 +87,10 @@ public class SchedulingService {
         saveVote(rel.getId(), userId, request.getRelationshipType());
         applyVote(rel, request.getRelationshipType());
 
-        if (request.getRelationshipType() == RelationshipType.MATCHES) {
-            mirrorMatchesVote(rel, userId);
+        // MATCHES and UNRELATED are symmetric: A→B implies B→A
+        RelationshipType type = request.getRelationshipType();
+        if (type == RelationshipType.MATCHES || type == RelationshipType.UNRELATED) {
+            mirrorSymmetricVote(rel, userId, type);
         }
 
         return toVoteResponse(rel);
@@ -201,8 +203,8 @@ public class SchedulingService {
         relationshipRepository.save(rel);
     }
 
-    /** MATCHES is symmetric: if A matches B, then B matches A. */
-    private void mirrorMatchesVote(CompetencyRelationship originalRel, String userId) {
+    /** Symmetric types: if A→B is MATCHES/UNRELATED, mirror the vote to B→A. */
+    private void mirrorSymmetricVote(CompetencyRelationship originalRel, String userId, RelationshipType type) {
         Optional<CompetencyRelationship> reverseOpt = relationshipRepository
                 .findByOriginIdAndDestinationId(originalRel.getDestinationId(), originalRel.getOriginId());
 
@@ -210,8 +212,8 @@ public class SchedulingService {
                 () -> createRelationship(originalRel.getDestinationId(), originalRel.getOriginId()));
 
         if (!voteRepository.existsByRelationshipIdAndUserId(reverse.getId(), userId)) {
-            applyVote(reverse, RelationshipType.MATCHES);
-            saveVote(reverse.getId(), userId, RelationshipType.MATCHES);
+            applyVote(reverse, type);
+            saveVote(reverse.getId(), userId, type);
         }
     }
 
