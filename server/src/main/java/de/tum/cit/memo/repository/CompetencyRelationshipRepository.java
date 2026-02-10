@@ -17,7 +17,8 @@ public interface CompetencyRelationshipRepository extends JpaRepository<Competen
     boolean existsByOriginIdAndDestinationId(String originId, String destinationId);
 
     /**
-     * Find high-entropy relationships that the user has not yet voted on.
+     * High-entropy relationships the user hasn't voted on yet (for consensus
+     * pipeline).
      */
     @Query("""
             SELECT r FROM CompetencyRelationship r
@@ -33,37 +34,18 @@ public interface CompetencyRelationshipRepository extends JpaRepository<Competen
             @Param("userId") String userId,
             @Param("minVotes") int minVotes,
             @Param("maxVotes") int maxVotes,
-            @Param("minEntropy") double minEntropy);
+            @Param("minEntropy") double minEntropy,
+            org.springframework.data.domain.Pageable pageable);
 
     /**
-     * Get competency degrees (number of relationships each competency appears in).
-     * Returns pairs of [competencyId, degree].
+     * Relationships where both origin AND destination are in the given pool of IDs.
      */
-    @Query(value = """
-            SELECT cid, SUM(cnt) as degree FROM (
-                SELECT origin_id AS cid, COUNT(*) AS cnt FROM competency_relationships GROUP BY origin_id
-                UNION ALL
-                SELECT destination_id AS cid, COUNT(*) AS cnt FROM competency_relationships GROUP BY destination_id
-            ) sub
-            GROUP BY cid
-            ORDER BY degree ASC
-            LIMIT :limit
-            """, nativeQuery = true)
-    List<Object[]> findLowDegreeCompetencyIds(@Param("limit") int limit);
+    @Query("SELECT r FROM CompetencyRelationship r WHERE r.originId IN :ids AND r.destinationId IN :ids")
+    List<CompetencyRelationship> findIntraPoolRelationships(@Param("ids") List<String> ids);
 
     /**
-     * Find all relationships where user has NOT voted, for filtering.
-     */
-    /**
-     * Find all relationships involving any of the given competency IDs.
-     * Used for batch processing in Coverage Pipeline to avoid N+1 queries.
-     */
-    @Query("SELECT r FROM CompetencyRelationship r WHERE r.originId IN :ids OR r.destinationId IN :ids")
-    List<CompetencyRelationship> findAllByCompetencyIds(@Param("ids") List<String> ids);
-
-    /**
-     * Find a single relationship the user has NOT voted on.
-     * Uses LIMIT 1 to avoid loading the entire table.
+     * A single relationship the user hasn't voted on (use with PageRequest.of(0,
+     * 1)).
      */
     @Query("""
             SELECT r FROM CompetencyRelationship r

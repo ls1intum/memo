@@ -1,6 +1,5 @@
 package de.tum.cit.memo.service;
 
-import de.tum.cit.memo.entity.Competency;
 import de.tum.cit.memo.entity.CompetencyRelationship;
 import de.tum.cit.memo.exception.InvalidOperationException;
 import de.tum.cit.memo.exception.ResourceNotFoundException;
@@ -14,8 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 /**
- * Service for basic CRUD operations on competency relationships.
- * For voting and scheduling, use {@link SchedulingService} instead.
+ * CRUD operations on competency relationships.
+ * For voting and scheduling, see {@link SchedulingService}.
  */
 @Service
 @RequiredArgsConstructor
@@ -26,9 +25,8 @@ public class CompetencyRelationshipService {
     private final CompetencyRepository competencyRepository;
 
     /**
-     * Create a new empty relationship (used for administrative purposes).
-     * Also updates the degree counter for both competencies.
-     * For normal user voting flow, use SchedulingService.
+     * Creates a new empty relationship (admin use).
+     * For the normal user voting flow, use SchedulingService.
      */
     @Transactional
     public CompetencyRelationship createRelationship(String originId, String destinationId) {
@@ -46,18 +44,12 @@ public class CompetencyRelationshipService {
                 .destinationId(destinationId)
                 .build();
 
-        // Update the denormalized degree counter for both competencies
-        List<Competency> competencies = competencyRepository.findAllById(List.of(originId, destinationId));
-        competencies.forEach(c -> c.setDegree(c.getDegree() + 1));
-        competencyRepository.saveAll(competencies);
-
+        competencyRepository.incrementDegree(List.of(originId, destinationId));
         return relationshipRepository.save(relationship);
     }
 
     /**
-     * Find existing relationship or create a new one.
-     * When creating a new relationship, also updates the degree counter for both
-     * competencies.
+     * Finds an existing relationship or creates a new one.
      */
     @Transactional
     public CompetencyRelationship findOrCreateRelationship(String originId, String destinationId) {
@@ -73,11 +65,7 @@ public class CompetencyRelationshipService {
                             .destinationId(destinationId)
                             .build();
 
-                    // Update the denormalized degree counter for both competencies
-                    List<Competency> competencies = competencyRepository.findAllById(List.of(originId, destinationId));
-                    competencies.forEach(c -> c.setDegree(c.getDegree() + 1));
-                    competencyRepository.saveAll(competencies);
-
+                    competencyRepository.incrementDegree(List.of(originId, destinationId));
                     return relationshipRepository.save(relationship);
                 });
     }
@@ -98,12 +86,7 @@ public class CompetencyRelationshipService {
         CompetencyRelationship relationship = relationshipRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Relationship not found"));
 
-        // Decrement the denormalized degree counter for both competencies
-        List<Competency> competencies = competencyRepository
-                .findAllById(List.of(relationship.getOriginId(), relationship.getDestinationId()));
-        competencies.forEach(c -> c.setDegree(Math.max(0, c.getDegree() - 1)));
-        competencyRepository.saveAll(competencies);
-
+        competencyRepository.decrementDegree(List.of(relationship.getOriginId(), relationship.getDestinationId()));
         relationshipRepository.deleteById(id);
     }
 }

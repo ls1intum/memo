@@ -14,9 +14,14 @@ public interface CompetencyRepository extends JpaRepository<Competency, String> 
     @Query(value = "SELECT * FROM competencies ORDER BY RANDOM() LIMIT :count", nativeQuery = true)
     List<Competency> findRandomCompetencies(@Param("count") int count);
 
-    List<Competency> findTop20ByOrderByDegreeAsc();
+    @Query("SELECT c.id FROM Competency c ORDER BY c.degree ASC")
+    List<String> findTop20IdsByDegreeAsc(org.springframework.data.domain.Pageable pageable);
 
     @org.springframework.data.jpa.repository.Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("UPDATE Competency c SET c.degree = c.degree + 1 WHERE c.id IN :ids")
     void incrementDegree(@Param("ids") List<String> ids);
+
+    @org.springframework.data.jpa.repository.Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query(value = "UPDATE competencies SET degree = GREATEST(degree - 1, 0) WHERE id IN :ids", nativeQuery = true)
+    void decrementDegree(@Param("ids") List<String> ids);
 }

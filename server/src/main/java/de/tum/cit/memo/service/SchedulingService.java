@@ -15,20 +15,25 @@ import de.tum.cit.memo.repository.CompetencyRepository;
 import de.tum.cit.memo.util.IdGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Collections;
-
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
- * Service for intelligent scheduling of competency mapping tasks.
- * Uses a dual-pipeline approach: coverage (70%) and consensus (30%).
+ * Dual-pipeline scheduling for competency mapping tasks.
+ * Coverage (70%): connects low-degree nodes to grow the graph evenly.
+ * Consensus (30%): resurfaces ambiguous relationships for more votes.
  */
 @Slf4j
 @Service
@@ -37,6 +42,7 @@ public class SchedulingService {
 
     private static final double COVERAGE_WEIGHT = 0.7;
     private static final int LOW_DEGREE_POOL_SIZE = 20;
+    private static final int CONSENSUS_CANDIDATE_LIMIT = 20;
     private static final int CONSENSUS_MIN_VOTES = 5;
     private static final int CONSENSUS_MAX_VOTES = 20;
     private static final double CONSENSUS_MIN_ENTROPY = 0.5;
@@ -60,113 +66,91 @@ public class SchedulingService {
 
         log.debug("Consensus pipeline for user {}", userId);
         RelationshipTaskResponse task = consensusPipeline(userId);
-        if (task == null) {
-            log.debug("Falling back to coverage");
-            return coveragePipeline(userId);
+        if (task != null) {
+            return task;
         }
-        return task;
+
+        log.debug("No consensus candidates, falling back to coverage");
+        return coveragePipeline(userId);
     }
 
     @Transactional
     public VoteResponse submitVote(String userId, VoteRequest request) {
-        CompetencyRelationship rel = relationshipRepository.findById(request.getRelationshipId())
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Relationship not found: " + request.getRelationshipId()));
+        CompetencyRelationship rel = findRelationshipOrThrow(request.getRelationshipId());
 
-        // Idempotent: if user already voted, return current state
-        if (voteRepository.existsByRelationshipIdAndUserId(request.getRelationshipId(), userId)) {
-            log.debug("User {} already voted on relationship {}", userId, request.getRelationshipId());
-            return buildVoteResponse(rel);
+        // Already voted? Return current state (idempotent)
+        if (voteRepository.existsByRelationshipIdAndUserId(rel.getId(), userId)) {
+            log.debug("User {} already voted on {}", userId, rel.getId());
+            return toVoteResponse(rel);
         }
 
-        // Record the vote
-        voteRepository.save(CompetencyRelationshipVote.builder()
-                .id(IdGenerator.generateCuid())
-                .relationshipId(request.getRelationshipId())
-                .userId(userId)
-                .relationshipType(request.getRelationshipType())
-                .build());
+        saveVote(rel.getId(), userId, request.getRelationshipType());
+        applyVote(rel, request.getRelationshipType());
 
-        // Update counters and entropy
-        incrementVoteCounter(rel, request.getRelationshipType());
-        rel.recalculateEntropy();
-        relationshipRepository.save(rel);
-
-        // Handle MATCHES bidirectionality
         if (request.getRelationshipType() == RelationshipType.MATCHES) {
-            handleBidirectionalMatches(rel, userId);
+            mirrorMatchesVote(rel, userId);
         }
 
-        return buildVoteResponse(rel);
+        return toVoteResponse(rel);
     }
+
+    // --- Pipelines ---
 
     private RelationshipTaskResponse coveragePipeline(String userId) {
         List<String> poolIds = getLowDegreeCompetencyIds();
-
         if (poolIds.size() < 2) {
             throw new InvalidOperationException("Not enough competencies to form pairs");
         }
 
-        // Optimization: Batch fetch existing relationships to avoid N+1 queries in the
-        // loop
-        // We fetch ALL relationships involving ANY of the nodes in the low-degree pool
-        // in one go.
-        List<CompetencyRelationship> existingRels = relationshipRepository.findAllByCompetencyIds(poolIds);
+        // Fetch only intra-pool relationships (both nodes in pool)
+        Set<String> existingPairs = relationshipRepository.findIntraPoolRelationships(poolIds).stream()
+                .flatMap(r -> Stream.of(pairKey(r.getOriginId(), r.getDestinationId()),
+                        pairKey(r.getDestinationId(), r.getOriginId())))
+                .collect(Collectors.toSet());
 
-        // Build a fast lookup set "A:B" and "B:A"
-        Set<String> existingPairs = existingRels.stream()
-                .flatMap(r -> java.util.stream.Stream.of(
-                        r.getOriginId() + ":" + r.getDestinationId(),
-                        r.getDestinationId() + ":" + r.getOriginId()))
-                .collect(java.util.stream.Collectors.toSet());
+        // Shuffle and find the first pair that doesn't exist yet
+        List<String> pool = new ArrayList<>(poolIds);
+        Collections.shuffle(pool, random);
 
-        // Try to find a new pair that doesn't exist yet (in-memory check)
-        List<String> shuffledPool = new ArrayList<>(poolIds);
-        Collections.shuffle(shuffledPool, random);
-
-        for (int i = 0; i < shuffledPool.size(); i++) {
-            for (int j = i + 1; j < shuffledPool.size(); j++) {
-                String originId = shuffledPool.get(i);
-                String destId = shuffledPool.get(j);
-
-                // O(1) in-memory check instead of O(N) DB call
-                if (!existingPairs.contains(originId + ":" + destId)) {
-                    CompetencyRelationship rel = createRelationship(originId, destId);
-                    return buildTaskResponse(rel, "COVERAGE");
+        for (int i = 0; i < pool.size(); i++) {
+            for (int j = i + 1; j < pool.size(); j++) {
+                if (!existingPairs.contains(pairKey(pool.get(i), pool.get(j)))) {
+                    return toTaskResponse(createRelationship(pool.get(i), pool.get(j)), "COVERAGE");
                 }
             }
         }
 
-        // All pairs exist, find one user hasn't voted on
-        log.debug("All candidate pairs exist, finding unvoted relationship");
-        return findUnvotedRelationship(userId);
+        // All pool pairs already exist — fall back to any unvoted relationship
+        log.debug("Pool fully connected, finding any unvoted relationship");
+        return relationshipRepository
+                .findFirstUnvotedByUser(userId, PageRequest.of(0, 1))
+                .map(rel -> toTaskResponse(rel, "COVERAGE"))
+                .orElseThrow(() -> new InvalidOperationException("No available relationships for voting"));
     }
 
     private RelationshipTaskResponse consensusPipeline(String userId) {
         List<CompetencyRelationship> candidates = relationshipRepository
                 .findHighEntropyRelationshipsExcludingUser(
-                        userId, CONSENSUS_MIN_VOTES, CONSENSUS_MAX_VOTES, CONSENSUS_MIN_ENTROPY);
+                        userId, CONSENSUS_MIN_VOTES, CONSENSUS_MAX_VOTES, CONSENSUS_MIN_ENTROPY,
+                        PageRequest.of(0, CONSENSUS_CANDIDATE_LIMIT));
 
         if (candidates.isEmpty()) {
             return null;
         }
 
-        // Weighted random selection by entropy (higher entropy = more weight)
-        CompetencyRelationship selected = selectByEntropyWeight(candidates);
-        return buildTaskResponse(selected, "CONSENSUS");
+        return toTaskResponse(pickWeightedByEntropy(candidates), "CONSENSUS");
     }
 
-    // Helper Methods
+    // --- Core helpers ---
 
     private List<String> getLowDegreeCompetencyIds() {
-        // Optimized: Uses denormalized degree index (single simple query) O(1)
-        List<Competency> nodes = competencyRepository.findTop20ByOrderByDegreeAsc();
-
-        if (nodes.isEmpty()) {
+        List<String> ids = competencyRepository.findTop20IdsByDegreeAsc(PageRequest.of(0, LOW_DEGREE_POOL_SIZE));
+        if (ids.isEmpty()) {
+            // No degree data yet — pick random competencies
             return competencyRepository.findRandomCompetencies(LOW_DEGREE_POOL_SIZE)
                     .stream().map(Competency::getId).toList();
         }
-        return nodes.stream().map(Competency::getId).toList();
+        return ids;
     }
 
     private CompetencyRelationship createRelationship(String originId, String destId) {
@@ -176,29 +160,23 @@ public class SchedulingService {
                 .destinationId(destId)
                 .build();
 
-        List<Competency> competencies = competencyRepository.findAllById(List.of(originId, destId));
-        competencies.forEach(c -> c.setDegree(c.getDegree() + 1));
-        competencyRepository.saveAll(competencies);
-
+        competencyRepository.incrementDegree(List.of(originId, destId));
         return relationshipRepository.save(rel);
     }
 
-    private RelationshipTaskResponse findUnvotedRelationship(String userId) {
-        return relationshipRepository
-                .findFirstUnvotedByUser(userId, org.springframework.data.domain.PageRequest.of(0, 1))
-                .map(rel -> buildTaskResponse(rel, "COVERAGE"))
-                .orElseThrow(() -> new InvalidOperationException("No available relationships for voting"));
-    }
-
-    private CompetencyRelationship selectByEntropyWeight(List<CompetencyRelationship> candidates) {
+    /**
+     * Entropy-weighted roulette selection, biased toward low-vote high-entropy
+     * items.
+     */
+    private CompetencyRelationship pickWeightedByEntropy(List<CompetencyRelationship> candidates) {
         double totalWeight = candidates.stream()
-                .mapToDouble(r -> r.getEntropy() / (r.getTotalVotes() + 1.0))
+                .mapToDouble(this::entropyWeight)
                 .sum();
         double roll = random.nextDouble() * totalWeight;
         double cumulative = 0;
 
         for (CompetencyRelationship rel : candidates) {
-            cumulative += rel.getEntropy() / (rel.getTotalVotes() + 1.0);
+            cumulative += entropyWeight(rel);
             if (roll <= cumulative) {
                 return rel;
             }
@@ -206,46 +184,103 @@ public class SchedulingService {
         return candidates.get(0);
     }
 
-    private void handleBidirectionalMatches(CompetencyRelationship originalRel, String userId) {
-        Optional<CompetencyRelationship> reverseOpt = relationshipRepository
-                .findByOriginIdAndDestinationId(originalRel.getDestinationId(), originalRel.getOriginId());
-
-        CompetencyRelationship reverse = reverseOpt.orElseGet(() -> createRelationship(
-                originalRel.getDestinationId(), originalRel.getOriginId()));
-
-        if (!voteRepository.existsByRelationshipIdAndUserId(reverse.getId(), userId)) {
-            reverse.setVoteMatches(reverse.getVoteMatches() + 1);
-            reverse.recalculateEntropy();
-            relationshipRepository.save(reverse);
-
-            voteRepository.save(CompetencyRelationshipVote.builder()
-                    .id(IdGenerator.generateCuid())
-                    .relationshipId(reverse.getId())
-                    .userId(userId)
-                    .relationshipType(RelationshipType.MATCHES)
-                    .build());
-        }
+    private double entropyWeight(CompetencyRelationship rel) {
+        return rel.getEntropy() / (rel.getTotalVotes() + 1.0);
     }
 
-    private void incrementVoteCounter(CompetencyRelationship rel, RelationshipType type) {
+    // --- Vote logic ---
+
+    private void saveVote(String relationshipId, String userId, RelationshipType type) {
+        voteRepository.save(CompetencyRelationshipVote.builder()
+                .id(IdGenerator.generateCuid())
+                .relationshipId(relationshipId)
+                .userId(userId)
+                .relationshipType(type)
+                .build());
+    }
+
+    private void applyVote(CompetencyRelationship rel, RelationshipType type) {
         switch (type) {
             case ASSUMES -> rel.setVoteAssumes(rel.getVoteAssumes() + 1);
             case EXTENDS -> rel.setVoteExtends(rel.getVoteExtends() + 1);
             case MATCHES -> rel.setVoteMatches(rel.getVoteMatches() + 1);
             case UNRELATED -> rel.setVoteUnrelated(rel.getVoteUnrelated() + 1);
         }
+        rel.recalculateEntropy();
+        relationshipRepository.save(rel);
     }
 
-    // Response Builders
-    private VoteResponse buildVoteResponse(CompetencyRelationship rel) {
+    /** MATCHES is symmetric: if A matches B, then B matches A. */
+    private void mirrorMatchesVote(CompetencyRelationship originalRel, String userId) {
+        Optional<CompetencyRelationship> reverseOpt = relationshipRepository
+                .findByOriginIdAndDestinationId(originalRel.getDestinationId(), originalRel.getOriginId());
+
+        CompetencyRelationship reverse = reverseOpt.orElseGet(
+                () -> createRelationship(originalRel.getDestinationId(), originalRel.getOriginId()));
+
+        if (!voteRepository.existsByRelationshipIdAndUserId(reverse.getId(), userId)) {
+            applyVote(reverse, RelationshipType.MATCHES);
+            saveVote(reverse.getId(), userId, RelationshipType.MATCHES);
+        }
+    }
+
+    // --- Lookups & response builders ---
+
+    private CompetencyRelationship findRelationshipOrThrow(String id) {
+        return relationshipRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Relationship not found: " + id));
+    }
+
+    /**
+     * Fetches both competencies in one query instead of two separate findById
+     * calls.
+     */
+    private RelationshipTaskResponse toTaskResponse(CompetencyRelationship rel, String pipeline) {
+        Map<String, Competency> byId = competencyRepository
+                .findAllById(List.of(rel.getOriginId(), rel.getDestinationId()))
+                .stream().collect(Collectors.toMap(Competency::getId, Function.identity()));
+
+        Competency origin = byId.get(rel.getOriginId());
+        Competency destination = byId.get(rel.getDestinationId());
+        if (origin == null || destination == null) {
+            throw new ResourceNotFoundException("Competency not found for relationship " + rel.getId());
+        }
+
+        return RelationshipTaskResponse.builder()
+                .relationshipId(rel.getId())
+                .origin(toCompetencyInfo(origin))
+                .destination(toCompetencyInfo(destination))
+                .pipeline(pipeline)
+                .currentVotes(toTaskVoteCounts(rel))
+                .build();
+    }
+
+    private VoteResponse toVoteResponse(CompetencyRelationship rel) {
         return VoteResponse.builder()
                 .success(true)
-                .updatedVotes(buildVoteResponseCounts(rel))
+                .updatedVotes(toResponseVoteCounts(rel))
                 .newEntropy(rel.getEntropy())
                 .build();
     }
 
-    private VoteResponse.VoteCounts buildVoteResponseCounts(CompetencyRelationship rel) {
+    private static RelationshipTaskResponse.CompetencyInfo toCompetencyInfo(Competency c) {
+        return RelationshipTaskResponse.CompetencyInfo.builder()
+                .id(c.getId())
+                .title(c.getTitle())
+                .description(c.getDescription())
+                .build();
+    }
+
+    private static RelationshipTaskResponse.VoteCounts toTaskVoteCounts(CompetencyRelationship rel) {
+        return RelationshipTaskResponse.VoteCounts.builder()
+                .assumes(rel.getVoteAssumes())
+                .extendsRelation(rel.getVoteExtends())
+                .matches(rel.getVoteMatches())
+                .unrelated(rel.getVoteUnrelated())
+                .build();
+    }
+
+    private static VoteResponse.VoteCounts toResponseVoteCounts(CompetencyRelationship rel) {
         return VoteResponse.VoteCounts.builder()
                 .assumes(rel.getVoteAssumes())
                 .extendsRelation(rel.getVoteExtends())
@@ -254,35 +289,7 @@ public class SchedulingService {
                 .build();
     }
 
-    private RelationshipTaskResponse buildTaskResponse(CompetencyRelationship rel, String pipeline) {
-        Competency origin = competencyRepository.findById(rel.getOriginId())
-                .orElseThrow(() -> new ResourceNotFoundException("Origin competency not found"));
-        Competency destination = competencyRepository.findById(rel.getDestinationId())
-                .orElseThrow(() -> new ResourceNotFoundException("Destination competency not found"));
-
-        return RelationshipTaskResponse.builder()
-                .relationshipId(rel.getId())
-                .origin(buildCompetencyInfo(origin))
-                .destination(buildCompetencyInfo(destination))
-                .pipeline(pipeline)
-                .currentVotes(buildTaskResponseCounts(rel))
-                .build();
-    }
-
-    private RelationshipTaskResponse.CompetencyInfo buildCompetencyInfo(Competency c) {
-        return RelationshipTaskResponse.CompetencyInfo.builder()
-                .id(c.getId())
-                .title(c.getTitle())
-                .description(c.getDescription())
-                .build();
-    }
-
-    private RelationshipTaskResponse.VoteCounts buildTaskResponseCounts(CompetencyRelationship rel) {
-        return RelationshipTaskResponse.VoteCounts.builder()
-                .assumes(rel.getVoteAssumes())
-                .extendsRelation(rel.getVoteExtends())
-                .matches(rel.getVoteMatches())
-                .unrelated(rel.getVoteUnrelated())
-                .build();
+    private static String pairKey(String a, String b) {
+        return a + ':' + b;
     }
 }
