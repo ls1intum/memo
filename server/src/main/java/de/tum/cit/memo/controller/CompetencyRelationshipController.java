@@ -1,24 +1,23 @@
 package de.tum.cit.memo.controller;
 
-import de.tum.cit.memo.dto.CreateCompetencyRelationshipRequest;
 import de.tum.cit.memo.entity.CompetencyRelationship;
 import de.tum.cit.memo.service.CompetencyRelationshipService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+/**
+ * Controller for competency relationship CRUD.
+ * For creating relationships and voting, use {@link SchedulingController}.
+ */
 @RestController
 @RequestMapping("/api/competency-relationships")
 @RequiredArgsConstructor
@@ -26,13 +25,6 @@ import java.util.List;
 public class CompetencyRelationshipController {
 
     private final CompetencyRelationshipService relationshipService;
-
-    @PostMapping
-    @Operation(summary = "Create a new competency relationship")
-    public ResponseEntity<CompetencyRelationship> createRelationship(@Valid @RequestBody CreateCompetencyRelationshipRequest request) {
-        CompetencyRelationship relationship = relationshipService.createRelationship(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(relationship);
-    }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get competency relationship by ID")

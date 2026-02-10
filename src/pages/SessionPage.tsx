@@ -1,8 +1,9 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { useSearchParams } from 'react-router-dom';
+
 import {
   getRandomCompetenciesAction,
-  createCompetencyRelationshipAction,
+  getNextRelationshipTaskAction,
+  submitCompetencyVoteAction,
   deleteCompetencyRelationshipAction,
   createCompetencyResourceLinkAction,
   deleteCompetencyResourceLinkAction,
@@ -96,12 +97,6 @@ const getRelationshipDescription = (
 };
 
 export function SessionPage() {
-  const [searchParams] = useSearchParams();
-  const countParam = searchParams.get('count');
-  const parsedCount = countParam ? Number(countParam) : NaN;
-  const count =
-    Number.isFinite(parsedCount) && parsedCount > 0 ? parsedCount : 2;
-
   const [relation, setRelation] = useState<RelationshipType | null>(null);
   const [resourceMatchType, setResourceMatchType] =
     useState<ResourceMatchType | null>(null);
@@ -128,6 +123,10 @@ export function SessionPage() {
   const [isCreating, setIsCreating] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [swapRotation, setSwapRotation] = useState(0);
+  const [allDone, setAllDone] = useState(false);
+  const [currentRelationshipId, setCurrentRelationshipId] = useState<
+    string | null
+  >(null);
 
   const {
     hoveredValue: hoveredRelation,
@@ -187,33 +186,51 @@ export function SessionPage() {
       setResourceMatchType(null);
 
       if (mappingMode === 'competency') {
-        const result = await getRandomCompetenciesAction(count);
+        if (!userId) {
+          setIsTransitioning(false);
+          return;
+        }
+
+        const result = await getNextRelationshipTaskAction(userId);
 
         if (!result.success) {
           setError(
             result.error ??
-              'An unexpected error occurred while fetching competencies.'
+              'An unexpected error occurred while fetching the next task.'
           );
           if (isInitialLoad) setCompetencies([]);
           setIsTransitioning(false);
           return;
         }
 
-        if (!result.competencies || result.competencies.length === 0) {
+        if (result.allDone) {
+          setAllDone(true);
+          setCompetencies([]);
+          setCurrentRelationshipId(null);
+          setIsTransitioning(false);
+          return;
+        }
+
+        if (!result.task) {
           if (isInitialLoad) setCompetencies([]);
           setIsTransitioning(false);
           return;
         }
 
-        if (
-          result.competencies.length >= 2 &&
-          result.competencies[0]!.id === result.competencies[1]!.id
-        ) {
-          await loadMappingPair(isInitialLoad);
-          return;
-        }
-
-        setCompetencies(result.competencies);
+        setAllDone(false);
+        setCurrentRelationshipId(result.task.relationshipId);
+        setCompetencies([
+          {
+            id: result.task.origin.id,
+            title: result.task.origin.title,
+            description: result.task.origin.description,
+          },
+          {
+            id: result.task.destination.id,
+            title: result.task.destination.title,
+            description: result.task.destination.description,
+          },
+        ] as Competency[]);
         setLearningResource(null);
       } else {
         const [compResult, resourceResult] = await Promise.all([
@@ -248,7 +265,7 @@ export function SessionPage() {
 
       setIsTransitioning(false);
     },
-    [count, mappingMode]
+    [mappingMode, userId]
   );
 
   const prevModeRef = useRef<MappingMode | null>(null);
@@ -263,13 +280,8 @@ export function SessionPage() {
     async (type: 'completed' | 'skipped') => {
       if (type === 'completed') {
         if (mappingMode === 'competency') {
-          if (
-            !competencies ||
-            competencies.length < 2 ||
-            !relation ||
-            !userId
-          ) {
-            setError('Missing required data to create relationship');
+          if (!currentRelationshipId || !relation || !userId) {
+            setError('Missing required data to submit vote');
             return;
           }
 
@@ -277,14 +289,12 @@ export function SessionPage() {
           setError(null);
 
           try {
-            const formData = new FormData();
-            formData.set('relationshipType', relation);
-            formData.set('originId', competencies[0]!.id);
-            formData.set('destinationId', competencies[1]!.id);
-            formData.set('userId', userId);
-
             const startTime = Date.now();
-            const result = await createCompetencyRelationshipAction(formData);
+            const result = await submitCompetencyVoteAction(
+              userId,
+              currentRelationshipId,
+              relation
+            );
 
             const elapsed = Date.now() - startTime;
             if (elapsed < 300) {
@@ -292,7 +302,7 @@ export function SessionPage() {
             }
 
             if (!result.success) {
-              setError(result.error ?? 'Failed to create relationship');
+              setError(result.error ?? 'Failed to submit vote');
               setIsCreating(false);
               return;
             }
@@ -303,7 +313,7 @@ export function SessionPage() {
               {
                 type: 'completed',
                 mode: 'competency',
-                relationshipId: result.relationship?.id,
+                relationshipId: currentRelationshipId,
                 competencies: competencies ? [...competencies] : undefined,
               },
             ]);
@@ -409,6 +419,7 @@ export function SessionPage() {
       userId,
       mappingMode,
       loadMappingPair,
+      currentRelationshipId,
     ]
   );
 
@@ -697,7 +708,19 @@ export function SessionPage() {
             </Card>
           )}
 
-          {noCompetencies && !error && (
+          {allDone && !error && (
+            <Card className="border border-emerald-200 bg-emerald-50/80">
+              <CardHeader>
+                <CardTitle className="text-emerald-800">🎉 All done!</CardTitle>
+                <CardDescription className="text-emerald-700">
+                  You've voted on every available competency pair. Great work!
+                  Check back later when more competencies have been added.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          )}
+
+          {noCompetencies && !allDone && !error && (
             <Card className="border border-red-100 bg-red-50/80">
               <CardHeader>
                 <CardTitle className="text-red-800">
@@ -726,7 +749,7 @@ export function SessionPage() {
             </Card>
           )}
 
-          {!error && !noCompetencies && !notEnough && (
+          {!error && !allDone && !noCompetencies && !notEnough && (
             <>
               <div className="flex flex-col items-center justify-center text-center space-y-2 mx-auto w-full">
                 {isLoading || !competencies?.length ? (
