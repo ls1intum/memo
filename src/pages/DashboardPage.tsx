@@ -14,7 +14,8 @@ import {
   Award,
   Star,
 } from 'lucide-react';
-import { ContributionHeatmap, heatmapColor } from '@/components/dashboard/ContributionHeatmap';
+import { ContributionHeatmap } from '@/components/dashboard/ContributionHeatmap';
+import { heatmapColor } from '@/lib/heatmap-helpers';
 
 const GUEST_USER_ID = 'guest';
 
@@ -90,10 +91,11 @@ function BadgeCard({ badge, earned }: { badge: BadgeDef; earned: boolean }) {
   const Icon = badge.icon;
   return (
     <div
-      className={`relative overflow-hidden rounded-2xl border-2 p-5 transition-all duration-300 ${earned
-        ? 'border-white/80 bg-white/90 shadow-[0_16px_50px_-16px_rgba(7,30,84,0.4)] hover:-translate-y-1 hover:shadow-[0_20px_60px_-20px_rgba(7,30,84,0.5)]'
-        : 'border-slate-200/80 bg-slate-50/50 opacity-50 grayscale'
-        }`}
+      className={`relative overflow-hidden rounded-2xl border-2 p-5 transition-all duration-300 ${
+        earned
+          ? 'border-white/80 bg-white/90 shadow-[0_16px_50px_-16px_rgba(7,30,84,0.4)] hover:-translate-y-1 hover:shadow-[0_20px_60px_-20px_rgba(7,30,84,0.5)]'
+          : 'border-slate-200/80 bg-slate-50/50 opacity-50 grayscale'
+      }`}
     >
       {earned && (
         <div
@@ -262,9 +264,7 @@ export function DashboardPage() {
                 />
                 <StatCard
                   label="Streak · Current / Longest"
-                  value={
-                    `🔥 ${stats.currentStreak > 0 ? `${stats.currentStreak} day${stats.currentStreak !== 1 ? 's' : ''}` : '—'} / ${stats.longestStreak > 0 ? `${stats.longestStreak} day${stats.longestStreak !== 1 ? 's' : ''}` : '—'}`
-                  }
+                  value={`🔥 ${stats.currentStreak > 0 ? `${stats.currentStreak} day${stats.currentStreak !== 1 ? 's' : ''}` : '—'} / ${stats.longestStreak > 0 ? `${stats.longestStreak} day${stats.longestStreak !== 1 ? 's' : ''}` : '—'}`}
                   icon={<Flame className="h-4 w-4" />}
                   accentColor="rgba(239,68,68,0.25)"
                 />
