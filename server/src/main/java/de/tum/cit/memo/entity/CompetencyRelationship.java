@@ -93,7 +93,7 @@ public class CompetencyRelationship {
         }
 
         double ent = 0.0;
-        int[] counts = { voteAssumes, voteExtends, voteMatches, voteUnrelated };
+        int[] counts = {voteAssumes, voteExtends, voteMatches, voteUnrelated};
         for (int count : counts) {
             if (count > 0) {
                 double p = (double) count / total;

@@ -34,7 +34,7 @@ public class SchedulingController {
     }
 
     @PostMapping("/vote")
-    @Operation(summary = "Submit a vote on a relationship", description = "Records the user's vote on a competency relationship. MATCHES votes are bidirectional.")
+    @Operation(summary = "Submit a vote on a relationship", description = "Records the user's vote on a competency relationship. Accepts either a relationshipId or originId+destinationId pair (for swapped direction). MATCHES and UNRELATED votes are bidirectional.")
     public ResponseEntity<VoteResponse> submitVote(
             @RequestHeader("X-User-Id") String userId,
             @Valid @RequestBody VoteRequest request) {
