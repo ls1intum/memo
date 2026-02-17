@@ -8,7 +8,6 @@ import de.tum.cit.memo.entity.Competency;
 import de.tum.cit.memo.entity.CompetencyRelationship;
 import de.tum.cit.memo.entity.CompetencyRelationshipVote;
 import de.tum.cit.memo.enums.RelationshipType;
-import de.tum.cit.memo.exception.InvalidOperationException;
 import de.tum.cit.memo.exception.ResourceNotFoundException;
 import de.tum.cit.memo.repository.CompetencyRelationshipRepository;
 import de.tum.cit.memo.repository.CompetencyRelationshipVoteRepository;
@@ -78,7 +77,15 @@ public class SchedulingService {
 
     @Transactional
     public VoteResponse submitVote(String userId, VoteRequest request) {
-        CompetencyRelationship rel = findRelationshipOrThrow(request.getRelationshipId());
+        // Resolve relationship: by ID directly, or find/create by competency pair
+        CompetencyRelationship rel;
+        if (request.getOriginId() != null && request.getDestinationId() != null) {
+            rel = relationshipRepository
+                    .findByOriginIdAndDestinationId(request.getOriginId(), request.getDestinationId())
+                    .orElseGet(() -> createRelationship(request.getOriginId(), request.getDestinationId()));
+        } else {
+            rel = findRelationshipOrThrow(request.getRelationshipId());
+        }
 
         if (voteRepository.existsByRelationshipIdAndUserId(rel.getId(), userId)) {
             log.debug("User {} already voted on {}", userId, rel.getId());
@@ -145,7 +152,7 @@ public class SchedulingService {
     // --- Core helpers ---
 
     private List<String> getLowDegreeCompetencyIds() {
-        List<String> ids = competencyRepository.findTop20IdsByDegreeAsc(PageRequest.of(0, LOW_DEGREE_POOL_SIZE));
+        List<String> ids = competencyRepository.findIdsByDegreeAsc(PageRequest.of(0, LOW_DEGREE_POOL_SIZE));
         if (ids.isEmpty()) {
             return competencyRepository.findRandomCompetencyIds(LOW_DEGREE_POOL_SIZE);
         }

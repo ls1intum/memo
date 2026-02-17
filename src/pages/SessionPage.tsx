@@ -124,6 +124,7 @@ export function SessionPage() {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [swapRotation, setSwapRotation] = useState(0);
   const [allDone, setAllDone] = useState(false);
+  const [isSwapped, setIsSwapped] = useState(false);
   const [currentRelationshipId, setCurrentRelationshipId] = useState<
     string | null
   >(null);
@@ -184,6 +185,7 @@ export function SessionPage() {
 
       setRelation(null);
       setResourceMatchType(null);
+      setIsSwapped(false);
 
       if (mappingMode === 'competency') {
         if (!userId) {
@@ -280,7 +282,7 @@ export function SessionPage() {
     async (type: 'completed' | 'skipped') => {
       if (type === 'completed') {
         if (mappingMode === 'competency') {
-          if (!currentRelationshipId || !relation || !userId) {
+          if ((!currentRelationshipId && !isSwapped) || !relation || !userId) {
             setError('Missing required data to submit vote');
             return;
           }
@@ -290,10 +292,17 @@ export function SessionPage() {
 
           try {
             const startTime = Date.now();
+            const voteOpts =
+              isSwapped && competencies && competencies.length >= 2
+                ? {
+                    originId: competencies[0]!.id,
+                    destinationId: competencies[1]!.id,
+                  }
+                : { relationshipId: currentRelationshipId! };
             const result = await submitCompetencyVoteAction(
               userId,
-              currentRelationshipId,
-              relation
+              relation,
+              voteOpts
             );
 
             const elapsed = Date.now() - startTime;
@@ -313,7 +322,7 @@ export function SessionPage() {
               {
                 type: 'completed',
                 mode: 'competency',
-                relationshipId: currentRelationshipId,
+                relationshipId: currentRelationshipId ?? undefined,
                 competencies: competencies ? [...competencies] : undefined,
               },
             ]);
@@ -420,6 +429,7 @@ export function SessionPage() {
       mappingMode,
       loadMappingPair,
       currentRelationshipId,
+      isSwapped,
     ]
   );
 
@@ -629,7 +639,7 @@ export function SessionPage() {
   );
 
   return (
-    <div className="relative overflow-hidden bg-gradient-to-br from-[#d7e3ff] via-[#f3f5ff] to-[#e8ecff] text-slate-900">
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#d7e3ff] via-[#f3f5ff] to-[#e8ecff] text-slate-900">
       <div className="absolute inset-0 -z-10 opacity-70">
         <div className="absolute left-1/2 top-[-6rem] h-[36rem] w-[36rem] -translate-x-1/2 rounded-full bg-white/80 blur-[140px]" />
         <div className="absolute left-[10%] top-[22%] h-80 w-80 rounded-full bg-[#7fb0ff]/35 blur-[120px]" />
@@ -875,6 +885,7 @@ export function SessionPage() {
                           size="sm"
                           onClick={() => {
                             setSwapRotation(prev => prev + 180);
+                            setIsSwapped(prev => !prev);
                             setIsTransitioning(true);
                             setTimeout(() => {
                               if (competencies && competencies.length >= 2) {

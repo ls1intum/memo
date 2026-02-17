@@ -1,4 +1,5 @@
 import { apiClient } from './client';
+import type { RelationshipType } from '@/components/session/session-constants';
 
 export interface CompetencyInfo {
   id: string;
@@ -47,15 +48,16 @@ export const schedulingApi = {
 
   /**
    * Submit a vote on a relationship.
+   * Pass relationshipId for normal votes, or originId+destinationId when swapped.
    */
   submitVote: async (
     userId: string,
-    relationshipId: string,
-    relationshipType: string
+    relationshipType: RelationshipType,
+    opts: { relationshipId?: string; originId?: string; destinationId?: string }
   ): Promise<VoteResponse> => {
     const response = await apiClient.post<VoteResponse>(
       '/api/scheduling/vote',
-      { relationshipId, relationshipType },
+      { ...opts, relationshipType },
       { headers: { 'X-User-Id': userId } }
     );
     return response.data;

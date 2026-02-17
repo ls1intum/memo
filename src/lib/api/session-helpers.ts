@@ -16,6 +16,7 @@ import type {
   LearningResource,
   CompetencyResourceLink,
 } from './types';
+import type { RelationshipType } from '@/components/session/session-constants';
 
 const GUEST_USER_ID = 'guest';
 
@@ -82,11 +83,12 @@ export async function getNextRelationshipTaskAction(userId: string): Promise<{
 
 /**
  * Submit a vote on a competency relationship via the scheduling pipeline.
+ * Pass opts.relationshipId for normal votes, or opts.originId+opts.destinationId when swapped.
  */
 export async function submitCompetencyVoteAction(
   userId: string,
-  relationshipId: string,
-  relationshipType: string
+  relationshipType: RelationshipType,
+  opts: { relationshipId?: string; originId?: string; destinationId?: string }
 ): Promise<{
   success: boolean;
   voteResponse?: SchedulingVoteResponse;
@@ -95,8 +97,8 @@ export async function submitCompetencyVoteAction(
   try {
     const voteResponse = await schedulingApi.submitVote(
       userId,
-      relationshipId,
-      relationshipType
+      relationshipType,
+      opts
     );
     return { success: true, voteResponse };
   } catch (error) {
