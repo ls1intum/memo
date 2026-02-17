@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
+import { Link } from 'react-router-dom';
 
 import {
   getRandomCompetenciesAction,
@@ -18,7 +19,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Kbd } from '@/components/ui/kbd';
-import { ArrowRight, ArrowLeftRight, Check, Link2 } from 'lucide-react';
+import { ArrowRight, ArrowLeftRight, Check, Link2, LogOut } from 'lucide-react';
 import {
   Card,
   CardDescription,
@@ -45,6 +46,7 @@ import {
   RESOURCE_ICONS,
   RESOURCE_MATCH_TYPE_TEXT_COLORS,
 } from '@/components/session/session-constants';
+import { SessionSummary } from '@/components/session/SessionSummary';
 
 type SessionStats = {
   completed: number;
@@ -128,6 +130,7 @@ export function SessionPage() {
   const [currentRelationshipId, setCurrentRelationshipId] = useState<
     string | null
   >(null);
+  const [showSessionSummary, setShowSessionSummary] = useState(false);
 
   const {
     hoveredValue: hoveredRelation,
@@ -157,7 +160,7 @@ export function SessionPage() {
         } else {
           setError(
             result.error ??
-              'Failed to load user information. Please try again later.'
+            'Failed to load user information. Please try again later.'
           );
         }
       } catch (err) {
@@ -198,7 +201,7 @@ export function SessionPage() {
         if (!result.success) {
           setError(
             result.error ??
-              'An unexpected error occurred while fetching the next task.'
+            'An unexpected error occurred while fetching the next task.'
           );
           if (isInitialLoad) setCompetencies([]);
           setIsTransitioning(false);
@@ -243,7 +246,7 @@ export function SessionPage() {
         if (!compResult.success || !compResult.competencies?.length) {
           setError(
             compResult.error ??
-              'Failed to fetch competency for resource mapping.'
+            'Failed to fetch competency for resource mapping.'
           );
           if (isInitialLoad) setCompetencies([]);
           setIsTransitioning(false);
@@ -253,7 +256,7 @@ export function SessionPage() {
         if (!resourceResult.success || !resourceResult.resource) {
           setError(
             resourceResult.error ??
-              'Failed to fetch learning resource. Make sure resources are seeded.'
+            'Failed to fetch learning resource. Make sure resources are seeded.'
           );
           setCompetencies(compResult.competencies);
           setLearningResource(null);
@@ -278,6 +281,13 @@ export function SessionPage() {
     void loadMappingPair(isInitialLoad);
   }, [mappingMode, loadMappingPair]);
 
+  const handleContinueSession = useCallback(() => {
+    setShowSessionSummary(false);
+    setStats({ completed: 0, skipped: 0 });
+    setHistory([]);
+    void loadMappingPair(true);
+  }, [loadMappingPair]);
+
   const handleAction = useCallback(
     async (type: 'completed' | 'skipped') => {
       if (type === 'completed') {
@@ -295,9 +305,9 @@ export function SessionPage() {
             const voteOpts =
               isSwapped && competencies && competencies.length >= 2
                 ? {
-                    originId: competencies[0]!.id,
-                    destinationId: competencies[1]!.id,
-                  }
+                  originId: competencies[0]!.id,
+                  destinationId: competencies[1]!.id,
+                }
                 : { relationshipId: currentRelationshipId! };
             const result = await submitCompetencyVoteAction(
               userId,
@@ -665,42 +675,50 @@ export function SessionPage() {
                 </span>
               </div>
             </div>
-            <div className="flex items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 p-1">
-              <button
-                type="button"
-                onClick={() => {
-                  if (mappingMode !== 'competency') {
-                    setMappingMode('competency');
-                  }
-                }}
-                className={`
-                  px-3 py-1.5 text-xs font-semibold rounded-md transition-all duration-200
-                  ${
-                    mappingMode === 'competency'
+            <div className="flex items-center gap-3">
+              <div className="flex h-9 items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 p-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (mappingMode !== 'competency') {
+                      setMappingMode('competency');
+                    }
+                  }}
+                  className={`
+                    h-full px-3 text-xs font-semibold rounded-md transition-all duration-200 flex items-center justify-center
+                    ${mappingMode === 'competency'
                       ? 'bg-white text-slate-900 shadow-sm'
                       : 'text-slate-500 hover:text-slate-700'
-                  }
-                `}
-              >
-                Competencies
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  if (mappingMode !== 'resource') {
-                    setMappingMode('resource');
-                  }
-                }}
-                className={`
-                  px-3 py-1.5 text-xs font-semibold rounded-md transition-all duration-200
-                  ${
-                    mappingMode === 'resource'
+                    }
+                  `}
+                >
+                  Competencies
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (mappingMode !== 'resource') {
+                      setMappingMode('resource');
+                    }
+                  }}
+                  className={`
+                    h-full px-3 text-xs font-semibold rounded-md transition-all duration-200 flex items-center justify-center
+                    ${mappingMode === 'resource'
                       ? 'bg-white text-slate-900 shadow-sm'
                       : 'text-slate-500 hover:text-slate-700'
-                  }
-                `}
+                    }
+                  `}
+                >
+                  Resources
+                </button>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowSessionSummary(true)}
+                className="flex h-9 items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-4 text-xs font-semibold text-slate-600 transition-all duration-200 hover:bg-red-50 hover:text-red-600 hover:border-red-200"
               >
-                Resources
+                <LogOut className="h-3.5 w-3.5" />
+                End Session
               </button>
             </div>
           </div>
@@ -970,8 +988,8 @@ export function SessionPage() {
                             {relation === 'UNRELATED'
                               ? 'is unrelated to'
                               : RELATIONSHIP_TYPES.find(
-                                  rt => rt.value === relation
-                                )?.label.toLowerCase() || ''}
+                                rt => rt.value === relation
+                              )?.label.toLowerCase() || ''}
                           </span>{' '}
                           <span className="font-bold text-slate-900">
                             {competencies[1]!.title}
@@ -1147,10 +1165,9 @@ export function SessionPage() {
                       className={`
                         relative flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm font-bold text-white
                         min-w-[180px]
-                        ${
-                          mappingMode === 'resource'
-                            ? 'bg-gradient-to-r from-pink-600 to-pink-500 shadow-lg shadow-pink-500/20 hover:shadow-xl hover:shadow-pink-500/30'
-                            : 'bg-gradient-to-r from-[#0a4da2] to-[#5538d1] shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/30'
+                        ${mappingMode === 'resource'
+                          ? 'bg-gradient-to-r from-pink-600 to-pink-500 shadow-lg shadow-pink-500/20 hover:shadow-xl hover:shadow-pink-500/30'
+                          : 'bg-gradient-to-r from-[#0a4da2] to-[#5538d1] shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/30'
                         }
                         transition-all duration-200 ease-out
                         hover:scale-[1.02]
@@ -1182,6 +1199,11 @@ export function SessionPage() {
           )}
         </section>
       </main>
+
+      {/* ─── Session Summary Overlay ─── */}
+      {showSessionSummary && (
+        <SessionSummary stats={stats} onContinue={handleContinueSession} />
+      )}
     </div>
   );
 }
