@@ -1,19 +1,28 @@
-import { dirname } from 'path';
-import { fileURLToPath } from 'url';
-import { FlatCompat } from '@eslint/eslintrc';
+import js from '@eslint/js';
+import globals from 'globals';
+import reactHooks from 'eslint-plugin-react-hooks';
+import reactRefresh from 'eslint-plugin-react-refresh';
+import tseslint from 'typescript-eslint';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-});
-
-const eslintConfig = [
-  ...compat.extends('next/core-web-vitals', 'next/typescript'),
+export default tseslint.config(
+  { ignores: ['dist', 'node_modules'] },
   {
+    extends: [js.configs.recommended, ...tseslint.configs.recommended],
+    files: ['**/*.{ts,tsx}'],
+    languageOptions: {
+      ecmaVersion: 2020,
+      globals: globals.browser,
+    },
+    plugins: {
+      'react-hooks': reactHooks,
+      'react-refresh': reactRefresh,
+    },
     rules: {
-      // Detect TODO and FIXME comments
+      ...reactHooks.configs.recommended.rules,
+      'react-refresh/only-export-components': [
+        'warn',
+        { allowConstantExport: true },
+      ],
       'no-warning-comments': [
         'warn',
         {
@@ -21,10 +30,9 @@ const eslintConfig = [
           location: 'start',
         },
       ],
-      // Additional code quality rules
-      'no-console': 'warn', // Warn about console statements
-      'no-debugger': 'error', // Prevent debugger statements
-      'prefer-const': 'error', // Prefer const over let when possible
+      'no-console': 'warn',
+      'no-debugger': 'error',
+      'prefer-const': 'error',
       '@typescript-eslint/no-unused-vars': [
         'error',
         {
@@ -32,9 +40,7 @@ const eslintConfig = [
           varsIgnorePattern: '^_',
         },
       ],
-      '@typescript-eslint/no-explicit-any': 'warn', // Warn about 'any' usage
+      '@typescript-eslint/no-explicit-any': 'warn',
     },
-  },
-];
-
-export default eslintConfig;
+  }
+);
