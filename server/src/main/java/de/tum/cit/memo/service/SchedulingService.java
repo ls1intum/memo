@@ -232,6 +232,7 @@ public class SchedulingService {
 
     private VoteResponse toVoteResponse(CompetencyRelationship rel) {
         return VoteResponse.builder()
+                .relationshipId(rel.getId())
                 .success(true)
                 .updatedVotes(toVoteCounts(rel))
                 .newEntropy(rel.getEntropy())

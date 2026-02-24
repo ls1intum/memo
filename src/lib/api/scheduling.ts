@@ -23,6 +23,7 @@ export interface RelationshipTask {
 }
 
 export interface VoteResponse {
+  relationshipId: string;
   success: boolean;
   updatedVotes: VoteCounts;
   newEntropy: number;

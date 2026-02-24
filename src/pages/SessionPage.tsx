@@ -125,7 +125,7 @@ export function SessionPage() {
   const [swapRotation, setSwapRotation] = useState(0);
   const [allDone, setAllDone] = useState(false);
   const [_isSwapped, setIsSwapped] = useState(false);
-  const [currentRelationshipId, setCurrentRelationshipId] = useState<
+  const [_currentRelationshipId, setCurrentRelationshipId] = useState<
     string | null
   >(null);
 
@@ -322,7 +322,8 @@ export function SessionPage() {
               {
                 type: 'completed',
                 mode: 'competency',
-                relationshipId: currentRelationshipId ?? undefined,
+                relationshipId:
+                  result.voteResponse?.relationshipId ?? undefined,
                 competencies: competencies ? [...competencies] : undefined,
               },
             ]);
@@ -428,7 +429,6 @@ export function SessionPage() {
       userId,
       mappingMode,
       loadMappingPair,
-      currentRelationshipId,
     ]
   );
 
