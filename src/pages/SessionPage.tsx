@@ -124,7 +124,7 @@ export function SessionPage() {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [swapRotation, setSwapRotation] = useState(0);
   const [allDone, setAllDone] = useState(false);
-  const [_isSwapped, setIsSwapped] = useState(false);
+  const [isSwapped, setIsSwapped] = useState(false);
   const [_currentRelationshipId, setCurrentRelationshipId] = useState<
     string | null
   >(null);
@@ -298,11 +298,18 @@ export function SessionPage() {
           try {
             const startTime = Date.now();
 
+            const originId = isSwapped
+              ? competencies[1]!.id
+              : competencies[0]!.id;
+            const destinationId = isSwapped
+              ? competencies[0]!.id
+              : competencies[1]!.id;
+
             const result = await submitCompetencyVoteAction(
               userId,
               relation,
-              competencies[0]!.id,
-              competencies[1]!.id
+              originId,
+              destinationId
             );
 
             const elapsed = Date.now() - startTime;
@@ -427,6 +434,7 @@ export function SessionPage() {
       relation,
       resourceMatchType,
       userId,
+      isSwapped,
       mappingMode,
       loadMappingPair,
     ]

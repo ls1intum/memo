@@ -112,7 +112,7 @@ public class SchedulingService {
         for (int i = 0; i < pool.size(); i++) {
             for (int j = i + 1; j < pool.size(); j++) {
                 if (!existingPairs.contains(pairKey(pool.get(i), pool.get(j)))) {
-                    return Optional.of(toTaskResponse(createRelationship(pool.get(i), pool.get(j)), "COVERAGE"));
+                    return Optional.of(toTaskResponseFromIds(pool.get(i), pool.get(j), "COVERAGE"));
                 }
             }
         }
@@ -227,6 +227,31 @@ public class SchedulingService {
                 .destination(toCompetencyInfo(destination))
                 .pipeline(pipeline)
                 .currentVotes(toVoteCounts(rel))
+                .build();
+    }
+
+    /**
+     * Builds a task response from two competency IDs without persisting a
+     * relationship.
+     * The relationship row is only created when the user actually votes.
+     */
+    private RelationshipTaskResponse toTaskResponseFromIds(String originId, String destinationId, String pipeline) {
+        Map<String, Competency> byId = competencyRepository
+                .findAllById(List.of(originId, destinationId))
+                .stream().collect(Collectors.toMap(Competency::getId, Function.identity()));
+
+        Competency origin = byId.get(originId);
+        Competency destination = byId.get(destinationId);
+        if (origin == null || destination == null) {
+            throw new ResourceNotFoundException("Competency not found for IDs " + originId + ", " + destinationId);
+        }
+
+        return RelationshipTaskResponse.builder()
+                .relationshipId(null)
+                .origin(toCompetencyInfo(origin))
+                .destination(toCompetencyInfo(destination))
+                .pipeline(pipeline)
+                .currentVotes(VoteCounts.builder().build())
                 .build();
     }
 
