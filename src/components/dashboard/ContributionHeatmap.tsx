@@ -2,7 +2,20 @@ import { useMemo, useRef, useEffect } from 'react';
 import type { DailyCount } from '@/lib/api/contributor-stats';
 import { heatmapColor } from '@/lib/heatmap-helpers';
 
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const MONTHS = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
+];
 const WEEKS_PER_COLUMN = 4;
 const SQUARE_SIZE = 26;
 
@@ -29,7 +42,7 @@ function buildGrid(dailyCounts: DailyCount[]) {
   const columns: { date: Date; count: number }[][] = [];
   let currentColumn: { date: Date; count: number }[] = [];
 
-  let currentWeekStart = new Date(startDate);
+  const currentWeekStart = new Date(startDate);
 
   while (currentWeekStart <= endDate) {
     let weeklyCount = 0;
@@ -45,7 +58,10 @@ function buildGrid(dailyCounts: DailyCount[]) {
       }
     }
 
-    currentColumn.push({ date: new Date(currentWeekStart), count: weeklyCount });
+    currentColumn.push({
+      date: new Date(currentWeekStart),
+      count: weeklyCount,
+    });
 
     // group by 4 weeks into columns
     if (currentColumn.length === WEEKS_PER_COLUMN) {
@@ -65,7 +81,11 @@ function buildGrid(dailyCounts: DailyCount[]) {
 }
 
 // helper to figure out if we need to show a month label
-function getColumnLabel(column: { date: Date }[], prevColumn: { date: Date }[] | undefined, colIndex: number) {
+function getColumnLabel(
+  column: { date: Date }[],
+  prevColumn: { date: Date }[] | undefined,
+  colIndex: number
+) {
   const currentMonth = column[0].date.getMonth();
   const currentYear = column[0].date.getFullYear();
 
@@ -80,10 +100,16 @@ function getColumnLabel(column: { date: Date }[], prevColumn: { date: Date }[] |
 
   // add year if its jan or the first column
   const includeYear = currentMonth === 0 || colIndex === 0;
-  return includeYear ? `${MONTHS[currentMonth]} ${currentYear}` : MONTHS[currentMonth];
+  return includeYear
+    ? `${MONTHS[currentMonth]} ${currentYear}`
+    : MONTHS[currentMonth];
 }
 
-export function ContributionHeatmap({ dailyCounts }: { dailyCounts: DailyCount[] }) {
+export function ContributionHeatmap({
+  dailyCounts,
+}: {
+  dailyCounts: DailyCount[];
+}) {
   const columns = useMemo(() => buildGrid(dailyCounts), [dailyCounts]);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -102,14 +128,18 @@ export function ContributionHeatmap({ dailyCounts }: { dailyCounts: DailyCount[]
         style={{ scrollbarWidth: 'thin', WebkitOverflowScrolling: 'touch' }}
       >
         <div className="min-w-max pr-4">
-
           {/* header row for labels */}
           <div className="flex mb-2 h-[16px]" style={{ gap: 4 }}>
             {columns.map((col, i) => {
-              const label = getColumnLabel(col, i > 0 ? columns[i - 1] : undefined, i);
+              const label = getColumnLabel(
+                col,
+                i > 0 ? columns[i - 1] : undefined,
+                i
+              );
 
               const currentYear = col[0].date.getFullYear();
-              const prevYear = i > 0 ? columns[i - 1][0].date.getFullYear() : currentYear;
+              const prevYear =
+                i > 0 ? columns[i - 1][0].date.getFullYear() : currentYear;
               const isYearChange = currentYear !== prevYear;
 
               return (
@@ -132,17 +162,21 @@ export function ContributionHeatmap({ dailyCounts }: { dailyCounts: DailyCount[]
           <div className="flex" style={{ gap: 4 }}>
             {columns.map((col, colIndex) => {
               const currentYear = col[0].date.getFullYear();
-              const prevYear = colIndex > 0 ? columns[colIndex - 1][0].date.getFullYear() : currentYear;
+              const prevYear =
+                colIndex > 0
+                  ? columns[colIndex - 1][0].date.getFullYear()
+                  : currentYear;
               const isYearChange = currentYear !== prevYear;
 
               // adding margin and a dashed border when the year changes
               return (
                 <div
                   key={colIndex}
-                  className={`flex flex-col shrink-0 ${isYearChange
-                    ? 'ml-3 mr-1 relative before:absolute before:-left-[10px] before:-top-[24px] before:-bottom-1 before:border-l-[2px] before:border-dashed before:border-slate-300 before:-z-10'
-                    : ''
-                    }`}
+                  className={`flex flex-col shrink-0 ${
+                    isYearChange
+                      ? 'ml-3 mr-1 relative before:absolute before:-left-[10px] before:-top-[24px] before:-bottom-1 before:border-l-[2px] before:border-dashed before:border-slate-300 before:-z-10'
+                      : ''
+                  }`}
                   style={{ gap: 4 }}
                 >
                   {col.map((week, weekIndex) => (
@@ -157,7 +191,6 @@ export function ContributionHeatmap({ dailyCounts }: { dailyCounts: DailyCount[]
               );
             })}
           </div>
-
         </div>
       </div>
     </div>
