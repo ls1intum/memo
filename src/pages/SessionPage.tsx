@@ -124,7 +124,7 @@ export function SessionPage() {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [swapRotation, setSwapRotation] = useState(0);
   const [allDone, setAllDone] = useState(false);
-  const [isSwapped, setIsSwapped] = useState(false);
+  const [_isSwapped, setIsSwapped] = useState(false);
   const [currentRelationshipId, setCurrentRelationshipId] = useState<
     string | null
   >(null);
@@ -282,7 +282,12 @@ export function SessionPage() {
     async (type: 'completed' | 'skipped') => {
       if (type === 'completed') {
         if (mappingMode === 'competency') {
-          if ((!currentRelationshipId && !isSwapped) || !relation || !userId) {
+          if (
+            !competencies ||
+            competencies.length < 2 ||
+            !relation ||
+            !userId
+          ) {
             setError('Missing required data to submit vote');
             return;
           }
@@ -292,17 +297,12 @@ export function SessionPage() {
 
           try {
             const startTime = Date.now();
-            const voteOpts =
-              isSwapped && competencies && competencies.length >= 2
-                ? {
-                    originId: competencies[0]!.id,
-                    destinationId: competencies[1]!.id,
-                  }
-                : { relationshipId: currentRelationshipId! };
+
             const result = await submitCompetencyVoteAction(
               userId,
               relation,
-              voteOpts
+              competencies[0]!.id,
+              competencies[1]!.id
             );
 
             const elapsed = Date.now() - startTime;
@@ -429,7 +429,6 @@ export function SessionPage() {
       mappingMode,
       loadMappingPair,
       currentRelationshipId,
-      isSwapped,
     ]
   );
 

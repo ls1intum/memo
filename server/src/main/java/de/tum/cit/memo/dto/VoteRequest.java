@@ -13,24 +13,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class VoteRequest {
 
-    /**
-     * Relationship ID (used directly when direction is not swapped).
-     * Optional if originId + destinationId are provided instead.
-     */
-    private String relationshipId;
-
-    /**
-     * Origin competency ID (used when direction is swapped).
-     * Must be provided together with destinationId.
-     */
+    @NotNull
     private String originId;
 
-    /**
-     * Destination competency ID (used when direction is swapped).
-     * Must be provided together with originId.
-     */
+    @NotNull
     private String destinationId;
 
-    @NotNull(message = "Relationship type is required")
+    @NotNull
     private RelationshipType relationshipType;
 }

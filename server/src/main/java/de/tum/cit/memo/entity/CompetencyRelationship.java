@@ -80,7 +80,7 @@ public class CompetencyRelationship {
     private Instant updatedAt;
 
     /**
-     * Recalculates entropy based on current vote distribution.
+     * Recomputes Shannon entropy from the current vote counts.
      * Entropy ranges from 0 (unanimous) to ~2.0 (max disagreement with 4 types).
      */
     public void recalculateEntropy() {
@@ -93,7 +93,7 @@ public class CompetencyRelationship {
         }
 
         double ent = 0.0;
-        int[] counts = {voteAssumes, voteExtends, voteMatches, voteUnrelated};
+        int[] counts = { voteAssumes, voteExtends, voteMatches, voteUnrelated };
         for (int count : counts) {
             if (count > 0) {
                 double p = (double) count / total;
