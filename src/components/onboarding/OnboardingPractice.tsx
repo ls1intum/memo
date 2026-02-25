@@ -174,10 +174,14 @@ export const OnboardingPractice = forwardRef<
     setWrongAttempt(false);
   }
 
-  useImperativeHandle(ref, () => ({
-    nextRound: handleNext,
-    isLastRound,
-  }));
+  useImperativeHandle(
+    ref,
+    () => ({
+      nextRound: handleNext,
+      isLastRound,
+    }),
+    [round, isLastRound, onComplete],
+  );
 
   return (
     <div className="space-y-5">
