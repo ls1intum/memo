@@ -1,5 +1,16 @@
+import { Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+
+const ONBOARDED_KEY = 'memo-onboarded';
+
+function getStartHref(): string {
+  try {
+    return localStorage.getItem(ONBOARDED_KEY) ? '/session' : '/onboarding';
+  } catch {
+    return '/onboarding';
+  }
+}
 
 type ProblemStatement = {
   headline: string;
@@ -56,7 +67,7 @@ export function HomePage() {
                 className="h-12 rounded-full bg-[#0a4da2] px-7 text-base font-semibold text-white shadow-[0_18px_45px_-26px_rgba(7,30,84,0.75)] transition hover:bg-[#0d56b5]"
                 asChild
               >
-                <a href="/session">Start Contributing</a>
+                <Link to={getStartHref()}>Start Contributing</Link>
               </Button>
             </div>
             <div className="relative flex justify-center pt-20 pb-12">

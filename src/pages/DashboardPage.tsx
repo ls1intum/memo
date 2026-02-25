@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import {
   contributorStatsApi,
@@ -13,11 +13,13 @@ import {
   Target,
   Award,
   Star,
+  BookOpen,
 } from 'lucide-react';
 import { ContributionHeatmap } from '@/components/dashboard/ContributionHeatmap';
 import { heatmapColor } from '@/lib/heatmap-helpers';
 
 const GUEST_USER_ID = 'guest';
+const ONBOARDED_KEY = 'memo-onboarded';
 
 interface BadgeDef {
   id: string;
@@ -166,6 +168,7 @@ function StatCard({
 }
 
 export function DashboardPage() {
+  const navigate = useNavigate();
   const [stats, setStats] = useState<ContributorStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -212,12 +215,29 @@ export function DashboardPage() {
               Track your contributions and unlock milestones.
             </p>
           </div>
-          <Button
-            className="h-12 rounded-full bg-gradient-to-r from-[#0a4da2] to-[#7c6cff] px-7 text-base font-semibold text-white shadow-[0_18px_45px_-26px_rgba(7,30,84,0.75)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_55px_-30px_rgba(7,30,84,0.6)]"
-            asChild
-          >
-            <Link to="/session">Start Mapping Session</Link>
-          </Button>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => {
+                try {
+                  localStorage.removeItem(ONBOARDED_KEY);
+                } catch {
+                  /* localStorage unavailable */
+                }
+                void navigate('/onboarding');
+              }}
+              className="flex h-12 items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-5 text-sm font-semibold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-white hover:border-slate-300"
+            >
+              <BookOpen className="h-4 w-4" />
+              Redo Onboarding
+            </button>
+            <Button
+              className="h-12 rounded-full bg-gradient-to-r from-[#0a4da2] to-[#7c6cff] px-7 text-base font-semibold text-white shadow-[0_18px_45px_-26px_rgba(7,30,84,0.75)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_55px_-30px_rgba(7,30,84,0.6)]"
+              asChild
+            >
+              <Link to="/session">Start Mapping Session</Link>
+            </Button>
+          </div>
         </div>
 
         {error && (
