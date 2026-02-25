@@ -15,7 +15,7 @@ export interface VoteCounts {
 }
 
 export interface RelationshipTask {
-  relationshipId: string;
+  relationshipId: string | null;
   origin: CompetencyInfo;
   destination: CompetencyInfo;
   pipeline: string;

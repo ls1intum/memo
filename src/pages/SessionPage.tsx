@@ -125,9 +125,6 @@ export function SessionPage() {
   const [swapRotation, setSwapRotation] = useState(0);
   const [allDone, setAllDone] = useState(false);
   const [isSwapped, setIsSwapped] = useState(false);
-  const [_currentRelationshipId, setCurrentRelationshipId] = useState<
-    string | null
-  >(null);
 
   const {
     hoveredValue: hoveredRelation,
@@ -208,7 +205,6 @@ export function SessionPage() {
         if (result.allDone) {
           setAllDone(true);
           setCompetencies([]);
-          setCurrentRelationshipId(null);
           setIsTransitioning(false);
           return;
         }
@@ -220,7 +216,6 @@ export function SessionPage() {
         }
 
         setAllDone(false);
-        setCurrentRelationshipId(result.task.relationshipId);
         setCompetencies([
           {
             id: result.task.origin.id,
