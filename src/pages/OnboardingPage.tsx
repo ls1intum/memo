@@ -7,22 +7,43 @@ import {
   BookOpen,
   Brain,
   CheckCircle2,
+  GraduationCap,
   Layers,
   LogIn,
   MousePointerClick,
-  Rocket,
   Users,
-  Waypoints,
+  Check,
+  ChevronsUpDown,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import {
+  Command,
+  CommandInput,
+  CommandList,
+  CommandEmpty,
+  CommandGroup,
+  CommandItem,
+} from '@/components/ui/command';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { OnboardingStep } from '@/components/onboarding/OnboardingStep';
 import {
   OnboardingPractice,
   OnboardingPracticeRef,
 } from '@/components/onboarding/OnboardingPractice';
 
-const TOTAL_STEPS = 4;
+const TOTAL_STEPS = 5;
 const ONBOARDED_KEY = 'memo-onboarded';
 
 export function OnboardingPage() {
@@ -31,11 +52,13 @@ export function OnboardingPage() {
   const [consentChecked, setConsentChecked] = useState(false);
   const [practiceCompleted, setPracticeCompleted] = useState(false);
   const [currentPracticeCorrect, setCurrentPracticeCorrect] = useState(false);
+  const [selectedDegree, setSelectedDegree] = useState<string | null>(null);
+  const [fieldOfStudy, setFieldOfStudy] = useState<string>('');
   const practiceRef = useRef<OnboardingPracticeRef>(null);
   const navigate = useNavigate();
 
   const goNext = useCallback(() => {
-    if (step === 2 && currentPracticeCorrect && !practiceCompleted) {
+    if (step === 3 && currentPracticeCorrect && !practiceCompleted) {
       practiceRef.current?.nextRound();
       return;
     }
@@ -66,7 +89,7 @@ export function OnboardingPage() {
 
       if (e.key === 'ArrowRight' && step < TOTAL_STEPS - 1) {
         // Don't advance past practice unless completed
-        if (step === 2 && !practiceCompleted && !currentPracticeCorrect) return;
+        if (step === 3 && !practiceCompleted && !currentPracticeCorrect) return;
         e.preventDefault();
         goNext();
       }
@@ -82,10 +105,12 @@ export function OnboardingPage() {
 
   const canAdvance =
     step === 2
-      ? practiceCompleted || currentPracticeCorrect
+      ? selectedDegree !== null && fieldOfStudy.trim().length > 0
       : step === 3
-        ? consentChecked
-        : true;
+        ? practiceCompleted || currentPracticeCorrect
+        : step === 4
+          ? consentChecked
+          : true;
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#d7e3ff] via-[#f3f5ff] to-[#e8ecff] text-slate-900">
@@ -102,7 +127,11 @@ export function OnboardingPage() {
               Step {step + 1} of {TOTAL_STEPS}
             </span>
             <span className="text-xs font-medium text-slate-400">
-              {['Welcome', 'Our Mission', 'Practice', 'Guidelines'][step]}
+              {
+                ['Welcome', 'Our Mission', 'Profile', 'Practice', 'Guidelines'][
+                  step
+                ]
+              }
             </span>
           </div>
           <div className="h-1.5 w-full rounded-full bg-slate-200/60 overflow-hidden">
@@ -117,8 +146,17 @@ export function OnboardingPage() {
 
         <OnboardingStep stepKey={`step-${step}`} direction={direction}>
           {step === 0 && <StepWelcome />}
-          {step === 1 && <StepHowItWorks onSignIn={goNext} />}
+          {step === 1 && <StepHowItWorks />}
           {step === 2 && (
+            <StepProfile
+              selectedDegree={selectedDegree}
+              onSelectDegree={setSelectedDegree}
+              fieldOfStudy={fieldOfStudy}
+              onFieldOfStudyChange={setFieldOfStudy}
+              onSignIn={goNext}
+            />
+          )}
+          {step === 3 && (
             <StepPractice
               ref={practiceRef}
               onComplete={() => {
@@ -130,7 +168,7 @@ export function OnboardingPage() {
               completed={practiceCompleted}
             />
           )}
-          {step === 3 && (
+          {step === 4 && (
             <StepConsent
               checked={consentChecked}
               onToggle={() => setConsentChecked(c => !c)}
@@ -139,35 +177,34 @@ export function OnboardingPage() {
         </OnboardingStep>
 
         <div className="mx-auto flex w-full max-w-md items-center justify-between pt-2">
-          <button
+          <Button
             type="button"
+            variant="outline"
             onClick={goBack}
             disabled={step === 0}
-            className="flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-all hover:-translate-y-0.5 hover:bg-white hover:border-slate-300 disabled:opacity-0 disabled:pointer-events-none"
+            className="flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-5 py-5 text-sm font-semibold text-slate-700 shadow-sm transition-all hover:-translate-y-0.5 hover:bg-white hover:border-slate-300 disabled:opacity-0 disabled:pointer-events-none"
           >
             <ArrowLeft className="h-4 w-4" />
             Back
-          </button>
+          </Button>
 
           {step < TOTAL_STEPS - 1 ? (
-            <button
+            <Button
               type="button"
               onClick={goNext}
               disabled={!canAdvance}
-              className={`flex items-center gap-2 rounded-full bg-gradient-to-r from-[#0a4da2] to-[#5538d1] px-6 py-2.5 text-sm font-bold text-white shadow-[0_18px_45px_-26px_rgba(7,30,84,0.75)] transition-all hover:-translate-y-0.5 hover:shadow-[0_22px_55px_-28px_rgba(7,30,84,0.85)] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0 ${step === 1 ? 'opacity-40' : ''}`}
+              className={`flex items-center gap-2 rounded-full bg-gradient-to-r from-[#0a4da2] to-[#5538d1] px-6 py-5 text-sm font-bold text-white shadow-[0_18px_45px_-26px_rgba(7,30,84,0.75)] transition-all hover:-translate-y-0.5 hover:shadow-[0_22px_55px_-28px_rgba(7,30,84,0.85)] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0`}
             >
-              {step === 2 &&
-              currentPracticeCorrect &&
-              practiceRef.current?.isLastRound
-                ? 'Continue'
-                : step === 2
-                  ? 'Next Round'
-                  : 'Continue'}
+              {step === 3 && !practiceCompleted
+                ? practiceRef.current?.isLastRound
+                  ? 'Continue'
+                  : 'Next Round'
+                : 'Continue'}
               <ArrowRight className="h-4 w-4" />
-            </button>
+            </Button>
           ) : (
             <Button
-              className="rounded-full bg-gradient-to-r from-emerald-500 to-emerald-600 px-7 py-2.5 text-sm font-bold text-white shadow-lg shadow-emerald-500/20 transition-all hover:-translate-y-0.5 hover:shadow-xl disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+              className="flex items-center gap-2 rounded-full bg-gradient-to-r from-emerald-500 to-emerald-600 px-7 py-2.5 text-sm font-bold text-white shadow-lg shadow-emerald-500/20 transition-all hover:-translate-y-0.5 hover:shadow-xl disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0"
               disabled={!canAdvance}
               onClick={() => {
                 try {
@@ -179,8 +216,8 @@ export function OnboardingPage() {
                 void navigate('/session');
               }}
             >
-              <Rocket className="h-4 w-4 mr-1.5" />
               Start Your First Session
+              <ArrowRight className="h-4 w-4" />
             </Button>
           )}
         </div>
@@ -219,7 +256,7 @@ function StepWelcome() {
           className="mx-auto max-w-xl text-base leading-relaxed text-slate-600"
         >
           A <strong className="text-slate-700">competency network</strong> maps
-          how skills relate to each other — which ones are prerequisites, which
+          how skills relate to each other - which ones are prerequisites, which
           extend others, and which are equivalent. These networks power
           personalized learning recommendations.
         </motion.p>
@@ -266,7 +303,6 @@ function CompetencyNetworkViz() {
   return (
     <div className="relative rounded-2xl border border-[#0a4da2]/20 bg-gradient-to-br from-blue-50/90 via-white/80 to-indigo-50/70 p-5 shadow-[0_8px_30px_-10px_rgba(7,30,84,0.15)] overflow-hidden">
       <div className="flex items-center gap-2 mb-3">
-        <Waypoints className="h-3.5 w-3.5 text-[#0a4da2]" />
         <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
           Competency Network Preview
         </span>
@@ -419,24 +455,41 @@ function CompetencyNetworkViz() {
           </motion.g>
         ))}
       </svg>
-      <div className="flex flex-wrap items-center justify-center gap-5 mt-3 text-xs font-medium text-slate-500">
+      <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-5 mt-3 md:mt-4 text-xs font-medium text-slate-500">
         <span className="flex items-center gap-1.5">
-          <span
-            className="inline-block h-1 w-6 rounded-full"
-            style={{ background: EDGE_COLORS.assumes }}
-          />
-          Assumes →
+          <span className="inline-block h-3 w-3 rounded-full border-2 border-[#0a4da2] bg-white shadow-sm" />
+          Competency
+        </span>
+        <div className="hidden sm:block h-3.5 w-px bg-slate-300/80 rounded-full" />
+        <span className="flex items-center gap-1.5">
+          <div className="flex items-center">
+            <span
+              className="inline-block h-[2px] w-3.5 sm:w-4"
+              style={{ background: EDGE_COLORS.assumes }}
+            />
+            <span
+              className="inline-block w-0 h-0 border-y-[4px] border-y-transparent border-l-[5px]"
+              style={{ borderLeftColor: EDGE_COLORS.assumes }}
+            />
+          </div>
+          Assumes
+        </span>
+        <span className="flex items-center gap-1.5">
+          <div className="flex items-center">
+            <span
+              className="inline-block h-[2px] w-3.5 sm:w-4"
+              style={{ background: EDGE_COLORS.extends }}
+            />
+            <span
+              className="inline-block w-0 h-0 border-y-[4px] border-y-transparent border-l-[5px]"
+              style={{ borderLeftColor: EDGE_COLORS.extends }}
+            />
+          </div>
+          Extends
         </span>
         <span className="flex items-center gap-1.5">
           <span
-            className="inline-block h-1 w-6 rounded-full"
-            style={{ background: EDGE_COLORS.extends }}
-          />
-          Extends →
-        </span>
-        <span className="flex items-center gap-1.5">
-          <span
-            className="inline-block h-1 w-6 rounded-full"
+            className="inline-block h-[2px] w-5 sm:w-6"
             style={{ background: EDGE_COLORS.matches }}
           />
           Matches
@@ -451,26 +504,26 @@ const HOW_IT_WORKS_TILES = [
     icon: Layers,
     color: 'from-[#0a4da2] to-[#4263eb]',
     iconBg: 'bg-blue-100 text-blue-600',
-    title: 'See two competencies',
-    desc: 'We show you a pair of skills from a knowledge domain — like "Recursion" and "Divide and Conquer".',
+    title: 'See Two Competencies',
+    desc: 'We show you a pair of skills from a knowledge domain like "Recursion" and "Divide and Conquer".',
   },
   {
     icon: MousePointerClick,
     color: 'from-[#7c3aed] to-[#9775fa]',
     iconBg: 'bg-purple-100 text-purple-600',
-    title: 'Pick a relationship',
+    title: 'Pick a Relationship',
     desc: 'Decide how they relate: prerequisite, extension, equivalent, or unrelated. Use buttons or keyboard shortcuts.',
   },
   {
     icon: CheckCircle2,
     color: 'from-emerald-500 to-emerald-600',
     iconBg: 'bg-emerald-100 text-emerald-600',
-    title: 'Build the benchmark',
+    title: 'Build the Benchmark',
     desc: 'Your label joins a crowd-sourced dataset for fair, reproducible evaluation of recommender systems.',
   },
 ];
 
-function StepHowItWorks({ onSignIn }: { onSignIn: () => void }) {
+function StepHowItWorks() {
   return (
     <section className="space-y-6 rounded-[32px] border border-white/70 bg-white/85 p-10 shadow-[0_26px_90px_-55px_rgba(7,30,84,0.5)] backdrop-blur-xl">
       <div className="text-center space-y-3">
@@ -526,27 +579,210 @@ function StepHowItWorks({ onSignIn }: { onSignIn: () => void }) {
         skills.
       </p>
 
-      <div className="mx-auto max-w-sm">
-        <button
-          type="button"
-          onClick={onSignIn}
-          className="flex w-full items-center justify-center gap-2.5 rounded-xl border border-slate-200 bg-white/80 px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-white hover:border-slate-300 hover:-translate-y-0.5"
-        >
-          <LogIn className="h-4 w-4" />
-          Sign in with University Account
-          <Badge className="ml-1 rounded-full border-0 bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-400">
-            Coming soon
-          </Badge>
-        </button>
-      </div>
-
       <div className="flex flex-wrap items-center justify-center gap-4 text-xs text-slate-500 pt-1">
         <span className="flex items-center gap-1.5">
-          <Users className="h-3.5 w-3.5" /> Community-driven
+          <Users className="h-3.5 w-3.5" /> Community-Driven
         </span>
         <span className="flex items-center gap-1.5">
-          <BookOpen className="h-3.5 w-3.5" /> Open-source research
+          <BookOpen className="h-3.5 w-3.5" /> Open-Source Research
         </span>
+      </div>
+    </section>
+  );
+}
+
+const DEGREES = [
+  { id: 'undergrad', label: 'Undergraduate Student' },
+  { id: 'grad', label: 'Graduate Student' },
+  { id: 'doc', label: 'Doctoral Student' },
+  { id: 'postdoc', label: 'Postdoc / Researcher' },
+  { id: 'industry', label: 'Industry Professional' },
+  { id: 'other', label: 'Other' },
+];
+
+const COMMON_DOMAINS = [
+  'Computer Science',
+  'Business Administration',
+  'Data Science',
+  'Mathematics',
+];
+
+function StepProfile({
+  selectedDegree,
+  onSelectDegree,
+  fieldOfStudy,
+  onFieldOfStudyChange,
+  onSignIn,
+}: {
+  selectedDegree: string | null;
+  onSelectDegree: (degree: string) => void;
+  fieldOfStudy: string;
+  onFieldOfStudyChange: (field: string) => void;
+  onSignIn: () => void;
+}) {
+  const [domainOpen, setDomainOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  return (
+    <section className="space-y-6 rounded-[32px] border border-white/70 bg-white/85 p-8 sm:p-10 shadow-[0_26px_90px_-55px_rgba(7,30,84,0.5)] backdrop-blur-xl">
+      <div className="text-center space-y-3">
+        <Badge className="w-fit mx-auto rounded-full border border-indigo-400/30 bg-indigo-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-indigo-700">
+          Your Profile
+        </Badge>
+        <h2 className="text-2xl font-bold text-slate-900 sm:text-3xl">
+          Set Everything Up
+        </h2>
+        <p className="mx-auto max-w-xl text-base text-slate-600 leading-relaxed">
+          Link your university account and share your academic background to
+          help us better understand the diverse perspectives shaping our
+          dataset.
+        </p>
+      </div>
+
+      <div className="mx-auto w-full max-w-4xl mt-8 grid gap-6 md:grid-cols-2">
+        {/* Authentication Card */}
+        <div className="flex flex-col rounded-2xl border border-slate-200/60 bg-white p-6 sm:p-7 space-y-4 shadow-sm relative overflow-hidden">
+          <div className="absolute right-0 top-0 rounded-bl-xl bg-amber-50 px-3 py-1 border-b border-l border-amber-200/50">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700">
+              Required
+            </span>
+          </div>
+          <div className="flex items-center justify-between pt-1">
+            <h3 className="font-bold text-slate-900 flex items-center gap-2">
+              <LogIn className="h-4 w-4 text-[#0a4da2]" />
+              Authentication
+            </h3>
+          </div>
+          <p className="text-sm text-slate-600 leading-relaxed flex-grow">
+            We use your university account to securely record your contributions
+            while keeping your data private.
+          </p>
+          <button
+            type="button"
+            onClick={onSignIn}
+            className="flex w-full sm:w-auto self-start mt-2 items-center justify-center gap-2 rounded-xl bg-white border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 hover:border-slate-300 hover:-translate-y-0.5"
+          >
+            <span>Sign in via University</span>
+          </button>
+        </div>
+
+        {/* Demographics Card */}
+        <div className="flex flex-col rounded-2xl border border-slate-200/60 bg-white p-6 sm:p-7 space-y-4 shadow-sm relative overflow-hidden">
+          <div className="absolute right-0 top-0 rounded-bl-xl bg-amber-50 px-3 py-1 border-b border-l border-amber-200/50">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700">
+              Required
+            </span>
+          </div>
+          <div className="flex items-center justify-between pt-1">
+            <h3 className="font-bold text-slate-900 flex items-center gap-2">
+              <GraduationCap className="h-4 w-4 text-[#0a4da2]" />
+              Academic Status
+            </h3>
+          </div>
+          <p className="text-sm text-slate-600 leading-relaxed">
+            Please select your current academic progress or highest degree so we
+            can better understand the demographics of our contributors.
+          </p>
+
+          <div className="space-y-4 mt-2">
+            <div className="relative">
+              <Select
+                value={selectedDegree || undefined}
+                onValueChange={onSelectDegree}
+              >
+                <SelectTrigger className="w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 h-auto text-sm font-medium text-slate-700 transition shadow-sm focus:border-[#0a4da2] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#0a4da2] data-[placeholder]:text-slate-500">
+                  <SelectValue placeholder="Select Your Status..." />
+                </SelectTrigger>
+                <SelectContent className="rounded-xl border border-slate-200 bg-white shadow-xl z-50 overflow-hidden">
+                  {DEGREES.map(degree => (
+                    <SelectItem
+                      key={degree.id}
+                      value={degree.id}
+                      className="cursor-pointer font-medium py-2.5"
+                    >
+                      {degree.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="relative">
+              <Popover open={domainOpen} onOpenChange={setDomainOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={domainOpen}
+                    className={`w-full justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 h-auto text-sm transition shadow-sm hover:bg-slate-50 focus:border-[#0a4da2] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#0a4da2] ${
+                      !fieldOfStudy
+                        ? 'text-slate-500 font-medium'
+                        : 'text-slate-700 font-medium'
+                    }`}
+                  >
+                    {fieldOfStudy ||
+                      'Domain / Field of Study (e.g. Computer Science)'}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent
+                  className="w-[var(--radix-popover-trigger-width)] p-0 rounded-xl bg-white shadow-xl border border-slate-200 z-50 overflow-hidden"
+                  align="start"
+                >
+                  <Command>
+                    <CommandInput
+                      placeholder="Search or enter domain..."
+                      value={searchQuery}
+                      onValueChange={setSearchQuery}
+                      className="h-11"
+                    />
+                    <CommandList>
+                      <CommandEmpty className="p-2">
+                        {searchQuery.trim() !== '' ? (
+                          <Button
+                            variant="ghost"
+                            className="w-full justify-start text-sm h-auto py-2 px-2 text-slate-700 font-normal hover:bg-slate-100"
+                            onClick={() => {
+                              onFieldOfStudyChange(searchQuery.trim());
+                              setDomainOpen(false);
+                            }}
+                          >
+                            <span className="truncate">
+                              Use &quot;{searchQuery}&quot;
+                            </span>
+                          </Button>
+                        ) : (
+                          <span className="text-sm text-slate-500 py-2 px-2">
+                            Type your domain...
+                          </span>
+                        )}
+                      </CommandEmpty>
+                      <CommandGroup heading="Common Domains">
+                        {COMMON_DOMAINS.map(domain => (
+                          <CommandItem
+                            key={domain}
+                            value={domain}
+                            onSelect={currentValue => {
+                              onFieldOfStudyChange(currentValue);
+                              setSearchQuery('');
+                              setDomainOpen(false);
+                            }}
+                            className="cursor-pointer font-medium"
+                          >
+                            <Check
+                              className={`mr-2 h-4 w-4 ${fieldOfStudy === domain ? 'opacity-100 text-[#0a4da2]' : 'opacity-0'}`}
+                            />
+                            {domain}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );
@@ -599,22 +835,22 @@ const StepPractice = forwardRef<
 const GUIDELINES = [
   {
     emoji: '🎯',
-    title: 'Accuracy over speed',
+    title: 'Accuracy Over Speed',
     desc: 'Take your time. One thoughtful label is better than many rushed ones.',
   },
   {
     emoji: '⏭️',
-    title: 'Skip when unsure',
+    title: 'Skip When Unsure',
     desc: 'No penalty for skipping. If a pair is ambiguous, move on.',
   },
   {
     emoji: '🤝',
-    title: 'No competition',
+    title: 'No Competition',
     desc: 'This is a collaboration, not a race. Every contribution matters.',
   },
   {
     emoji: '↩️',
-    title: 'Undo is available',
+    title: 'Undo Is Available',
     desc: 'Made a mistake? Use the undo button or Shift+Z to fix it.',
   },
 ];
@@ -671,7 +907,8 @@ function StepConsent({
               ground-truth benchmark data
             </span>{' '}
             for evaluating competency-aware recommender systems. My
-            contributions are anonymous and cannot be traced back to me.
+            contributions are private and will only be accessible anonymized
+            during this research project.
           </span>
         </label>
       </div>

@@ -50,7 +50,7 @@ const TUTORIAL_ROUNDS: TutorialRound[] = [
     guidanceLevel: 'strict',
     guidanceLabel: 'Guided',
     introText:
-      'Divide and Conquer requires understanding recursion first. Click the highlighted button below!',
+      'Divide and Conquer assumes understanding recursion first. Click the highlighted button below!',
     feedbackCorrect:
       'Correct! Recursion is a prerequisite for Divide and Conquer.',
     feedbackWrong: '',
@@ -80,7 +80,7 @@ const TUTORIAL_ROUNDS: TutorialRound[] = [
     feedbackCorrect:
       'Exactly! Merge Sort extends the concept of Sorting, a specialized technique that builds on the general idea.',
     feedbackWrong:
-      'Not quite — think about whether one is a specialization of the other. Try again!',
+      'Not quite. Think about whether one is a specialization of the other. Try again!',
   },
   {
     competencies: [
@@ -134,7 +134,16 @@ export const OnboardingPractice = forwardRef<
   const isLastRound = round === TUTORIAL_ROUNDS.length - 1;
 
   function handleSelect(value: RelationshipType | null) {
-    if (!value || isCorrect) return;
+    if (!value) {
+      if (current.guidanceLevel === 'free') {
+        setSelectedRelation(null);
+        setWrongAttempt(false);
+      }
+      return;
+    }
+
+    // Once a correct answer is selected in strict/soft mode, it cannot be changed
+    if (isCorrect && current.guidanceLevel !== 'free') return;
 
     // Strict mode: only allow the correct answer
     if (current.guidanceLevel === 'strict' && value !== current.correctAnswer) {
@@ -163,6 +172,47 @@ export const OnboardingPractice = forwardRef<
       onCorrectStateChange(isCorrect);
     }
   }, [isCorrect, onCorrectStateChange]);
+
+  // Effect to handle keyboard shortcuts (1-9)
+  useEffect(() => {
+    if (isLastRound && isCorrect) return; // Prevent interaction after finishing
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (
+        target.tagName === 'INPUT' ||
+        target.tagName === 'TEXTAREA' ||
+        target.isContentEditable
+      ) {
+        return;
+      }
+
+      const key = parseInt(e.key);
+      if (key >= 1 && key <= 4) {
+        const index = key - 1;
+        if (index < RELATIONSHIP_TYPES.length) {
+          const relationType = RELATIONSHIP_TYPES[index].value;
+
+          const isCorrectBtn = relationType === current.correctAnswer;
+          const isStrictDisabled =
+            current.guidanceLevel === 'strict' && !isCorrectBtn && !isCorrect;
+
+          if (!isStrictDisabled && !wrongAttempt) {
+            // Toggle off if already selected, otherwise select
+            if (selectedRelation === relationType) {
+              handleSelect(null);
+            } else {
+              handleSelect(relationType);
+            }
+          }
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [current, isCorrect, isLastRound, wrongAttempt]);
 
   function handleNext() {
     if (isLastRound) {
@@ -341,7 +391,7 @@ export const OnboardingPractice = forwardRef<
                   !isCorrect && (
                     <motion.div
                       initial={{ opacity: 0 }}
-                      animate={{ opacity: 1, y: [0, 4, 0] }}
+                      animate={{ opacity: 1, y: [0, 8, 0] }}
                       transition={{
                         opacity: { delay: 1, duration: 0.3 },
                         y: {
@@ -351,9 +401,12 @@ export const OnboardingPractice = forwardRef<
                           ease: 'easeInOut',
                         },
                       }}
-                      className="absolute -top-7 left-1/2 -translate-x-1/2 z-20"
+                      className="absolute -top-10 left-1/2 -translate-x-1/2 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-xl shadow-purple-500/20 ring-1 ring-purple-100"
                     >
-                      <ChevronDown className="h-5 w-5 text-purple-500" />
+                      <ChevronDown
+                        className="h-7 w-7 text-purple-600"
+                        strokeWidth={3}
+                      />
                     </motion.div>
                   )}
 
