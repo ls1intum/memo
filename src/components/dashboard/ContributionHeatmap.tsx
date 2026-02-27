@@ -212,7 +212,7 @@ export function ContributionHeatmap({
             })}
           </div>
 
-          { }
+          {}
           <div className="flex" style={{ gap: 4 }}>
             {columns.map((col, colIndex) => {
               const currentYear = col[0].date.getUTCFullYear();
@@ -226,10 +226,11 @@ export function ContributionHeatmap({
               return (
                 <div
                   key={colIndex}
-                  className={`flex flex-col shrink-0 ${isYearChange
+                  className={`flex flex-col shrink-0 ${
+                    isYearChange
                       ? 'ml-3 mr-1 relative before:absolute before:-left-[10px] before:-top-[24px] before:-bottom-1 before:border-l-[2px] before:border-dashed before:border-slate-300 before:-z-10'
                       : ''
-                    }`}
+                  }`}
                   style={{ gap: 4 }}
                 >
                   {col.map((week, weekIndex) => (
