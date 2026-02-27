@@ -4,7 +4,6 @@ import {
   getRandomCompetenciesAction,
   getNextRelationshipTaskAction,
   submitCompetencyVoteAction,
-  deleteCompetencyRelationshipAction,
   createCompetencyResourceLinkAction,
   deleteCompetencyResourceLinkAction,
   getRandomLearningResourceAction,
@@ -109,7 +108,6 @@ export function SessionPage() {
     Array<{
       type: 'completed' | 'skipped';
       mode: MappingMode;
-      relationshipId?: string;
       resourceLinkId?: string;
       competencies?: Competency[];
       learningResource?: LearningResource;
@@ -139,9 +137,6 @@ export function SessionPage() {
     handleMouseLeave: handleResourceMatchMouseLeave,
   } = useHoverWithTimeout<ResourceMatchType>();
 
-  const [relationshipToDelete, setRelationshipToDelete] = useState<
-    string | null
-  >(null);
   const [resourceLinkToDelete, setResourceLinkToDelete] = useState<
     string | null
   >(null);
@@ -155,7 +150,7 @@ export function SessionPage() {
         } else {
           setError(
             result.error ??
-              'Failed to load user information. Please try again later.'
+            'Failed to load user information. Please try again later.'
           );
         }
       } catch (err) {
@@ -195,7 +190,7 @@ export function SessionPage() {
         if (!result.success) {
           setError(
             result.error ??
-              'An unexpected error occurred while fetching the next task.'
+            'An unexpected error occurred while fetching the next task.'
           );
           if (isInitialLoad) setCompetencies([]);
           setIsTransitioning(false);
@@ -238,7 +233,7 @@ export function SessionPage() {
         if (!compResult.success || !compResult.competencies?.length) {
           setError(
             compResult.error ??
-              'Failed to fetch competency for resource mapping.'
+            'Failed to fetch competency for resource mapping.'
           );
           if (isInitialLoad) setCompetencies([]);
           setIsTransitioning(false);
@@ -248,7 +243,7 @@ export function SessionPage() {
         if (!resourceResult.success || !resourceResult.resource) {
           setError(
             resourceResult.error ??
-              'Failed to fetch learning resource. Make sure resources are seeded.'
+            'Failed to fetch learning resource. Make sure resources are seeded.'
           );
           setCompetencies(compResult.competencies);
           setLearningResource(null);
@@ -325,8 +320,6 @@ export function SessionPage() {
               {
                 type: 'completed',
                 mode: 'competency',
-                relationshipId:
-                  result.voteResponse?.relationshipId ?? undefined,
                 competencies: competencies ? [...competencies] : undefined,
               },
             ]);
@@ -355,14 +348,13 @@ export function SessionPage() {
           setError(null);
 
           try {
-            const formData = new FormData();
-            formData.set('competencyId', competencies[0]!.id);
-            formData.set('resourceId', learningResource.id);
-            formData.set('userId', userId);
-            formData.set('matchType', resourceMatchType);
-
             const startTime = Date.now();
-            const result = await createCompetencyResourceLinkAction(formData);
+            const result = await createCompetencyResourceLinkAction({
+              competencyId: competencies[0]!.id,
+              resourceId: learningResource.id,
+              userId,
+              matchType: resourceMatchType,
+            });
 
             const elapsed = Date.now() - startTime;
             if (elapsed < 300) {
@@ -451,9 +443,7 @@ export function SessionPage() {
         }));
 
         if (last.type === 'completed') {
-          if (last.mode === 'competency' && last.relationshipId) {
-            setRelationshipToDelete(last.relationshipId);
-          } else if (last.mode === 'resource' && last.resourceLinkId) {
+          if (last.mode === 'resource' && last.resourceLinkId) {
             setResourceLinkToDelete(last.resourceLinkId);
           }
         }
@@ -480,25 +470,6 @@ export function SessionPage() {
       setIsTransitioning(false);
     }, 300);
   }, [history]);
-
-  useEffect(() => {
-    if (relationshipToDelete) {
-      deleteCompetencyRelationshipAction(relationshipToDelete)
-        .then(result => {
-          if (!result.success) {
-            setError(result.error ?? 'Failed to delete relationship');
-          }
-        })
-        .catch(err => {
-          setError(
-            err instanceof Error ? err.message : 'Failed to delete relationship'
-          );
-        })
-        .finally(() => {
-          setRelationshipToDelete(null);
-        });
-    }
-  }, [relationshipToDelete]);
 
   useEffect(() => {
     if (resourceLinkToDelete) {
@@ -678,10 +649,9 @@ export function SessionPage() {
                   }}
                   className={`
                     h-full px-3 text-xs font-semibold rounded-md transition-all duration-200 flex items-center justify-center
-                    ${
-                      mappingMode === 'competency'
-                        ? 'bg-white text-slate-900 shadow-sm'
-                        : 'text-slate-500 hover:text-slate-700'
+                    ${mappingMode === 'competency'
+                      ? 'bg-white text-slate-900 shadow-sm'
+                      : 'text-slate-500 hover:text-slate-700'
                     }
                   `}
                 >
@@ -696,10 +666,9 @@ export function SessionPage() {
                   }}
                   className={`
                     h-full px-3 text-xs font-semibold rounded-md transition-all duration-200 flex items-center justify-center
-                    ${
-                      mappingMode === 'resource'
-                        ? 'bg-white text-slate-900 shadow-sm'
-                        : 'text-slate-500 hover:text-slate-700'
+                    ${mappingMode === 'resource'
+                      ? 'bg-white text-slate-900 shadow-sm'
+                      : 'text-slate-500 hover:text-slate-700'
                     }
                   `}
                 >
@@ -981,8 +950,8 @@ export function SessionPage() {
                             {relation === 'UNRELATED'
                               ? 'is unrelated to'
                               : RELATIONSHIP_TYPES.find(
-                                  rt => rt.value === relation
-                                )?.label.toLowerCase() || ''}
+                                rt => rt.value === relation
+                              )?.label.toLowerCase() || ''}
                           </span>{' '}
                           <span className="font-bold text-slate-900">
                             {competencies[1]!.title}
@@ -1158,10 +1127,9 @@ export function SessionPage() {
                       className={`
                         relative flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm font-bold text-white
                         min-w-[180px]
-                        ${
-                          mappingMode === 'resource'
-                            ? 'bg-gradient-to-r from-pink-600 to-pink-500 shadow-lg shadow-pink-500/20 hover:shadow-xl hover:shadow-pink-500/30'
-                            : 'bg-gradient-to-r from-[#0a4da2] to-[#5538d1] shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/30'
+                        ${mappingMode === 'resource'
+                          ? 'bg-gradient-to-r from-pink-600 to-pink-500 shadow-lg shadow-pink-500/20 hover:shadow-xl hover:shadow-pink-500/30'
+                          : 'bg-gradient-to-r from-[#0a4da2] to-[#5538d1] shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/30'
                         }
                         transition-all duration-200 ease-out
                         hover:scale-[1.02]
@@ -1194,7 +1162,6 @@ export function SessionPage() {
         </section>
       </main>
 
-      {/* ─── Session Summary Overlay ─── */}
       {showSessionSummary && (
         <SessionSummary stats={stats} onContinue={handleContinueSession} />
       )}

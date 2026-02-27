@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 
@@ -12,16 +13,46 @@ interface SessionSummaryProps {
 }
 
 export function SessionSummary({ stats, onContinue }: SessionSummaryProps) {
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onContinue();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    if (modalRef.current) {
+      modalRef.current.focus();
+    }
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [onContinue]);
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 animate-in fade-in duration-300">
-      <div className="relative w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-2xl p-8 animate-in zoom-in-95 duration-300">
+      <div
+        ref={modalRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="session-summary-heading"
+        tabIndex={-1}
+        className="relative w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-2xl p-8 animate-in zoom-in-95 duration-300 focus:outline-none"
+      >
         <div className="pointer-events-none absolute -right-12 -top-12 h-32 w-32 rounded-full bg-[#7c6cff]/20 blur-[60px]" />
         <div className="pointer-events-none absolute -left-8 -bottom-8 h-24 w-24 rounded-full bg-[#0a4da2]/15 blur-[50px]" />
 
         <div className="relative z-10 space-y-6">
           <div className="text-center space-y-2">
             <div className="text-4xl">🧠</div>
-            <h2 className="text-2xl font-bold text-slate-900">
+            <h2
+              id="session-summary-heading"
+              className="text-2xl font-bold text-slate-900"
+            >
               Session Complete
             </h2>
             <p className="text-sm text-slate-500">
