@@ -2,10 +2,12 @@
  * Session API helpers for the session page to use with the Spring Boot API
  */
 
+import { apiClient } from './client';
 import { competenciesApi } from './competencies';
 import { competencyRelationshipsApi } from './competency-relationships';
 import { competencyResourceLinksApi } from './competency-resource-links';
 import { learningResourcesApi } from './learning-resources';
+import { keycloak } from '../auth/keycloak';
 import type {
   Competency,
   LearningResource,
@@ -13,17 +15,26 @@ import type {
   CompetencyResourceLink,
 } from './types';
 
-const GUEST_USER_ID = 'guest';
-
 export async function getOrCreateDemoUserAction(): Promise<{
   success: boolean;
   user?: { id: string; name: string };
   error?: string;
 }> {
-  return {
-    success: true,
-    user: { id: GUEST_USER_ID, name: 'Guest User' },
-  };
+  try {
+    const response = await apiClient.get<{ id: string; role: string }>(
+      '/api/auth/me'
+    );
+    return {
+      success: true,
+      user: { id: response.data.id, name: '' },
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : 'Failed to get current user',
+    };
+  }
 }
 
 export async function getRandomCompetenciesAction(count: number): Promise<{
@@ -87,7 +98,7 @@ export async function createCompetencyRelationshipAction(
       relationshipType: relationshipType as 'ASSUMES' | 'EXTENDS' | 'MATCHES',
       originId,
       destinationId,
-      userId: GUEST_USER_ID,
+      userId: keycloak.tokenParsed?.sub ?? '',
     });
     return { success: true, relationship };
   } catch (error) {
@@ -133,7 +144,7 @@ export async function createCompetencyResourceLinkAction(
     const link = await competencyResourceLinksApi.create({
       competencyId,
       resourceId,
-      userId: GUEST_USER_ID,
+      userId: keycloak.tokenParsed?.sub ?? '',
       matchType: matchType as
         | 'UNRELATED'
         | 'WEAK'

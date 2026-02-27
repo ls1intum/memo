@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { keycloak } from '../auth/keycloak';
 
 export const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8080',
@@ -6,6 +7,14 @@ export const apiClient = axios.create({
     'Content-Type': 'application/json',
   },
   timeout: 10000,
+});
+
+apiClient.interceptors.request.use(async config => {
+  if (keycloak.authenticated) {
+    await keycloak.updateToken(30).catch(() => {});
+    config.headers.Authorization = `Bearer ${keycloak.token}`;
+  }
+  return config;
 });
 
 apiClient.interceptors.response.use(

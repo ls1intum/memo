@@ -7,6 +7,9 @@ import { HomePage } from './pages/HomePage';
 import { AboutPage } from './pages/AboutPage';
 import { SessionPage } from './pages/SessionPage';
 import { OnboardingPage } from './pages/OnboardingPage';
+import { LoginPage } from './pages/LoginPage';
+import { ProtectedRoute } from './components/ProtectedRoute';
+import { AuthProvider } from './contexts/AuthContext';
 
 export function App() {
   const [queryClient] = useState(
@@ -23,16 +26,21 @@ export function App() {
 
   return (
     <ThemeProvider defaultTheme="system" storageKey="memo-theme">
-      <QueryClientProvider client={queryClient}>
-        <Routes>
-          <Route element={<Layout />}>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/about" element={<AboutPage />} />
-            <Route path="/session" element={<SessionPage />} />
-            <Route path="/onboarding" element={<OnboardingPage />} />
-          </Route>
-        </Routes>
-      </QueryClientProvider>
+      <AuthProvider>
+        <QueryClientProvider client={queryClient}>
+          <Routes>
+            <Route path="/login" element={<LoginPage />} />
+            <Route element={<Layout />}>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/about" element={<AboutPage />} />
+              <Route element={<ProtectedRoute />}>
+                <Route path="/session" element={<SessionPage />} />
+                <Route path="/onboarding" element={<OnboardingPage />} />
+              </Route>
+            </Route>
+          </Routes>
+        </QueryClientProvider>
+      </AuthProvider>
     </ThemeProvider>
   );
 }

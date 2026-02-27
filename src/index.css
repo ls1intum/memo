@@ -29,10 +29,18 @@
 
   --color-ring: var(--ring);
   --color-border: var(--border);
-  --color-accent: var(--accent);
-  --color-muted: var(--muted);
   --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
   --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
   --color-yinmn-blue: oklch(0.38 0.08 245);
   --color-air-superiority-blue: oklch(0.62 0.05 235);
   --color-uranian-blue: oklch(0.82 0.04 235);

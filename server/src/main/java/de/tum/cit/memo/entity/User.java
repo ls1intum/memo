@@ -7,8 +7,6 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -26,16 +24,13 @@ import java.time.Instant;
 public class User {
 
     @Id
-    @Column(length = 30)
+    @Column(length = 36)
     private String id;
 
-    @NotBlank
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String name;
 
-    @NotBlank
-    @Email
-    @Column(nullable = false, unique = true)
+    @Column(nullable = true, unique = true)
     private String email;
 
     @Enumerated(EnumType.STRING)
