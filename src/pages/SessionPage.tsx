@@ -125,7 +125,7 @@ export function SessionPage() {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [swapRotation, setSwapRotation] = useState(0);
   const [allDone, setAllDone] = useState(false);
-  const [isSwapped, setIsSwapped] = useState(false);
+  const [showSessionSummary, setShowSessionSummary] = useState(false);
 
   const {
     hoveredValue: hoveredRelation,
@@ -183,7 +183,6 @@ export function SessionPage() {
 
       setRelation(null);
       setResourceMatchType(null);
-      setIsSwapped(false);
 
       if (mappingMode === 'competency') {
         if (!userId) {
@@ -300,14 +299,8 @@ export function SessionPage() {
 
           try {
             const startTime = Date.now();
-
-            const originId = isSwapped
-              ? competencies[1]!.id
-              : competencies[0]!.id;
-            const destinationId = isSwapped
-              ? competencies[0]!.id
-              : competencies[1]!.id;
-
+            const originId = competencies[0]!.id;
+            const destinationId = competencies[1]!.id;
             const result = await submitCompetencyVoteAction(
               userId,
               relation,
@@ -437,11 +430,8 @@ export function SessionPage() {
       relation,
       resourceMatchType,
       userId,
-      isSwapped,
       mappingMode,
       loadMappingPair,
-      currentRelationshipId,
-      isSwapped,
     ]
   );
 
@@ -907,7 +897,6 @@ export function SessionPage() {
                           size="sm"
                           onClick={() => {
                             setSwapRotation(prev => prev + 180);
-                            setIsSwapped(prev => !prev);
                             setIsTransitioning(true);
                             setTimeout(() => {
                               if (competencies && competencies.length >= 2) {

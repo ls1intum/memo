@@ -61,8 +61,9 @@ public class CompetencyRelationshipService {
                 .destinationId(destinationId)
                 .build();
 
+        CompetencyRelationship saved = relationshipRepository.save(relationship);
         competencyRepository.incrementDegree(List.of(originId, destinationId));
-        return relationshipRepository.save(relationship);
+        return saved;
     }
 
     private static void validateDistinctIds(String originId, String destinationId) {
