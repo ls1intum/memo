@@ -52,12 +52,7 @@ public class SchedulingService {
     private final CompetencyRepository competencyRepository;
     private final Random random = new Random();
 
-    /**
-     * Get the next relationship task for a user.
-     * Uses 70% coverage pipeline (new pairs) and 30% consensus pipeline
-     * (high-entropy).
-     * Returns empty if the user has voted on every available relationship.
-     */
+    /** Returns the next pair for a user to vote on, or empty if none left. */
     @Transactional
     public Optional<RelationshipTaskResponse> getNextTask(String userId) {
         if (random.nextDouble() < COVERAGE_WEIGHT) {
@@ -77,15 +72,10 @@ public class SchedulingService {
 
     @Transactional
     public VoteResponse submitVote(String userId, VoteRequest request) {
-        // Resolve relationship: by ID directly, or find/create by competency pair
-        CompetencyRelationship rel;
-        if (request.getOriginId() != null && request.getDestinationId() != null) {
-            rel = relationshipRepository
-                    .findByOriginIdAndDestinationId(request.getOriginId(), request.getDestinationId())
-                    .orElseGet(() -> createRelationship(request.getOriginId(), request.getDestinationId()));
-        } else {
-            rel = findRelationshipOrThrow(request.getRelationshipId());
-        }
+        // Look up (or create) the relationship for this pair
+        CompetencyRelationship rel = relationshipRepository
+                .findByOriginIdAndDestinationId(request.getOriginId(), request.getDestinationId())
+                .orElseGet(() -> createRelationship(request.getOriginId(), request.getDestinationId()));
 
         if (voteRepository.existsByRelationshipIdAndUserId(rel.getId(), userId)) {
             log.debug("User {} already voted on {}", userId, rel.getId());
@@ -95,7 +85,7 @@ public class SchedulingService {
         saveVote(rel.getId(), userId, request.getRelationshipType());
         applyVote(rel, request.getRelationshipType());
 
-        // MATCHES and UNRELATED are symmetric: A→B implies B→A
+        // MATCHES and UNRELATED are symmetric, so mirror the vote to B→A
         RelationshipType type = request.getRelationshipType();
         if (type == RelationshipType.MATCHES || type == RelationshipType.UNRELATED) {
             mirrorSymmetricVote(rel, userId, type);
@@ -103,8 +93,6 @@ public class SchedulingService {
 
         return toVoteResponse(rel);
     }
-
-    // --- Pipelines ---
 
     private Optional<RelationshipTaskResponse> coveragePipeline(String userId) {
         List<String> poolIds = getLowDegreeCompetencyIds();
@@ -124,7 +112,7 @@ public class SchedulingService {
         for (int i = 0; i < pool.size(); i++) {
             for (int j = i + 1; j < pool.size(); j++) {
                 if (!existingPairs.contains(pairKey(pool.get(i), pool.get(j)))) {
-                    return Optional.of(toTaskResponse(createRelationship(pool.get(i), pool.get(j)), "COVERAGE"));
+                    return Optional.of(toTaskResponseFromIds(pool.get(i), pool.get(j), "COVERAGE"));
                 }
             }
         }
@@ -148,8 +136,6 @@ public class SchedulingService {
 
         return toTaskResponse(pickWeightedByEntropy(candidates), "CONSENSUS");
     }
-
-    // --- Core helpers ---
 
     private List<String> getLowDegreeCompetencyIds() {
         List<String> ids = competencyRepository.findIdsByDegreeAsc(PageRequest.of(0, LOW_DEGREE_POOL_SIZE));
@@ -190,8 +176,6 @@ public class SchedulingService {
         return rel.getEntropy() / (rel.getTotalVotes() + 1.0);
     }
 
-    // --- Vote logic ---
-
     private void saveVote(String relationshipId, String userId, RelationshipType type) {
         voteRepository.save(CompetencyRelationshipVote.builder()
                 .id(IdGenerator.generateCuid())
@@ -212,7 +196,7 @@ public class SchedulingService {
         relationshipRepository.save(rel);
     }
 
-    /** Symmetric types: if A→B is MATCHES/UNRELATED, mirror the vote to B→A. */
+    /** For symmetric types, also records the vote on the reverse direction. */
     private void mirrorSymmetricVote(CompetencyRelationship originalRel, String userId, RelationshipType type) {
         Optional<CompetencyRelationship> reverseOpt = relationshipRepository
                 .findByOriginIdAndDestinationId(originalRel.getDestinationId(), originalRel.getOriginId());
@@ -224,13 +208,6 @@ public class SchedulingService {
             applyVote(reverse, type);
             saveVote(reverse.getId(), userId, type);
         }
-    }
-
-    // --- Response builders ---
-
-    private CompetencyRelationship findRelationshipOrThrow(String id) {
-        return relationshipRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Relationship not found: " + id));
     }
 
     private RelationshipTaskResponse toTaskResponse(CompetencyRelationship rel, String pipeline) {
@@ -253,8 +230,34 @@ public class SchedulingService {
                 .build();
     }
 
+    /**
+     * Builds a task response from two competency IDs without persisting a
+     * relationship.
+     * The relationship row is only created when the user actually votes.
+     */
+    private RelationshipTaskResponse toTaskResponseFromIds(String originId, String destinationId, String pipeline) {
+        Map<String, Competency> byId = competencyRepository
+                .findAllById(List.of(originId, destinationId))
+                .stream().collect(Collectors.toMap(Competency::getId, Function.identity()));
+
+        Competency origin = byId.get(originId);
+        Competency destination = byId.get(destinationId);
+        if (origin == null || destination == null) {
+            throw new ResourceNotFoundException("Competency not found for IDs " + originId + ", " + destinationId);
+        }
+
+        return RelationshipTaskResponse.builder()
+                .relationshipId(null)
+                .origin(toCompetencyInfo(origin))
+                .destination(toCompetencyInfo(destination))
+                .pipeline(pipeline)
+                .currentVotes(VoteCounts.builder().build())
+                .build();
+    }
+
     private VoteResponse toVoteResponse(CompetencyRelationship rel) {
         return VoteResponse.builder()
+                .relationshipId(rel.getId())
                 .success(true)
                 .updatedVotes(toVoteCounts(rel))
                 .newEntropy(rel.getEntropy())

@@ -15,7 +15,7 @@ export interface VoteCounts {
 }
 
 export interface RelationshipTask {
-  relationshipId: string;
+  relationshipId: string | null;
   origin: CompetencyInfo;
   destination: CompetencyInfo;
   pipeline: string;
@@ -23,16 +23,14 @@ export interface RelationshipTask {
 }
 
 export interface VoteResponse {
+  relationshipId: string;
   success: boolean;
   updatedVotes: VoteCounts;
   newEntropy: number;
 }
 
 export const schedulingApi = {
-  /**
-   * Get the next relationship task for a user.
-   * Returns null when there are no more tasks (HTTP 204).
-   */
+  /** Fetches the next relationship task, or null if there are none left (HTTP 204). */
   getNextRelationship: async (
     userId: string
   ): Promise<RelationshipTask | null> => {
@@ -46,18 +44,16 @@ export const schedulingApi = {
     return response.data;
   },
 
-  /**
-   * Submit a vote on a relationship.
-   * Pass relationshipId for normal votes, or originId+destinationId when swapped.
-   */
+  /** Submits a vote for the given competency pair. */
   submitVote: async (
     userId: string,
     relationshipType: RelationshipType,
-    opts: { relationshipId?: string; originId?: string; destinationId?: string }
+    originId: string,
+    destinationId: string
   ): Promise<VoteResponse> => {
     const response = await apiClient.post<VoteResponse>(
       '/api/scheduling/vote',
-      { ...opts, relationshipType },
+      { originId, destinationId, relationshipType },
       { headers: { 'X-User-Id': userId } }
     );
     return response.data;

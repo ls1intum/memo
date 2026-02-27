@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 /**
- * Controller for competency relationship CRUD.
- * For creating relationships and voting, use {@link SchedulingController}.
+ * CRUD endpoints for competency relationships (voting happens via
+ * SchedulingController).
  */
 @RestController
 @RequestMapping("/api/competency-relationships")

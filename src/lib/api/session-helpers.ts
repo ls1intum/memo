@@ -1,6 +1,4 @@
-/**
- * Session API helpers for the session page to use with the Spring Boot API
- */
+// Wrappers around the API clients used by the session page
 
 import { competenciesApi } from './competencies';
 import { competencyRelationshipsApi } from './competency-relationships';
@@ -54,10 +52,7 @@ export async function getRandomCompetenciesAction(count: number): Promise<{
   }
 }
 
-/**
- * Get the next relationship task from the scheduling pipeline.
- * Returns allDone: true when there are no more pairs to vote on.
- */
+/** Fetches the next pair from the scheduling pipeline; sets allDone if nothing is left. */
 export async function getNextRelationshipTaskAction(userId: string): Promise<{
   success: boolean;
   task?: RelationshipTask;
@@ -81,14 +76,12 @@ export async function getNextRelationshipTaskAction(userId: string): Promise<{
   }
 }
 
-/**
- * Submit a vote on a competency relationship via the scheduling pipeline.
- * Pass opts.relationshipId for normal votes, or opts.originId+opts.destinationId when swapped.
- */
+/** Submits a vote for the given competency pair. */
 export async function submitCompetencyVoteAction(
   userId: string,
   relationshipType: RelationshipType,
-  opts: { relationshipId?: string; originId?: string; destinationId?: string }
+  originId: string,
+  destinationId: string
 ): Promise<{
   success: boolean;
   voteResponse?: SchedulingVoteResponse;
@@ -98,7 +91,8 @@ export async function submitCompetencyVoteAction(
     const voteResponse = await schedulingApi.submitVote(
       userId,
       relationshipType,
-      opts
+      originId,
+      destinationId
     );
     return { success: true, voteResponse };
   } catch (error) {

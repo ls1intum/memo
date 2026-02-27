@@ -126,10 +126,6 @@ export function SessionPage() {
   const [swapRotation, setSwapRotation] = useState(0);
   const [allDone, setAllDone] = useState(false);
   const [isSwapped, setIsSwapped] = useState(false);
-  const [currentRelationshipId, setCurrentRelationshipId] = useState<
-    string | null
-  >(null);
-  const [showSessionSummary, setShowSessionSummary] = useState(false);
 
   const {
     hoveredValue: hoveredRelation,
@@ -210,7 +206,6 @@ export function SessionPage() {
         if (result.allDone) {
           setAllDone(true);
           setCompetencies([]);
-          setCurrentRelationshipId(null);
           setIsTransitioning(false);
           return;
         }
@@ -222,7 +217,6 @@ export function SessionPage() {
         }
 
         setAllDone(false);
-        setCurrentRelationshipId(result.task.relationshipId);
         setCompetencies([
           {
             id: result.task.origin.id,
@@ -291,7 +285,12 @@ export function SessionPage() {
     async (type: 'completed' | 'skipped') => {
       if (type === 'completed') {
         if (mappingMode === 'competency') {
-          if ((!currentRelationshipId && !isSwapped) || !relation || !userId) {
+          if (
+            !competencies ||
+            competencies.length < 2 ||
+            !relation ||
+            !userId
+          ) {
             setError('Missing required data to submit vote');
             return;
           }
@@ -301,17 +300,19 @@ export function SessionPage() {
 
           try {
             const startTime = Date.now();
-            const voteOpts =
-              isSwapped && competencies && competencies.length >= 2
-                ? {
-                    originId: competencies[0]!.id,
-                    destinationId: competencies[1]!.id,
-                  }
-                : { relationshipId: currentRelationshipId! };
+
+            const originId = isSwapped
+              ? competencies[1]!.id
+              : competencies[0]!.id;
+            const destinationId = isSwapped
+              ? competencies[0]!.id
+              : competencies[1]!.id;
+
             const result = await submitCompetencyVoteAction(
               userId,
               relation,
-              voteOpts
+              originId,
+              destinationId
             );
 
             const elapsed = Date.now() - startTime;
@@ -331,7 +332,8 @@ export function SessionPage() {
               {
                 type: 'completed',
                 mode: 'competency',
-                relationshipId: currentRelationshipId ?? undefined,
+                relationshipId:
+                  result.voteResponse?.relationshipId ?? undefined,
                 competencies: competencies ? [...competencies] : undefined,
               },
             ]);
@@ -435,6 +437,7 @@ export function SessionPage() {
       relation,
       resourceMatchType,
       userId,
+      isSwapped,
       mappingMode,
       loadMappingPair,
       currentRelationshipId,
