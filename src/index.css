@@ -26,7 +26,8 @@
   --color-foreground: var(--foreground);
   --font-sans: 'Geist', system-ui, -apple-system, sans-serif;
   --font-mono: 'Geist Mono', ui-monospace, monospace;
-
+  --font-geist-sans: 'Geist', system-ui, -apple-system, sans-serif;
+  --font-geist-mono: 'Geist Mono', ui-monospace, monospace;
   --color-ring: var(--ring);
   --color-border: var(--border);
   --color-primary: var(--primary);

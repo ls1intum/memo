@@ -1,19 +1,23 @@
-/**
- * Session API helpers for the session page to use with the Spring Boot API
- */
+// Wrappers around the API clients used by the session page
 
 import { apiClient } from './client';
 import { competenciesApi } from './competencies';
 import { competencyRelationshipsApi } from './competency-relationships';
 import { competencyResourceLinksApi } from './competency-resource-links';
 import { learningResourcesApi } from './learning-resources';
-import { keycloak } from '../auth/keycloak';
+import { schedulingApi } from './scheduling';
+import type {
+  RelationshipTask,
+  VoteResponse as SchedulingVoteResponse,
+} from './scheduling';
 import type {
   Competency,
   LearningResource,
-  CompetencyRelationship,
   CompetencyResourceLink,
 } from './types';
+import type { RelationshipType } from '@/components/session/session-constants';
+
+const GUEST_USER_ID = 'guest';
 
 export async function getOrCreateDemoUserAction(): Promise<{
   success: boolean;
@@ -60,6 +64,57 @@ export async function getRandomCompetenciesAction(count: number): Promise<{
   }
 }
 
+/** Fetches the next pair from the scheduling pipeline; sets allDone if nothing is left. */
+export async function getNextRelationshipTaskAction(userId: string): Promise<{
+  success: boolean;
+  task?: RelationshipTask;
+  allDone?: boolean;
+  error?: string;
+}> {
+  try {
+    const task = await schedulingApi.getNextRelationship(userId);
+    if (task === null) {
+      return { success: true, allDone: true };
+    }
+    return { success: true, task };
+  } catch (error) {
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to fetch next relationship task',
+    };
+  }
+}
+
+/** Submits a vote for the given competency pair. */
+export async function submitCompetencyVoteAction(
+  userId: string,
+  relationshipType: RelationshipType,
+  originId: string,
+  destinationId: string
+): Promise<{
+  success: boolean;
+  voteResponse?: SchedulingVoteResponse;
+  error?: string;
+}> {
+  try {
+    const voteResponse = await schedulingApi.submitVote(
+      userId,
+      relationshipType,
+      originId,
+      destinationId
+    );
+    return { success: true, voteResponse };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to submit vote',
+    };
+  }
+}
+
 export async function getRandomLearningResourceAction(): Promise<{
   success: boolean;
   resource?: LearningResource;
@@ -78,36 +133,6 @@ export async function getRandomLearningResourceAction(): Promise<{
         error instanceof Error
           ? error.message
           : 'Failed to fetch learning resource',
-    };
-  }
-}
-
-export async function createCompetencyRelationshipAction(
-  formData: FormData
-): Promise<{
-  success: boolean;
-  relationship?: CompetencyRelationship;
-  error?: string;
-}> {
-  try {
-    const relationshipType = formData.get('relationshipType') as string;
-    const originId = formData.get('originId') as string;
-    const destinationId = formData.get('destinationId') as string;
-
-    const relationship = await competencyRelationshipsApi.create({
-      relationshipType: relationshipType as 'ASSUMES' | 'EXTENDS' | 'MATCHES',
-      originId,
-      destinationId,
-      userId: keycloak.tokenParsed?.sub ?? '',
-    });
-    return { success: true, relationship };
-  } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : 'Failed to create relationship',
     };
   }
 }
