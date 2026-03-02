@@ -27,8 +27,9 @@ public class SchedulingController {
     @GetMapping("/next-relationship")
     @Operation(summary = "Get next relationship to vote on", description = "Returns a competency pair for the user to map. Uses coverage (70%) and consensus (30%) pipelines. Returns 204 if no tasks remain.")
     public ResponseEntity<RelationshipTaskResponse> getNextRelationship(
-            @RequestHeader("X-User-Id") String userId) {
-        return schedulingService.getNextTask(userId)
+            @RequestHeader("X-User-Id") String userId,
+            @org.springframework.web.bind.annotation.RequestParam(required = false) java.util.List<String> skippedIds) {
+        return schedulingService.getNextTask(userId, skippedIds)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.noContent().build());
     }

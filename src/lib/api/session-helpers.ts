@@ -58,14 +58,17 @@ export async function getRandomCompetenciesAction(count: number): Promise<{
  * Get the next relationship task from the scheduling pipeline.
  * Returns allDone: true when there are no more pairs to vote on.
  */
-export async function getNextRelationshipTaskAction(userId: string): Promise<{
+export async function getNextRelationshipTaskAction(
+  userId: string,
+  skippedIds?: string[]
+): Promise<{
   success: boolean;
   task?: RelationshipTask;
   allDone?: boolean;
   error?: string;
 }> {
   try {
-    const task = await schedulingApi.getNextRelationship(userId);
+    const task = await schedulingApi.getNextRelationship(userId, skippedIds);
     if (task === null) {
       return { success: true, allDone: true };
     }

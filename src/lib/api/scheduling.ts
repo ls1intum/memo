@@ -34,10 +34,17 @@ export const schedulingApi = {
    * Returns null when there are no more tasks (HTTP 204).
    */
   getNextRelationship: async (
-    userId: string
+    userId: string,
+    skippedIds?: string[]
   ): Promise<RelationshipTask | null> => {
+    const params = new URLSearchParams();
+    if (skippedIds && skippedIds.length > 0) {
+      skippedIds.forEach(id => params.append('skippedIds', id));
+    }
+    const queryString = params.toString() ? `?${params.toString()}` : '';
+
     const response = await apiClient.get<RelationshipTask>(
-      '/api/scheduling/next-relationship',
+      `/api/scheduling/next-relationship${queryString}`,
       { headers: { 'X-User-Id': userId } }
     );
     if (response.status === 204) {

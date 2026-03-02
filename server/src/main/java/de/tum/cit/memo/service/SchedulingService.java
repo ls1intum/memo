@@ -59,20 +59,23 @@ public class SchedulingService {
      * Returns empty if the user has voted on every available relationship.
      */
     @Transactional
-    public Optional<RelationshipTaskResponse> getNextTask(String userId) {
+    public Optional<RelationshipTaskResponse> getNextTask(String userId, List<String> skippedIds) {
+        // Normalize null to empty list
+        List<String> skipList = skippedIds != null ? skippedIds : List.of();
+        
         if (random.nextDouble() < COVERAGE_WEIGHT) {
             log.debug("Coverage pipeline for user {}", userId);
-            return coveragePipeline(userId);
+            return coveragePipeline(userId, skipList);
         }
 
         log.debug("Consensus pipeline for user {}", userId);
-        RelationshipTaskResponse task = consensusPipeline(userId);
+        RelationshipTaskResponse task = consensusPipeline(userId, skipList);
         if (task != null) {
             return Optional.of(task);
         }
 
         log.debug("No consensus candidates, falling back to coverage");
-        return coveragePipeline(userId);
+        return coveragePipeline(userId, skipList);
     }
 
     @Transactional
@@ -106,7 +109,7 @@ public class SchedulingService {
 
     // --- Pipelines ---
 
-    private Optional<RelationshipTaskResponse> coveragePipeline(String userId) {
+    private Optional<RelationshipTaskResponse> coveragePipeline(String userId, List<String> skippedIds) {
         List<String> poolIds = getLowDegreeCompetencyIds();
         if (poolIds.size() < 2) {
             log.debug("Not enough competencies to form pairs");
@@ -117,6 +120,19 @@ public class SchedulingService {
                 .flatMap(r -> Stream.of(pairKey(r.getOriginId(), r.getDestinationId()),
                         pairKey(r.getDestinationId(), r.getOriginId())))
                 .collect(Collectors.toSet());
+        // Also add skipped pairs to the set of existing pairs so we don't present them
+        // again
+        if (skippedIds != null && !skippedIds.isEmpty()) {
+            for (String skippedId : skippedIds) {
+                // skippedIds from frontend are actually encoded as originId:destinationId
+                // when no true relationshipId exists yet
+                String[] parts = skippedId.split(":");
+                if (parts.length == 2) {
+                    existingPairs.add(pairKey(parts[0], parts[1]));
+                    existingPairs.add(pairKey(parts[1], parts[0]));
+                }
+            }
+        }
 
         List<String> pool = new ArrayList<>(poolIds);
         Collections.shuffle(pool, random);
@@ -131,16 +147,16 @@ public class SchedulingService {
 
         log.debug("Pool fully connected, finding any unvoted relationship");
         return relationshipRepository
-                .findUnvotedByUser(userId, PageRequest.of(0, 1))
+                .findUnvotedByUserAndNotSkipped(userId, skippedIds, PageRequest.of(0, 1))
                 .stream().findFirst()
                 .map(rel -> toTaskResponse(rel, "COVERAGE"));
     }
 
-    private RelationshipTaskResponse consensusPipeline(String userId) {
+    private RelationshipTaskResponse consensusPipeline(String userId, List<String> skippedIds) {
         List<CompetencyRelationship> candidates = relationshipRepository
                 .findHighEntropyRelationshipsExcludingUser(
                         userId, CONSENSUS_MIN_VOTES, CONSENSUS_MAX_VOTES, CONSENSUS_MIN_ENTROPY,
-                        PageRequest.of(0, CONSENSUS_CANDIDATE_LIMIT));
+                        skippedIds, PageRequest.of(0, CONSENSUS_CANDIDATE_LIMIT));
 
         if (candidates.isEmpty()) {
             return null;

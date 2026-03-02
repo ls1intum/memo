@@ -13,8 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 /**
- * CRUD operations on competency relationships.
- * For voting and scheduling, see {@link SchedulingService}.
+ * CRUD for competency relationships (voting logic lives in SchedulingService).
  */
 @Service
 @RequiredArgsConstructor

@@ -125,7 +125,7 @@ export function SessionPage() {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [swapRotation, setSwapRotation] = useState(0);
   const [allDone, setAllDone] = useState(false);
-  const [isSwapped, setIsSwapped] = useState(false);
+  const [_isSwapped, setIsSwapped] = useState(false);
   const [currentRelationshipId, setCurrentRelationshipId] = useState<
     string | null
   >(null);
@@ -175,7 +175,7 @@ export function SessionPage() {
   }, []);
 
   const loadMappingPair = useCallback(
-    async (isInitialLoad = false) => {
+    async (isInitialLoad = false, currentSkipId?: string) => {
       setError(null);
 
       if (isInitialLoad) {
@@ -195,7 +195,25 @@ export function SessionPage() {
           return;
         }
 
-        const result = await getNextRelationshipTaskAction(userId);
+        const skippedIds = history
+          .filter(
+            h =>
+              h.type === 'skipped' &&
+              h.mode === 'competency' &&
+              h.competencies &&
+              h.competencies.length === 2
+          )
+          .map(h => {
+            if (h.relationshipId) return h.relationshipId;
+            return `${h.competencies![0]!.id}:${h.competencies![1]!.id}`;
+          });
+
+        // Include the current skip ID if provided (handles async state update)
+        if (currentSkipId && !skippedIds.includes(currentSkipId)) {
+          skippedIds.push(currentSkipId);
+        }
+
+        const result = await getNextRelationshipTaskAction(userId, skippedIds);
 
         if (!result.success) {
           setError(
@@ -269,7 +287,7 @@ export function SessionPage() {
 
       setIsTransitioning(false);
     },
-    [mappingMode, userId]
+    [mappingMode, userId, history]
   );
 
   const prevModeRef = useRef<MappingMode | null>(null);
@@ -291,7 +309,12 @@ export function SessionPage() {
     async (type: 'completed' | 'skipped') => {
       if (type === 'completed') {
         if (mappingMode === 'competency') {
-          if ((!currentRelationshipId && !isSwapped) || !relation || !userId) {
+          if (
+            !competencies ||
+            competencies.length < 2 ||
+            !relation ||
+            !userId
+          ) {
             setError('Missing required data to submit vote');
             return;
           }
@@ -301,13 +324,11 @@ export function SessionPage() {
 
           try {
             const startTime = Date.now();
-            const voteOpts =
-              isSwapped && competencies && competencies.length >= 2
-                ? {
-                    originId: competencies[0]!.id,
-                    destinationId: competencies[1]!.id,
-                  }
-                : { relationshipId: currentRelationshipId! };
+            const voteOpts = {
+              relationshipId: currentRelationshipId ?? undefined,
+              originId: competencies[0]!.id,
+              destinationId: competencies[1]!.id,
+            };
             const result = await submitCompetencyVoteAction(
               userId,
               relation,
@@ -406,19 +427,28 @@ export function SessionPage() {
         setIsTransitioning(true);
         await new Promise(resolve => setTimeout(resolve, 300));
 
+        // Build the skip ID before updating history
+        const currentSkipId =
+          mappingMode === 'competency' && competencies?.length === 2
+            ? (currentRelationshipId ??
+              `${competencies[0]!.id}:${competencies[1]!.id}`)
+            : undefined;
+
         setStats(prev => ({ ...prev, skipped: prev.skipped + 1 }));
         setHistory(prev => [
           ...prev,
           {
             type: 'skipped',
             mode: mappingMode,
+            relationshipId: currentRelationshipId ?? undefined,
             competencies: competencies ? [...competencies] : undefined,
             learningResource: learningResource ?? undefined,
           },
         ]);
         setRelation(null);
         try {
-          await loadMappingPair();
+          // Pass the current skip ID directly to avoid stale closure issue
+          await loadMappingPair(false, currentSkipId);
         } catch (err) {
           setError(
             err instanceof Error
@@ -438,7 +468,6 @@ export function SessionPage() {
       mappingMode,
       loadMappingPair,
       currentRelationshipId,
-      isSwapped,
     ]
   );
 
