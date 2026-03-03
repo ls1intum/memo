@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { CompetencyNetworkViz } from '@/components/competency-network/CompetencyNetworkViz';
 
 const ONBOARDED_KEY = 'memo-onboarded';
 
@@ -71,10 +72,12 @@ export function HomePage() {
               </Button>
             </div>
             <div className="relative flex justify-center pt-20 pb-12">
-              <div className="relative w-full max-h-[520px] overflow-hidden">
+              <div className="relative w-full max-h-[600px] overflow-hidden">
                 <img
-                  src="/sessionPreview.png"
+                  src="/sessionPreview2.png"
                   alt="Preview of a Memo competency mapping session"
+                  width={2924}
+                  height={2048}
                   className="mx-auto h-auto w-[90%] max-w-6xl rounded-[32px]"
                 />
               </div>
@@ -106,9 +109,14 @@ export function HomePage() {
                 results across recommender systems hard to compare and trust.
               </p>
             </div>
-            <button className="w-full max-w-xl rounded-2xl border border-[#d9e6ff] bg-[#e9f1ff] px-6 py-6 text-lg font-semibold text-[#0a4da2] shadow-[0_22px_60px_-36px_rgba(7,30,84,0.35)] transition hover:-translate-y-0.5 hover:shadow-[0_26px_70px_-40px_rgba(7,30,84,0.45)]">
-              Visualization
-            </button>
+            <div className="w-full max-w-4xl">
+              <CompetencyNetworkViz
+                idPrefix="homepage"
+                showTitle={false}
+                animated={false}
+                floatingNodes={true}
+              />
+            </div>
           </div>
         </section>
 
