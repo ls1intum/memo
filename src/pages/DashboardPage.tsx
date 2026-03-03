@@ -5,91 +5,21 @@ import {
   contributorStatsApi,
   type ContributorStats,
 } from '@/lib/api/contributor-stats';
-import {
-  Flame,
-  Trophy,
-  Zap,
-  Mountain,
-  Target,
-  Award,
-  Star,
-  BookOpen,
-} from 'lucide-react';
+import { BookOpen, Flame } from 'lucide-react';
 import { ContributionHeatmap } from '@/components/dashboard/ContributionHeatmap';
 import { heatmapColor } from '@/lib/heatmap-helpers';
+import { MILESTONES, type MilestoneDef } from '@/lib/milestones';
 
 const GUEST_USER_ID = 'guest';
 const ONBOARDED_KEY = 'memo-onboarded';
 
-interface BadgeDef {
-  id: string;
-  name: string;
-  description: string;
-  icon: React.ElementType;
-  gradient: string;
-  glowColor: string;
-}
-
-const BADGE_DEFS: BadgeDef[] = [
-  {
-    id: 'first-steps',
-    name: 'The First Node',
-    description: '1+ mapping',
-    icon: Star,
-    gradient: 'from-emerald-400 to-teal-500',
-    glowColor: 'rgba(16,185,129,0.35)',
-  },
-  {
-    id: 'getting-started',
-    name: 'Getting Started',
-    description: '10+ mappings',
-    icon: Target,
-    gradient: 'from-blue-400 to-indigo-500',
-    glowColor: 'rgba(99,102,241,0.35)',
-  },
-  {
-    id: 'half-century',
-    name: 'Half Century',
-    description: '50+ mappings',
-    icon: Award,
-    gradient: 'from-violet-400 to-purple-600',
-    glowColor: 'rgba(139,92,246,0.35)',
-  },
-  {
-    id: 'century',
-    name: 'Century',
-    description: '100+ mappings',
-    icon: Trophy,
-    gradient: 'from-amber-400 to-orange-500',
-    glowColor: 'rgba(245,158,11,0.35)',
-  },
-  {
-    id: 'streak-3',
-    name: 'On Fire',
-    description: '3-day streak',
-    icon: Flame,
-    gradient: 'from-orange-400 to-red-500',
-    glowColor: 'rgba(239,68,68,0.35)',
-  },
-  {
-    id: 'streak-7',
-    name: 'Dedicated',
-    description: '7-day streak',
-    icon: Zap,
-    gradient: 'from-yellow-400 to-amber-500',
-    glowColor: 'rgba(245,158,11,0.35)',
-  },
-  {
-    id: 'streak-30',
-    name: 'Monthly Mapper',
-    description: '30-day streak',
-    icon: Mountain,
-    gradient: 'from-cyan-400 to-blue-600',
-    glowColor: 'rgba(6,182,212,0.35)',
-  },
-];
-
-function BadgeCard({ badge, earned }: { badge: BadgeDef; earned: boolean }) {
+function BadgeCard({
+  badge,
+  earned,
+}: {
+  badge: MilestoneDef;
+  earned: boolean;
+}) {
   const Icon = badge.icon;
   return (
     <div
@@ -319,11 +249,11 @@ export function DashboardPage() {
                   Milestone Badges
                 </h2>
                 <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
-                  {earnedSet.size} / {BADGE_DEFS.length} earned
+                  {earnedSet.size} / {MILESTONES.length} earned
                 </span>
               </div>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {BADGE_DEFS.map(badge => (
+                {MILESTONES.map(badge => (
                   <BadgeCard
                     key={badge.id}
                     badge={badge}

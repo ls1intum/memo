@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
+import { toast } from 'sonner';
 
 import {
   getRandomCompetenciesAction,
@@ -10,6 +11,8 @@ import {
   getRandomLearningResourceAction,
   getOrCreateDemoUserAction,
 } from '@/lib/api/session-helpers';
+import { contributorStatsApi } from '@/lib/api/contributor-stats';
+import { getNewlyEarnedMilestones } from '@/lib/milestones';
 import type { Competency, LearningResource } from '@/lib/api/types';
 import {
   RelationshipType,
@@ -130,6 +133,9 @@ export function SessionPage() {
     string | null
   >(null);
   const [showSessionSummary, setShowSessionSummary] = useState(false);
+  const [initialTotalVotes, setInitialTotalVotes] = useState<number | null>(
+    null
+  );
 
   const {
     hoveredValue: hoveredRelation,
@@ -150,12 +156,58 @@ export function SessionPage() {
     string | null
   >(null);
 
+  // Track which milestones have been shown
+  const shownMilestonesRef = useRef<Set<string>>(new Set());
+
+  // Check for newly earned milestones and celebrate
+  const checkMilestones = useCallback(
+    (newCompletedCount: number) => {
+      if (initialTotalVotes === null) return;
+      const oldTotal = initialTotalVotes + newCompletedCount - 1;
+      const newTotal = initialTotalVotes + newCompletedCount;
+      const newMilestones = getNewlyEarnedMilestones(oldTotal, newTotal);
+
+      newMilestones.forEach(milestone => {
+        // Skip if already shown
+        if (shownMilestonesRef.current.has(milestone.id)) return;
+        shownMilestonesRef.current.add(milestone.id);
+
+        // Show toast with milestone info
+        const Icon = milestone.icon;
+        toast.success(
+          <div className="flex items-center gap-3">
+            <div
+              className={`flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${milestone.gradient}`}
+            >
+              <Icon className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <div className="text-base font-bold">{milestone.name}</div>
+              <div className="text-sm opacity-80">{milestone.description}</div>
+            </div>
+          </div>,
+          { duration: 2500 }
+        );
+      });
+    },
+    [initialTotalVotes]
+  );
+
   useEffect(() => {
     async function loadDemoUser() {
       try {
         const result = await getOrCreateDemoUserAction();
         if (result.success && result.user) {
           setUserId(result.user.id);
+          // Fetch initial stats for milestone tracking
+          try {
+            const userStats = await contributorStatsApi.getStats(
+              result.user.id
+            );
+            setInitialTotalVotes(userStats.totalVotes);
+          } catch {
+            setInitialTotalVotes(0);
+          }
         } else {
           setError(
             result.error ??
@@ -346,7 +398,12 @@ export function SessionPage() {
               return;
             }
 
-            setStats(prev => ({ ...prev, completed: prev.completed + 1 }));
+            setStats(prev => {
+              const newCompleted = prev.completed + 1;
+              // Call checkMilestones after state update (outside updater to avoid React Strict Mode double-call)
+              setTimeout(() => checkMilestones(newCompleted), 0);
+              return { ...prev, completed: newCompleted };
+            });
             setHistory(prev => [
               ...prev,
               {
@@ -401,7 +458,12 @@ export function SessionPage() {
               return;
             }
 
-            setStats(prev => ({ ...prev, completed: prev.completed + 1 }));
+            setStats(prev => {
+              const newCompleted = prev.completed + 1;
+              // Call checkMilestones after state update (outside updater to avoid React Strict Mode double-call)
+              setTimeout(() => checkMilestones(newCompleted), 0);
+              return { ...prev, completed: newCompleted };
+            });
             setHistory(prev => [
               ...prev,
               {
@@ -468,6 +530,7 @@ export function SessionPage() {
       mappingMode,
       loadMappingPair,
       currentRelationshipId,
+      checkMilestones,
     ]
   );
 
