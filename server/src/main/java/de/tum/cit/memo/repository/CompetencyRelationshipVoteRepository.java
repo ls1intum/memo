@@ -14,12 +14,20 @@ public interface CompetencyRelationshipVoteRepository extends JpaRepository<Comp
 
     boolean existsByRelationshipIdAndUserId(String relationshipId, String userId);
 
-    long countByUserId(String userId);
-
-    @Query(value = "SELECT CAST(v.created_at AS DATE) AS vote_date, COUNT(*) AS vote_count "
-            + "FROM competency_relationships_votes v "
-            + "WHERE v.user_id = :userId AND v.created_at >= :since "
-            + "GROUP BY CAST(v.created_at AS DATE) "
-            + "ORDER BY vote_date", nativeQuery = true)
-    List<Object[]> findDailyVoteCountsByUserId(@Param("userId") String userId, @Param("since") Instant since);
+    @Query(value = """
+            SELECT CAST(v.created_at AS DATE) AS vote_date,
+                   COUNT(*) AS vote_count
+            FROM competency_relationships_votes v
+            WHERE v.user_id = :userId
+              AND v.created_at >= :since
+            GROUP BY CAST(v.created_at AS DATE)
+            UNION ALL
+            SELECT NULL AS vote_date,
+                   COUNT(*) FILTER (WHERE v.created_at < :since) AS vote_count
+            FROM competency_relationships_votes v
+            WHERE v.user_id = :userId
+            ORDER BY vote_date
+            """, nativeQuery = true)
+    List<DailyVoteCount> findDailyVoteCountsWithPreWindowTotal(@Param("userId") String userId,
+            @Param("since") Instant since);
 }
