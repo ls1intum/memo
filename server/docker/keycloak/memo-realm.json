@@ -23,7 +23,23 @@
       "attributes": {
         "access.token.lifespan": "3600",
         "post.logout.redirect.uris": "+"
-      }
+      },
+      "protocolMappers": [
+        {
+          "name": "email",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "user.attribute": "email",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "email",
+            "jsonType.label": "String"
+          }
+        }
+      ]
     }
   ],
   "roles": {
@@ -38,36 +54,16 @@
       }
     ]
   },
-  "users": [
-    {
-      "username": "demo",
-      "email": "demo@memo.local",
-      "enabled": true,
-      "firstName": "Demo",
-      "lastName": "User",
-      "credentials": [
-        {
-          "type": "password",
-          "value": "demo",
-          "temporary": false
-        }
-      ],
-      "realmRoles": ["USER"]
-    },
-    {
-      "username": "admin",
-      "email": "admin@memo.local",
-      "enabled": true,
-      "firstName": "Admin",
-      "lastName": "User",
-      "credentials": [
-        {
-          "type": "password",
-          "value": "admin",
-          "temporary": false
-        }
-      ],
-      "realmRoles": ["ADMIN", "USER"]
-    }
-  ]
+  "identityProviders": [],
+  "identityProviderMappers": [],
+  "verifyEmail": true,
+  "smtpServer": {
+    "host": "mailpit",
+    "port": "1025",
+    "from": "noreply@memo.local",
+    "fromDisplayName": "Memo",
+    "ssl": "false",
+    "starttls": "false",
+    "auth": "false"
+  }
 }

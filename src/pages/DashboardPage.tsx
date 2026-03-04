@@ -8,9 +8,9 @@ import {
 import { BookOpen, Flame } from 'lucide-react';
 import { ContributionHeatmap } from '@/components/dashboard/ContributionHeatmap';
 import { heatmapColor } from '@/lib/heatmap-helpers';
+import { useAuth } from '@/contexts/AuthContext';
 import { MILESTONES, type MilestoneDef } from '@/lib/milestones';
 
-const GUEST_USER_ID = 'guest';
 const ONBOARDED_KEY = 'memo-onboarded';
 
 function BadgeCard({
@@ -98,16 +98,18 @@ function StatCard({
 }
 
 export function DashboardPage() {
+  const { userId } = useAuth();
   const navigate = useNavigate();
   const [stats, setStats] = useState<ContributorStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!userId) return;
     async function loadStats() {
       try {
         setLoading(true);
-        const data = await contributorStatsApi.getStats(GUEST_USER_ID);
+        const data = await contributorStatsApi.getStats(userId!);
         setStats(data);
       } catch (err) {
         setError(
@@ -120,7 +122,7 @@ export function DashboardPage() {
       }
     }
     void loadStats();
-  }, []);
+  }, [userId]);
 
   const earnedSet = useMemo(
     () => new Set(stats?.earnedBadges ?? []),

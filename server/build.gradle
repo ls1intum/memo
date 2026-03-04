@@ -66,6 +66,7 @@ dependencies {
     implementation 'org.flywaydb:flyway-database-postgresql'
 
     // Security
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
     implementation 'com.nimbusds:nimbus-jose-jwt:10.6'
 
     // API Documentation
