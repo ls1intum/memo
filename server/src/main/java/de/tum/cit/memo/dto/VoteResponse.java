@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class VoteResponse {
 
+    private String relationshipId;
     private boolean success;
     private VoteCounts updatedVotes;
     private double newEntropy;

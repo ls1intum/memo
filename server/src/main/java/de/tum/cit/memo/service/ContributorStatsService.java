@@ -3,6 +3,7 @@ package de.tum.cit.memo.service;
 import de.tum.cit.memo.dto.ContributorStatsResponse;
 import de.tum.cit.memo.dto.ContributorStatsResponse.DailyCount;
 import de.tum.cit.memo.repository.CompetencyRelationshipVoteRepository;
+import de.tum.cit.memo.repository.DailyVoteCount;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,22 +32,23 @@ public class ContributorStatsService {
         LocalDate since = today.minusDays(365);
         Instant sinceInstant = since.atStartOfDay(ZoneOffset.UTC).toInstant();
 
-        // Fetch raw daily counts from votes
-        List<Object[]> rawCounts = voteRepository.findDailyVoteCountsByUserId(userId, sinceInstant);
+        // Single query: daily rows for [since, today] + one sentinel NULL row for
+        // pre-window total
+        List<DailyVoteCount> rawCounts = voteRepository.findDailyVoteCountsWithPreWindowTotal(userId, sinceInstant);
 
-        // Build ordered map of date -> count
         Map<LocalDate, Integer> countMap = new LinkedHashMap<>();
-        int totalVotes = 0;
-        for (Object[] row : rawCounts) {
-            LocalDate date = ((java.sql.Date) row[0]).toLocalDate();
-            int count = ((Number) row[1]).intValue();
-            countMap.put(date, count);
-            totalVotes += count;
+        long windowVotes = 0;
+        long preWindowVotes = 0;
+        for (DailyVoteCount row : rawCounts) {
+            if (row.getVoteDate() == null) {
+                // Sentinel row: holds count of votes before :since
+                preWindowVotes = row.getVoteCount() != null ? row.getVoteCount() : 0;
+            } else {
+                countMap.put(row.getVoteDate(), row.getVoteCount().intValue());
+                windowVotes += row.getVoteCount();
+            }
         }
-
-        // Also count votes before the 365-day window
-        long olderVotes = voteRepository.countByUserId(userId) - totalVotes;
-        totalVotes += (int) Math.max(olderVotes, 0);
+        long totalVotes = windowVotes + preWindowVotes;
 
         // Build daily counts list for heatmap
         List<DailyCount> dailyCounts = new ArrayList<>();
@@ -109,7 +111,7 @@ public class ContributorStatsService {
     /**
      * Evaluate which badges the user has earned.
      */
-    private List<String> evaluateBadges(int totalVotes, int currentStreak, int longestStreak) {
+    private List<String> evaluateBadges(long totalVotes, int currentStreak, int longestStreak) {
         List<String> badges = new ArrayList<>();
         int maxStreak = Math.max(currentStreak, longestStreak);
 

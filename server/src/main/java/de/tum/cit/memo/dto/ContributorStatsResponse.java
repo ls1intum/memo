@@ -14,7 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 public class ContributorStatsResponse {
 
-    private int totalVotes;
+    private long totalVotes;
     private int currentStreak;
     private int longestStreak;
     private List<DailyCount> dailyCounts;

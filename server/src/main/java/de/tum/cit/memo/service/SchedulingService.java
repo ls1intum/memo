@@ -8,13 +8,16 @@ import de.tum.cit.memo.entity.Competency;
 import de.tum.cit.memo.entity.CompetencyRelationship;
 import de.tum.cit.memo.entity.CompetencyRelationshipVote;
 import de.tum.cit.memo.enums.RelationshipType;
+import de.tum.cit.memo.exception.InvalidOperationException;
 import de.tum.cit.memo.exception.ResourceNotFoundException;
 import de.tum.cit.memo.repository.CompetencyRelationshipRepository;
 import de.tum.cit.memo.repository.CompetencyRelationshipVoteRepository;
 import de.tum.cit.memo.repository.CompetencyRepository;
+import de.tum.cit.memo.repository.UserRepository;
 import de.tum.cit.memo.util.IdGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,19 +53,20 @@ public class SchedulingService {
     private final CompetencyRelationshipRepository relationshipRepository;
     private final CompetencyRelationshipVoteRepository voteRepository;
     private final CompetencyRepository competencyRepository;
+    private final UserRepository userRepository;
     private final Random random = new Random();
 
-    /**
-     * Get the next relationship task for a user.
-     * Uses 70% coverage pipeline (new pairs) and 30% consensus pipeline
-     * (high-entropy).
-     * Returns empty if the user has voted on every available relationship.
-     */
+    /** Returns the next pair for a user to vote on, or empty if none left. */
     @Transactional
     public Optional<RelationshipTaskResponse> getNextTask(String userId, List<String> skippedIds) {
-        // Normalize null to empty list
-        List<String> skipList = skippedIds != null ? skippedIds : List.of();
-        
+        assertUserExists(userId);
+        List<String> skipList;
+        if (skippedIds != null) {
+            skipList = skippedIds;
+        } else {
+            skipList = List.of();
+        }
+
         if (random.nextDouble() < COVERAGE_WEIGHT) {
             log.debug("Coverage pipeline for user {}", userId);
             return coveragePipeline(userId, skipList);
@@ -80,25 +84,22 @@ public class SchedulingService {
 
     @Transactional
     public VoteResponse submitVote(String userId, VoteRequest request) {
-        // Resolve relationship: by ID directly, or find/create by competency pair
-        CompetencyRelationship rel;
-        if (request.getOriginId() != null && request.getDestinationId() != null) {
-            rel = relationshipRepository
-                    .findByOriginIdAndDestinationId(request.getOriginId(), request.getDestinationId())
-                    .orElseGet(() -> createRelationship(request.getOriginId(), request.getDestinationId()));
-        } else {
-            rel = findRelationshipOrThrow(request.getRelationshipId());
+        assertUserExists(userId);
+        String originId = request.getOriginId();
+        String destinationId = request.getDestinationId();
+        if (originId == null || destinationId == null) {
+            throw new InvalidOperationException("originId and destinationId are required");
         }
 
-        if (voteRepository.existsByRelationshipIdAndUserId(rel.getId(), userId)) {
-            log.debug("User {} already voted on {}", userId, rel.getId());
+        CompetencyRelationship rel = findOrCreateRelationship(originId, destinationId);
+        if (!recordVoteIfAbsent(rel.getId(), userId, request.getRelationshipType())) {
+            log.debug("Duplicate vote ignored for user {} on {}", userId, rel.getId());
             return toVoteResponse(rel);
         }
 
-        saveVote(rel.getId(), userId, request.getRelationshipType());
         applyVote(rel, request.getRelationshipType());
 
-        // MATCHES and UNRELATED are symmetric: A→B implies B→A
+        // MATCHES and UNRELATED are symmetric, so mirror the vote to B→A
         RelationshipType type = request.getRelationshipType();
         if (type == RelationshipType.MATCHES || type == RelationshipType.UNRELATED) {
             mirrorSymmetricVote(rel, userId, type);
@@ -106,8 +107,6 @@ public class SchedulingService {
 
         return toVoteResponse(rel);
     }
-
-    // --- Pipelines ---
 
     private Optional<RelationshipTaskResponse> coveragePipeline(String userId, List<String> skippedIds) {
         List<String> poolIds = getLowDegreeCompetencyIds();
@@ -120,12 +119,10 @@ public class SchedulingService {
                 .flatMap(r -> Stream.of(pairKey(r.getOriginId(), r.getDestinationId()),
                         pairKey(r.getDestinationId(), r.getOriginId())))
                 .collect(Collectors.toSet());
-        // Also add skipped pairs to the set of existing pairs so we don't present them
-        // again
+
+        // Also exclude skipped pairs so we don't present them again
         if (skippedIds != null && !skippedIds.isEmpty()) {
             for (String skippedId : skippedIds) {
-                // skippedIds from frontend are actually encoded as originId:destinationId
-                // when no true relationshipId exists yet
                 String[] parts = skippedId.split(":");
                 if (parts.length == 2) {
                     existingPairs.add(pairKey(parts[0], parts[1]));
@@ -140,7 +137,7 @@ public class SchedulingService {
         for (int i = 0; i < pool.size(); i++) {
             for (int j = i + 1; j < pool.size(); j++) {
                 if (!existingPairs.contains(pairKey(pool.get(i), pool.get(j)))) {
-                    return Optional.of(toTaskResponse(createRelationship(pool.get(i), pool.get(j)), "COVERAGE"));
+                    return Optional.of(toTaskResponseFromIds(pool.get(i), pool.get(j), "COVERAGE"));
                 }
             }
         }
@@ -165,8 +162,6 @@ public class SchedulingService {
         return toTaskResponse(pickWeightedByEntropy(candidates), "CONSENSUS");
     }
 
-    // --- Core helpers ---
-
     private List<String> getLowDegreeCompetencyIds() {
         List<String> ids = competencyRepository.findIdsByDegreeAsc(PageRequest.of(0, LOW_DEGREE_POOL_SIZE));
         if (ids.isEmpty()) {
@@ -176,14 +171,25 @@ public class SchedulingService {
     }
 
     private CompetencyRelationship createRelationship(String originId, String destId) {
+        if (originId.equals(destId)) {
+            throw new InvalidOperationException("Cannot create relationship to itself");
+        }
+
         CompetencyRelationship rel = CompetencyRelationship.builder()
                 .id(IdGenerator.generateCuid())
                 .originId(originId)
                 .destinationId(destId)
                 .build();
 
+        CompetencyRelationship saved = relationshipRepository.save(rel);
         competencyRepository.incrementDegree(List.of(originId, destId));
-        return relationshipRepository.save(rel);
+        return saved;
+    }
+
+    private CompetencyRelationship findOrCreateRelationship(String originId, String destinationId) {
+        return relationshipRepository
+                .findByOriginIdAndDestinationId(originId, destinationId)
+                .orElseGet(() -> createRelationship(originId, destinationId));
     }
 
     private CompetencyRelationship pickWeightedByEntropy(List<CompetencyRelationship> candidates) {
@@ -206,15 +212,24 @@ public class SchedulingService {
         return rel.getEntropy() / (rel.getTotalVotes() + 1.0);
     }
 
-    // --- Vote logic ---
+    private boolean recordVoteIfAbsent(String relationshipId, String userId, RelationshipType type) {
+        if (voteRepository.existsByRelationshipIdAndUserId(relationshipId, userId)) {
+            return false;
+        }
 
-    private void saveVote(String relationshipId, String userId, RelationshipType type) {
-        voteRepository.save(CompetencyRelationshipVote.builder()
-                .id(IdGenerator.generateCuid())
-                .relationshipId(relationshipId)
-                .userId(userId)
-                .relationshipType(type)
-                .build());
+        try {
+            voteRepository.save(CompetencyRelationshipVote.builder()
+                    .id(IdGenerator.generateCuid())
+                    .relationshipId(relationshipId)
+                    .userId(userId)
+                    .relationshipType(type)
+                    .build());
+            return true;
+        } catch (DataIntegrityViolationException ex) {
+            log.debug("Vote already exists due to concurrent request for user {} on {}",
+                    userId, relationshipId);
+            return false;
+        }
     }
 
     private void applyVote(CompetencyRelationship rel, RelationshipType type) {
@@ -228,25 +243,21 @@ public class SchedulingService {
         relationshipRepository.save(rel);
     }
 
-    /** Symmetric types: if A→B is MATCHES/UNRELATED, mirror the vote to B→A. */
+    /** For symmetric types, also records the vote on the reverse direction. */
     private void mirrorSymmetricVote(CompetencyRelationship originalRel, String userId, RelationshipType type) {
-        Optional<CompetencyRelationship> reverseOpt = relationshipRepository
-                .findByOriginIdAndDestinationId(originalRel.getDestinationId(), originalRel.getOriginId());
-
-        CompetencyRelationship reverse = reverseOpt.orElseGet(
-                () -> createRelationship(originalRel.getDestinationId(), originalRel.getOriginId()));
-
-        if (!voteRepository.existsByRelationshipIdAndUserId(reverse.getId(), userId)) {
+        CompetencyRelationship reverse = findOrCreateRelationship(
+                originalRel.getDestinationId(), originalRel.getOriginId());
+        if (recordVoteIfAbsent(reverse.getId(), userId, type)) {
             applyVote(reverse, type);
-            saveVote(reverse.getId(), userId, type);
         }
     }
 
     // --- Response builders ---
 
-    private CompetencyRelationship findRelationshipOrThrow(String id) {
-        return relationshipRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Relationship not found: " + id));
+    private void assertUserExists(String userId) {
+        if (!userRepository.existsById(userId)) {
+            throw new ResourceNotFoundException("User not found: " + userId);
+        }
     }
 
     private RelationshipTaskResponse toTaskResponse(CompetencyRelationship rel, String pipeline) {
@@ -269,8 +280,34 @@ public class SchedulingService {
                 .build();
     }
 
+    /**
+     * Builds a task response from two competency IDs without persisting a
+     * relationship.
+     * The relationship row is only created when the user actually votes.
+     */
+    private RelationshipTaskResponse toTaskResponseFromIds(String originId, String destinationId, String pipeline) {
+        Map<String, Competency> byId = competencyRepository
+                .findAllById(List.of(originId, destinationId))
+                .stream().collect(Collectors.toMap(Competency::getId, Function.identity()));
+
+        Competency origin = byId.get(originId);
+        Competency destination = byId.get(destinationId);
+        if (origin == null || destination == null) {
+            throw new ResourceNotFoundException("Competency not found for IDs " + originId + ", " + destinationId);
+        }
+
+        return RelationshipTaskResponse.builder()
+                .relationshipId(null)
+                .origin(toCompetencyInfo(origin))
+                .destination(toCompetencyInfo(destination))
+                .pipeline(pipeline)
+                .currentVotes(VoteCounts.builder().build())
+                .build();
+    }
+
     private VoteResponse toVoteResponse(CompetencyRelationship rel) {
         return VoteResponse.builder()
+                .relationshipId(rel.getId())
                 .success(true)
                 .updatedVotes(toVoteCounts(rel))
                 .newEntropy(rel.getEntropy())

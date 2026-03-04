@@ -14,7 +14,7 @@ export interface NetworkEdge {
   label: 'assumes' | 'extends' | 'matches';
 }
 
-export const NETWORK_NODES: NetworkNode[] = [
+const NETWORK_NODES: NetworkNode[] = [
   { id: 'methods', label: 'Methods', x: 80, y: 50, color: '#0a4da2' },
   { id: 'functions', label: 'Functions', x: 80, y: 150, color: '#0a4da2' },
   { id: 'recursion', label: 'Recursion', x: 280, y: 100, color: '#5538d1' },
@@ -23,7 +23,7 @@ export const NETWORK_NODES: NetworkNode[] = [
   { id: 'trees', label: 'Tree Traversal', x: 480, y: 155, color: '#9b5dfa' },
 ];
 
-export const NETWORK_EDGES: NetworkEdge[] = [
+const NETWORK_EDGES: NetworkEdge[] = [
   { from: 'methods', to: 'functions', label: 'matches' },
   { from: 'recursion', to: 'methods', label: 'assumes' },
   { from: 'mergesort', to: 'recursion', label: 'assumes' },
@@ -31,7 +31,7 @@ export const NETWORK_EDGES: NetworkEdge[] = [
   { from: 'mergesort', to: 'sorting', label: 'extends' },
 ];
 
-export const EDGE_COLORS: Record<string, string> = {
+const EDGE_COLORS: Record<string, string> = {
   assumes: '#0a4da2',
   extends: '#7c3aed',
   matches: '#10b981',

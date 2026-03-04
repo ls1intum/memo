@@ -1,6 +1,8 @@
 package de.tum.cit.memo.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import de.tum.cit.memo.enums.RelationshipType;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,21 +16,17 @@ import lombok.NoArgsConstructor;
 public class VoteRequest {
 
     /**
-     * Relationship ID (used directly when direction is not swapped).
-     * Optional if originId + destinationId are provided instead.
+     * Origin competency ID.
      */
-    private String relationshipId;
-
-    /**
-     * Origin competency ID (used when direction is swapped).
-     * Must be provided together with destinationId.
-     */
+    @NotBlank(message = "originId is required")
+    @Schema(description = "Origin competency ID", requiredMode = Schema.RequiredMode.REQUIRED)
     private String originId;
 
     /**
-     * Destination competency ID (used when direction is swapped).
-     * Must be provided together with originId.
+     * Destination competency ID.
      */
+    @NotBlank(message = "destinationId is required")
+    @Schema(description = "Destination competency ID", requiredMode = Schema.RequiredMode.REQUIRED)
     private String destinationId;
 
     @NotNull(message = "Relationship type is required")

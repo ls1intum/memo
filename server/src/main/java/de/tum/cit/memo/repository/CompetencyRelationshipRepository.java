@@ -16,10 +16,7 @@ public interface CompetencyRelationshipRepository extends JpaRepository<Competen
 
   boolean existsByOriginIdAndDestinationId(String originId, String destinationId);
 
-  /**
-   * High-entropy relationships the user hasn't voted on yet (for consensus
-   * pipeline).
-   */
+  /** High-entropy relationships this user hasn't voted on yet. */
   @Query("""
       SELECT r FROM CompetencyRelationship r
       WHERE r.totalVotes BETWEEN :minVotes AND :maxVotes
@@ -39,16 +36,11 @@ public interface CompetencyRelationshipRepository extends JpaRepository<Competen
       @Param("skippedIds") List<String> skippedIds,
       org.springframework.data.domain.Pageable pageable);
 
-  /**
-   * Relationships where both origin AND destination are in the given pool of IDs.
-   */
+  /** All relationships where both endpoints are within the given ID pool. */
   @Query("SELECT r FROM CompetencyRelationship r WHERE r.originId IN :ids AND r.destinationId IN :ids")
   List<CompetencyRelationship> findIntraPoolRelationships(@Param("ids") List<String> ids);
 
-  /**
-   * Relationships the user hasn't voted on (use with PageRequest.of(0, 1) for a
-   * single result).
-   */
+  /** Relationships the user hasn't voted on yet. */
   @Query("""
       SELECT r FROM CompetencyRelationship r
       WHERE NOT EXISTS (
