@@ -11,7 +11,6 @@ import { OnboardingPage } from './pages/OnboardingPage';
 import { ImprintPage } from './pages/ImprintPage';
 import { PrivacyPage } from './pages/PrivacyPage';
 import { DashboardPage } from './pages/DashboardPage';
-import { LoginPage } from './pages/LoginPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { AuthProvider } from './contexts/AuthContext';
 
@@ -34,7 +33,6 @@ export function App() {
         <QueryClientProvider client={queryClient}>
           <Toaster position="top-center" richColors />
           <Routes>
-            <Route path="/login" element={<LoginPage />} />
             <Route element={<Layout />}>
               <Route path="/" element={<HomePage />} />
               <Route path="/about" element={<AboutPage />} />

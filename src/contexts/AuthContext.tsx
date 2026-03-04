@@ -76,15 +76,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   function login() {
-    keycloak.login({ redirectUri: window.location.origin + '/session' });
+    let onboarded = false;
+    try {
+      onboarded = !!localStorage.getItem('memo-onboarded');
+    } catch {
+      /* ignore */
+    }
+    keycloak.login({
+      redirectUri:
+        window.location.origin + (onboarded ? '/session' : '/onboarding'),
+    });
   }
 
   function onboardingLogin() {
-    keycloak.login({ redirectUri: window.location.origin + '/onboarding' });
+    keycloak.login({
+      redirectUri: window.location.origin + '/onboarding?step=2',
+    });
   }
 
   function logout() {
-    keycloak.logout({ redirectUri: window.location.origin + '/login' });
+    keycloak.logout({ redirectUri: window.location.origin + '/' });
   }
 
   return (

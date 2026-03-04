@@ -56,7 +56,17 @@ export function OnboardingPage() {
     isLoading: isAuthLoading,
     onboardingLogin,
   } = useAuth();
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useState(() => {
+    try {
+      const s = parseInt(
+        new URLSearchParams(window.location.search).get('step') ?? '0',
+        10
+      );
+      return isNaN(s) || s < 0 || s >= TOTAL_STEPS ? 0 : s;
+    } catch {
+      return 0;
+    }
+  });
   const [direction, setDirection] = useState(1);
   const [consentChecked, setConsentChecked] = useState(false);
   const [practiceCompleted, setPracticeCompleted] = useState(false);
@@ -482,7 +492,7 @@ function StepProfile({
               onClick={onSignIn}
               className="flex w-full sm:w-auto self-start mt-2 items-center justify-center gap-2 rounded-xl bg-white border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 hover:border-slate-300 hover:-translate-y-0.5"
             >
-              <span>Sign in via University</span>
+              <span>Sign in via University Email</span>
             </button>
           )}
         </div>
