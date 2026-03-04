@@ -58,7 +58,7 @@ export function Navbar() {
               <img
                 src="/logoV4.svg"
                 alt="Memo logo"
-                className="h-16 w-16"
+                className="h-14 w-14"
               />
               <span className="font-bold text-lg">Memo</span>
             </Link>
