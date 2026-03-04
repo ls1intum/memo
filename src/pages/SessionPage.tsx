@@ -5,7 +5,7 @@ import {
   getRandomCompetenciesAction,
   getNextRelationshipTaskAction,
   submitCompetencyVoteAction,
-  deleteCompetencyRelationshipAction,
+  unvoteAction,
   createCompetencyResourceLinkAction,
   deleteCompetencyResourceLinkAction,
   getRandomLearningResourceAction,
@@ -118,6 +118,8 @@ export function SessionPage() {
       learningResource?: LearningResource;
     }>
   >([]);
+  const historyRef = useRef(history);
+  historyRef.current = history;
   const [competencies, setCompetencies] = useState<Competency[] | null>(null);
   const [learningResource, setLearningResource] =
     useState<LearningResource | null>(null);
@@ -128,7 +130,7 @@ export function SessionPage() {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [swapRotation, setSwapRotation] = useState(0);
   const [allDone, setAllDone] = useState(false);
-  const [_isSwapped, setIsSwapped] = useState(false);
+  const [isSwapped, setIsSwapped] = useState(false);
   const [currentRelationshipId, setCurrentRelationshipId] = useState<
     string | null
   >(null);
@@ -247,7 +249,7 @@ export function SessionPage() {
           return;
         }
 
-        const skippedIds = history
+        const skippedIds = historyRef.current
           .filter(
             h =>
               h.type === 'skipped' &&
@@ -339,7 +341,7 @@ export function SessionPage() {
 
       setIsTransitioning(false);
     },
-    [mappingMode, userId, history]
+    [mappingMode, userId]
   );
 
   const prevModeRef = useRef<MappingMode | null>(null);
@@ -376,11 +378,16 @@ export function SessionPage() {
 
           try {
             const startTime = Date.now();
-            const voteOpts = {
-              relationshipId: currentRelationshipId ?? undefined,
-              originId: competencies[0]!.id,
-              destinationId: competencies[1]!.id,
-            };
+            const voteOpts = isSwapped
+              ? {
+                  originId: competencies[0]!.id,
+                  destinationId: competencies[1]!.id,
+                }
+              : {
+                  relationshipId: currentRelationshipId ?? undefined,
+                  originId: competencies[0]!.id,
+                  destinationId: competencies[1]!.id,
+                };
             const result = await submitCompetencyVoteAction(
               userId,
               relation,
@@ -409,7 +416,10 @@ export function SessionPage() {
               {
                 type: 'completed',
                 mode: 'competency',
-                relationshipId: currentRelationshipId ?? undefined,
+                relationshipId:
+                  result.voteResponse?.relationshipId ??
+                  currentRelationshipId ??
+                  undefined,
                 competencies: competencies ? [...competencies] : undefined,
               },
             ]);
@@ -530,6 +540,7 @@ export function SessionPage() {
       mappingMode,
       loadMappingPair,
       currentRelationshipId,
+      isSwapped,
       checkMilestones,
     ]
   );
@@ -581,23 +592,21 @@ export function SessionPage() {
   }, [history]);
 
   useEffect(() => {
-    if (relationshipToDelete) {
-      deleteCompetencyRelationshipAction(relationshipToDelete)
+    if (relationshipToDelete && userId) {
+      unvoteAction(userId, relationshipToDelete)
         .then(result => {
           if (!result.success) {
-            setError(result.error ?? 'Failed to delete relationship');
+            setError(result.error ?? 'Failed to undo vote');
           }
         })
-        .catch(err => {
-          setError(
-            err instanceof Error ? err.message : 'Failed to delete relationship'
-          );
+        .catch((err: unknown) => {
+          setError(err instanceof Error ? err.message : 'Failed to undo vote');
         })
         .finally(() => {
           setRelationshipToDelete(null);
         });
     }
-  }, [relationshipToDelete]);
+  }, [relationshipToDelete, userId]);
 
   useEffect(() => {
     if (resourceLinkToDelete) {

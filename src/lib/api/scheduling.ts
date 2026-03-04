@@ -23,6 +23,7 @@ export interface RelationshipTask {
 }
 
 export interface VoteResponse {
+  relationshipId: string;
   success: boolean;
   updatedVotes: VoteCounts;
   newEntropy: number;
@@ -68,5 +69,11 @@ export const schedulingApi = {
       { headers: { 'X-User-Id': userId } }
     );
     return response.data;
+  },
+
+  unvote: async (userId: string, relationshipId: string): Promise<void> => {
+    await apiClient.delete(`/api/scheduling/vote/${relationshipId}`, {
+      headers: { 'X-User-Id': userId },
+    });
   },
 };

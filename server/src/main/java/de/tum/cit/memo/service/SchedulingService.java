@@ -85,13 +85,15 @@ public class SchedulingService {
     @Transactional
     public VoteResponse submitVote(String userId, VoteRequest request) {
         assertUserExists(userId);
-        String originId = request.getOriginId();
-        String destinationId = request.getDestinationId();
-        if (originId == null || destinationId == null) {
-            throw new InvalidOperationException("originId and destinationId are required");
-        }
 
-        CompetencyRelationship rel = findOrCreateRelationship(originId, destinationId);
+        CompetencyRelationship rel;
+        if (request.getRelationshipId() != null && !request.getRelationshipId().isBlank()) {
+            rel = relationshipRepository.findById(request.getRelationshipId())
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Relationship not found: " + request.getRelationshipId()));
+        } else {
+            rel = findOrCreateRelationship(request.getOriginId(), request.getDestinationId());
+        }
         if (!recordVoteIfAbsent(rel.getId(), userId, request.getRelationshipType())) {
             log.debug("Duplicate vote ignored for user {} on {}", userId, rel.getId());
             return toVoteResponse(rel);
@@ -106,6 +108,51 @@ public class SchedulingService {
         }
 
         return toVoteResponse(rel);
+    }
+
+    @Transactional
+    public void unvote(String userId, String relationshipId) {
+        assertUserExists(userId);
+
+        CompetencyRelationship rel = relationshipRepository.findById(relationshipId)
+                .orElseThrow(() -> new ResourceNotFoundException("Relationship not found: " + relationshipId));
+
+        CompetencyRelationshipVote vote = voteRepository.findByRelationshipIdAndUserId(relationshipId, userId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "No vote found for user " + userId + " on relationship " + relationshipId));
+
+        voteRepository.delete(vote);
+        removeVote(rel, vote.getRelationshipType());
+
+        // If symmetric, also remove the mirrored vote on the reverse relationship
+        RelationshipType type = vote.getRelationshipType();
+        if (type == RelationshipType.MATCHES || type == RelationshipType.UNRELATED) {
+            relationshipRepository.findByOriginIdAndDestinationId(rel.getDestinationId(), rel.getOriginId())
+                    .ifPresent(reverse -> {
+                        voteRepository.findByRelationshipIdAndUserId(reverse.getId(), userId)
+                                .ifPresent(mirrorVote -> {
+                                    voteRepository.delete(mirrorVote);
+                                    removeVote(reverse, mirrorVote.getRelationshipType());
+                                });
+                    });
+        }
+    }
+
+    private void removeVote(CompetencyRelationship rel, RelationshipType type) {
+        switch (type) {
+            case ASSUMES -> rel.setVoteAssumes(Math.max(0, rel.getVoteAssumes() - 1));
+            case EXTENDS -> rel.setVoteExtends(Math.max(0, rel.getVoteExtends() - 1));
+            case MATCHES -> rel.setVoteMatches(Math.max(0, rel.getVoteMatches() - 1));
+            case UNRELATED -> rel.setVoteUnrelated(Math.max(0, rel.getVoteUnrelated() - 1));
+        }
+        rel.recalculateEntropy();
+
+        if (rel.getTotalVotes() == 0) {
+            competencyRepository.decrementDegree(List.of(rel.getOriginId(), rel.getDestinationId()));
+            relationshipRepository.delete(rel);
+        } else {
+            relationshipRepository.save(rel);
+        }
     }
 
     private Optional<RelationshipTaskResponse> coveragePipeline(String userId, List<String> skippedIds) {

@@ -53,6 +53,7 @@ export function OnboardingPage() {
   const [consentChecked, setConsentChecked] = useState(false);
   const [practiceCompleted, setPracticeCompleted] = useState(false);
   const [currentPracticeCorrect, setCurrentPracticeCorrect] = useState(false);
+  const [isPracticeLastRound, setIsPracticeLastRound] = useState(false);
   const [selectedDegree, setSelectedDegree] = useState<string | null>(null);
   const [fieldOfStudy, setFieldOfStudy] = useState<string>('');
   const practiceRef = useRef<OnboardingPracticeRef>(null);
@@ -166,6 +167,7 @@ export function OnboardingPage() {
                 setStep(s => s + 1);
               }}
               onCorrectStateChange={setCurrentPracticeCorrect}
+              onLastRoundChange={setIsPracticeLastRound}
               completed={practiceCompleted}
             />
           )}
@@ -197,7 +199,7 @@ export function OnboardingPage() {
               className={`flex items-center gap-2 rounded-full bg-gradient-to-r from-[#0a4da2] to-[#5538d1] px-6 py-5 text-sm font-bold text-white shadow-[0_18px_45px_-26px_rgba(7,30,84,0.75)] transition-all hover:-translate-y-0.5 hover:shadow-[0_22px_55px_-28px_rgba(7,30,84,0.85)] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0`}
             >
               {step === 3 && !practiceCompleted
-                ? practiceRef.current?.isLastRound
+                ? isPracticeLastRound
                   ? 'Continue'
                   : 'Next Round'
                 : 'Continue'}
@@ -569,9 +571,13 @@ const StepPractice = forwardRef<
   {
     onComplete: () => void;
     onCorrectStateChange: (isCorrect: boolean) => void;
+    onLastRoundChange: (isLastRound: boolean) => void;
     completed: boolean;
   }
->(function StepPractice({ onComplete, onCorrectStateChange, completed }, ref) {
+>(function StepPractice(
+  { onComplete, onCorrectStateChange, onLastRoundChange, completed },
+  ref
+) {
   return (
     <section className="space-y-4 rounded-[32px] border border-white/70 bg-white/85 p-8 shadow-[0_26px_90px_-55px_rgba(7,30,84,0.5)] backdrop-blur-xl">
       <div className="text-center space-y-2">
@@ -602,6 +608,7 @@ const StepPractice = forwardRef<
           ref={ref}
           onComplete={onComplete}
           onCorrectStateChange={onCorrectStateChange}
+          onLastRoundChange={onLastRoundChange}
         />
       )}
     </section>

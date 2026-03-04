@@ -113,6 +113,7 @@ const TUTORIAL_ROUNDS: TutorialRound[] = [
 interface OnboardingPracticeProps {
   onComplete: () => void;
   onCorrectStateChange?: (isCorrect: boolean) => void;
+  onLastRoundChange?: (isLastRound: boolean) => void;
 }
 
 export interface OnboardingPracticeRef {
@@ -123,7 +124,10 @@ export interface OnboardingPracticeRef {
 export const OnboardingPractice = forwardRef<
   OnboardingPracticeRef,
   OnboardingPracticeProps
->(function OnboardingPractice({ onComplete, onCorrectStateChange }, ref) {
+>(function OnboardingPractice(
+  { onComplete, onCorrectStateChange, onLastRoundChange },
+  ref
+) {
   const [round, setRound] = useState(0);
   const [selectedRelation, setSelectedRelation] =
     useState<RelationshipType | null>(null);
@@ -163,6 +167,12 @@ export const OnboardingPractice = forwardRef<
       onCorrectStateChange(isCorrect);
     }
   }, [isCorrect, onCorrectStateChange]);
+
+  useEffect(() => {
+    if (onLastRoundChange) {
+      onLastRoundChange(isLastRound);
+    }
+  }, [isLastRound, onLastRoundChange]);
 
   function handleNext() {
     if (isLastRound) {

@@ -3,7 +3,6 @@
  */
 
 import { competenciesApi } from './competencies';
-import { competencyRelationshipsApi } from './competency-relationships';
 import { competencyResourceLinksApi } from './competency-resource-links';
 import { learningResourcesApi } from './learning-resources';
 import { schedulingApi } from './scheduling';
@@ -134,19 +133,17 @@ export async function getRandomLearningResourceAction(): Promise<{
   }
 }
 
-export async function deleteCompetencyRelationshipAction(
-  id: string
+export async function unvoteAction(
+  userId: string,
+  relationshipId: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    await competencyRelationshipsApi.delete(id);
+    await schedulingApi.unvote(userId, relationshipId);
     return { success: true };
   } catch (error) {
     return {
       success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : 'Failed to delete relationship',
+      error: error instanceof Error ? error.message : 'Failed to undo vote',
     };
   }
 }
