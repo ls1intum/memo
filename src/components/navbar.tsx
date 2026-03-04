@@ -55,11 +55,7 @@ export function Navbar() {
               className="group inline-flex items-center gap-2 rounded-md px-1.5 py-1 text-slate-900 transition hover:text-[#0a4da2] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0a4da2] focus-visible:ring-offset-2 dark:text-white dark:hover:text-[#b3c8ff]"
               aria-label="Memo - Home"
             >
-              <img
-                src="/logoV4.svg"
-                alt="Memo logo"
-                className="h-14 w-14"
-              />
+              <img src="/logoV4.svg" alt="Memo logo" className="h-13 w-13" />
               <span className="font-bold text-lg">Memo</span>
             </Link>
             <span

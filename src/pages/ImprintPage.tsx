@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react';
+
 export function ImprintPage() {
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#d7e3ff] via-[#f3f5ff] to-[#e8ecff] text-slate-900">
@@ -204,13 +206,7 @@ export function ImprintPage() {
   );
 }
 
-function Section({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
+function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="space-y-3">
       <h2 className="text-xl font-semibold text-slate-900">{title}</h2>

@@ -44,14 +44,18 @@ export function PrivacyPage() {
               ),
               li: ({ children }) => <li>{children}</li>,
               strong: ({ children }) => (
-                <strong className="font-medium text-slate-700">{children}</strong>
+                <strong className="font-medium text-slate-700">
+                  {children}
+                </strong>
               ),
               a: ({ href, children }) => (
                 <a
                   href={href}
                   className="text-[#0a4da2] hover:underline"
                   target={href?.startsWith('http') ? '_blank' : undefined}
-                  rel={href?.startsWith('http') ? 'noopener noreferrer' : undefined}
+                  rel={
+                    href?.startsWith('http') ? 'noopener noreferrer' : undefined
+                  }
                 >
                   {children}
                 </a>
