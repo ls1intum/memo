@@ -11,8 +11,14 @@ export function Footer() {
           <Link className="transition hover:text-slate-900" to="/#overview">
             Overview
           </Link>
-          <Link className="transition hover:text-slate-900" to="/#challenges">
-            Challenges
+          <Link className="transition hover:text-slate-900" to="/about">
+            About
+          </Link>
+          <Link className="transition hover:text-slate-900" to="/imprint">
+            Imprint
+          </Link>
+          <Link className="transition hover:text-slate-900" to="/privacy">
+            Privacy Policy
           </Link>
         </div>
         <div className="text-slate-400">© {new Date().getFullYear()} Memo</div>
