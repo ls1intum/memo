@@ -52,7 +52,7 @@ public class AuthController {
         if (atIndex < 0) {
             return false;
         }
-        String domain = email.substring(atIndex + 1).toLowerCase();
+        String domain = email.substring(atIndex + 1).toLowerCase(java.util.Locale.ROOT);
         return allowedDomains.contains(domain);
     }
 }

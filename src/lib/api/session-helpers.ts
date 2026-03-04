@@ -18,19 +18,16 @@ import type {
 import type { RelationshipType } from '@/components/session/session-constants';
 import { keycloak } from '../auth/keycloak';
 
-export async function getOrCreateDemoUserAction(): Promise<{
+export async function getCurrentUserAction(): Promise<{
   success: boolean;
-  user?: { id: string; name: string };
+  user?: { id: string; role: string };
   error?: string;
 }> {
   try {
     const response = await apiClient.get<{ id: string; role: string }>(
       '/api/auth/me'
     );
-    return {
-      success: true,
-      user: { id: response.data.id, name: '' },
-    };
+    return { success: true, user: response.data };
   } catch (error) {
     return {
       success: false,
@@ -168,7 +165,11 @@ export async function createCompetencyResourceLinkAction(
     const link = await competencyResourceLinksApi.create({
       competencyId,
       resourceId,
-      userId: keycloak.tokenParsed?.sub ?? '',
+      userId:
+        keycloak.tokenParsed?.sub ??
+        (() => {
+          throw new Error('User not authenticated');
+        })(),
       matchType: matchType as
         | 'UNRELATED'
         | 'WEAK'

@@ -12,7 +12,7 @@ export const apiClient = axios.create({
 apiClient.interceptors.request.use(async config => {
   if (keycloak.authenticated) {
     await keycloak.updateToken(30).catch(() => {});
-    config.headers.Authorization = `Bearer ${keycloak.token}`;
+    config.headers.set('Authorization', `Bearer ${keycloak.token}`);
   }
   return config;
 });

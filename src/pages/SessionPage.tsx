@@ -8,7 +8,7 @@ import {
   createCompetencyResourceLinkAction,
   deleteCompetencyResourceLinkAction,
   getRandomLearningResourceAction,
-  getOrCreateDemoUserAction,
+  getCurrentUserAction,
 } from '@/lib/api/session-helpers';
 import type { Competency, LearningResource } from '@/lib/api/types';
 import {
@@ -148,7 +148,7 @@ export function SessionPage() {
   useEffect(() => {
     async function loadDemoUser() {
       try {
-        const result = await getOrCreateDemoUserAction();
+        const result = await getCurrentUserAction();
         if (result.success && result.user) {
           setUserId(result.user.id);
         } else {
