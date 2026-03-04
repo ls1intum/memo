@@ -8,6 +8,8 @@ import { HomePage } from './pages/HomePage';
 import { AboutPage } from './pages/AboutPage';
 import { SessionPage } from './pages/SessionPage';
 import { OnboardingPage } from './pages/OnboardingPage';
+import { ImprintPage } from './pages/ImprintPage';
+import { PrivacyPage } from './pages/PrivacyPage';
 import { DashboardPage } from './pages/DashboardPage';
 
 export function App() {
@@ -34,6 +36,8 @@ export function App() {
             <Route path="/about" element={<AboutPage />} />
             <Route path="/session" element={<SessionPage />} />
             <Route path="/onboarding" element={<OnboardingPage />} />
+            <Route path="/imprint" element={<ImprintPage />} />
+            <Route path="/privacy" element={<PrivacyPage />} />
           </Route>
         </Routes>
       </QueryClientProvider>
