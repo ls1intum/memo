@@ -2,6 +2,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { useTheme } from './use-theme';
 import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
+import { CircleUser } from 'lucide-react';
 
 const navItems = [
   { href: '/', label: 'Home' },
@@ -97,12 +98,13 @@ export function Navbar() {
             </div>
           </div>
 
-          {/* Right side - Dark mode toggle & Login */}
           <div className="relative z-10 ml-auto flex items-center gap-3">
-            {/* Dark mode toggle */}
             <button
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200/80 bg-white/70 text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-white/100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0a4da2] focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:border-slate-800/70 dark:bg-slate-900/80 dark:text-slate-200 dark:hover:bg-slate-800/80 dark:focus-visible:ring-offset-slate-900"
+              className={cn(
+                'flex h-9 w-9 items-center justify-center rounded-full border shadow-sm transition hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0a4da2] focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900',
+                'border-slate-200/80 bg-white/70 text-slate-700 hover:bg-white/100 dark:border-slate-800/70 dark:bg-slate-900/80 dark:text-slate-200 dark:hover:bg-slate-800/80'
+              )}
               aria-label={
                 mounted
                   ? `Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`
@@ -112,7 +114,7 @@ export function Navbar() {
               {mounted ? (
                 theme === 'dark' ? (
                   <svg
-                    className="w-5 h-5"
+                    className="w-4 h-4"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -127,7 +129,7 @@ export function Navbar() {
                   </svg>
                 ) : (
                   <svg
-                    className="w-5 h-5"
+                    className="w-4 h-4"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -142,17 +144,22 @@ export function Navbar() {
                   </svg>
                 )
               ) : (
-                <span className="w-5 h-5 block" />
+                <span className="w-4 h-4 block" />
               )}
             </button>
 
-            {/* Login button */}
             <Link
-              to="/session"
-              className="hidden rounded-full bg-gradient-to-r from-[#0a4da2] to-[#7c6cff] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_30px_-12px_rgba(10,77,162,0.65)] transition hover:-translate-y-0.5 hover:shadow-[0_16px_40px_-20px_rgba(10,77,162,0.7)] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-white focus-visible:ring-[#0a4da2] dark:focus-visible:ring-offset-slate-900 sm:inline-flex"
-              aria-label="Start Contributing"
+              to="/dashboard"
+              className={cn(
+                'group flex h-9 items-center justify-center gap-2 rounded-full border px-4 shadow-sm transition hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0a4da2] focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900',
+                pathname === '/dashboard'
+                  ? 'border-[#0a4da2]/50 bg-gradient-to-br from-[#0a4da2]/10 to-[#7c6cff]/10 text-[#0a4da2] ring-1 ring-[#0a4da2]/20 dark:border-[#7c6cff]/50 dark:text-[#b3c8ff] dark:ring-[#7c6cff]/20'
+                  : 'border-slate-200/80 bg-white/70 text-slate-700 hover:bg-white/100 dark:border-slate-800/70 dark:bg-slate-900/80 dark:text-slate-200 dark:hover:bg-slate-800/80'
+              )}
+              aria-label="Your Dashboard"
             >
-              Start Contributing
+              <CircleUser className="h-4 w-4" />
+              <span className="text-sm font-semibold">Dashboard</span>
             </Link>
           </div>
         </nav>

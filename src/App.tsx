@@ -9,6 +9,7 @@ import { SessionPage } from './pages/SessionPage';
 import { OnboardingPage } from './pages/OnboardingPage';
 import { ImprintPage } from './pages/ImprintPage';
 import { PrivacyPage } from './pages/PrivacyPage';
+import { DashboardPage } from './pages/DashboardPage';
 
 export function App() {
   const [queryClient] = useState(
@@ -29,6 +30,7 @@ export function App() {
         <Routes>
           <Route element={<Layout />}>
             <Route path="/" element={<HomePage />} />
+            <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/session" element={<SessionPage />} />
             <Route path="/onboarding" element={<OnboardingPage />} />

@@ -10,7 +10,7 @@ CREATE TABLE "competency_relationships" (
     "vote_matches" INT NOT NULL DEFAULT 0,
     "vote_unrelated" INT NOT NULL DEFAULT 0,
     
-    -- precomputed entropy for consensus scheduling
+    -- Precomputed entropy for consensus priority (0.0 = unanimous, ~2.0 = max disagreement)
     "entropy" DOUBLE PRECISION NOT NULL DEFAULT 0.0,
     
     -- Total votes = vote_assumes + vote_extends + vote_matches + vote_unrelated
@@ -45,7 +45,7 @@ CREATE INDEX "idx_rel_dest" ON "competency_relationships"("destination_id");
 CREATE INDEX "idx_votes_rel" ON "competency_relationships_votes"("relationship_id");
 CREATE INDEX "idx_votes_user" ON "competency_relationships_votes"("user_id");
 
--- foreign keys
+-- Foreign keys
 ALTER TABLE "competency_relationships" ADD CONSTRAINT "fk_rel_origin" 
     FOREIGN KEY ("origin_id") REFERENCES "competencies"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
