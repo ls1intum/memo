@@ -79,13 +79,9 @@ export function HomePage() {
             </div>
             <div className="relative flex justify-center pt-20 pb-12">
               <div className="relative w-full max-h-[600px] overflow-hidden">
-              <div className="relative w-full max-h-[600px] overflow-hidden">
                 <img
                   src="/sessionPreview2.png"
-                  src="/sessionPreview2.png"
                   alt="Preview of a Memo competency mapping session"
-                  width={2924}
-                  height={2048}
                   width={2924}
                   height={2048}
                   className="mx-auto h-auto w-[90%] max-w-6xl rounded-[32px]"
@@ -118,14 +114,6 @@ export function HomePage() {
                 content. However, reliance on custom networks and datasets makes
                 results across recommender systems hard to compare and trust.
               </p>
-            </div>
-            <div className="w-full max-w-4xl">
-              <CompetencyNetworkViz
-                idPrefix="homepage"
-                showTitle={false}
-                animated={false}
-                floatingNodes={true}
-              />
             </div>
             <div className="w-full max-w-4xl">
               <CompetencyNetworkViz

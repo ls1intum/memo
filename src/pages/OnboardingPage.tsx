@@ -16,24 +16,6 @@ import {
   Check,
   ChevronsUpDown,
 } from 'lucide-react';
-import { useCallback, useEffect, useState, useRef, forwardRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { motion } from 'motion/react';
-import { CompetencyNetworkViz } from '@/components/competency-network/CompetencyNetworkViz';
-import {
-  ArrowLeft,
-  ArrowRight,
-  BookOpen,
-  Brain,
-  CheckCircle2,
-  GraduationCap,
-  Layers,
-  LogIn,
-  MousePointerClick,
-  Users,
-  Check,
-  ChevronsUpDown,
-} from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -196,28 +178,6 @@ export function OnboardingPage() {
               transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
             />
           </div>
-      <main className="relative z-10 mx-auto mt-16 flex w-full max-w-5xl flex-col gap-8 px-6 pb-20 lg:mt-24 lg:px-0">
-        <div className="mx-auto w-full max-w-md">
-          <div className="flex items-center justify-between mb-2 px-1">
-            <span className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-              Step {step + 1} of {TOTAL_STEPS}
-            </span>
-            <span className="text-xs font-medium text-slate-400">
-              {
-                ['Welcome', 'Our Mission', 'Profile', 'Practice', 'Guidelines'][
-                  step
-                ]
-              }
-            </span>
-          </div>
-          <div className="h-1.5 w-full rounded-full bg-slate-200/60 overflow-hidden">
-            <motion.div
-              className="h-full rounded-full bg-gradient-to-r from-[#0a4da2] to-[#7c6cff]"
-              initial={false}
-              animate={{ width: `${((step + 1) / TOTAL_STEPS) * 100}%` }}
-              transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
-            />
-          </div>
         </div>
 
         <OnboardingStep stepKey={`step-${step}`} direction={direction}>
@@ -257,14 +217,6 @@ export function OnboardingPage() {
 
         <div className="mx-auto flex w-full max-w-md items-center justify-between pt-2">
           <Button
-            type="button"
-            variant="outline"
-            onClick={goBack}
-            disabled={step === 0}
-            className="flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-5 py-5 text-sm font-semibold text-slate-700 shadow-sm transition-all hover:-translate-y-0.5 hover:bg-white hover:border-slate-300 disabled:opacity-0 disabled:pointer-events-none"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back
             type="button"
             variant="outline"
             onClick={goBack}

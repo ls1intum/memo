@@ -1,12 +1,10 @@
 import { useEffect, useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import {
   contributorStatsApi,
   type ContributorStats,
 } from '@/lib/api/contributor-stats';
-import { BookOpen, Flame } from 'lucide-react';
 import { BookOpen, Flame } from 'lucide-react';
 import { ContributionHeatmap } from '@/components/dashboard/ContributionHeatmap';
 import { heatmapColor } from '@/lib/heatmap-helpers';
@@ -277,11 +275,9 @@ export function DashboardPage() {
                 </h2>
                 <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
                   {earnedSet.size} / {MILESTONES.length} earned
-                  {earnedSet.size} / {MILESTONES.length} earned
                 </span>
               </div>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {MILESTONES.map(badge => (
                 {MILESTONES.map(badge => (
                   <BadgeCard
                     key={badge.id}
