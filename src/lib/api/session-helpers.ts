@@ -1,4 +1,6 @@
-// Wrappers around the API clients used by the session page
+/**
+ * Session API helpers for the session page to use with the Spring Boot API
+ */
 
 import { apiClient } from './client';
 import { competenciesApi } from './competencies';
@@ -14,10 +16,7 @@ import type {
   LearningResource,
   CompetencyResourceLink,
 } from './types';
-import type {
-  RelationshipType,
-  ResourceMatchType,
-} from '@/components/session/session-constants';
+import type { RelationshipType } from '@/components/session/session-constants';
 
 export async function getCurrentUserAction(): Promise<{
   success: boolean;
@@ -61,15 +60,21 @@ export async function getRandomCompetenciesAction(count: number): Promise<{
   }
 }
 
-/** Fetches the next pair from the scheduling pipeline; sets allDone if nothing is left. */
-export async function getNextRelationshipTaskAction(userId: string): Promise<{
+/**
+ * Get the next relationship task from the scheduling pipeline.
+ * Returns allDone: true when there are no more pairs to vote on.
+ */
+export async function getNextRelationshipTaskAction(
+  userId: string,
+  skippedIds?: string[]
+): Promise<{
   success: boolean;
   task?: RelationshipTask;
   allDone?: boolean;
   error?: string;
 }> {
   try {
-    const task = await schedulingApi.getNextRelationship(userId);
+    const task = await schedulingApi.getNextRelationship(userId, skippedIds);
     if (task === null) {
       return { success: true, allDone: true };
     }
@@ -85,12 +90,14 @@ export async function getNextRelationshipTaskAction(userId: string): Promise<{
   }
 }
 
-/** Submits a vote for the given competency pair. */
+/**
+ * Submit a vote on a competency relationship via the scheduling pipeline.
+ * Pass opts.relationshipId for normal votes, or opts.originId+opts.destinationId when swapped.
+ */
 export async function submitCompetencyVoteAction(
   userId: string,
   relationshipType: RelationshipType,
-  originId: string,
-  destinationId: string
+  opts: { relationshipId?: string; originId?: string; destinationId?: string }
 ): Promise<{
   success: boolean;
   voteResponse?: SchedulingVoteResponse;
@@ -100,8 +107,7 @@ export async function submitCompetencyVoteAction(
     const voteResponse = await schedulingApi.submitVote(
       userId,
       relationshipType,
-      originId,
-      destinationId
+      opts
     );
     return { success: true, voteResponse };
   } catch (error) {
@@ -134,22 +140,42 @@ export async function getRandomLearningResourceAction(): Promise<{
   }
 }
 
-export async function createCompetencyResourceLinkAction(input: {
-  competencyId: string;
-  resourceId: string;
-  userId: string;
-  matchType: ResourceMatchType;
-}): Promise<{
+export async function unvoteAction(
+  userId: string,
+  relationshipId: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    await schedulingApi.unvote(userId, relationshipId);
+    return { success: true };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to undo vote',
+    };
+  }
+}
+
+export async function createCompetencyResourceLinkAction(
+  formData: FormData
+): Promise<{
   success: boolean;
   link?: CompetencyResourceLink;
   error?: string;
 }> {
   try {
+    const competencyId = formData.get('competencyId') as string;
+    const resourceId = formData.get('resourceId') as string;
+    const matchType = formData.get('matchType') as string;
+
     const link = await competencyResourceLinksApi.create({
-      competencyId: input.competencyId,
-      resourceId: input.resourceId,
-      userId: input.userId,
-      matchType: input.matchType,
+      competencyId,
+      resourceId,
+      userId: GUEST_USER_ID,
+      matchType: matchType as
+        | 'UNRELATED'
+        | 'WEAK'
+        | 'GOOD_FIT'
+        | 'PERFECT_MATCH',
     });
     return { success: true, link };
   } catch (error) {

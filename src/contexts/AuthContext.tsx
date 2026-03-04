@@ -15,6 +15,7 @@ interface AuthContextValue {
   role: string | null;
   domainError: boolean;
   login: () => void;
+  onboardingLogin: () => void;
   logout: () => void;
 }
 
@@ -78,6 +79,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     keycloak.login({ redirectUri: window.location.origin + '/session' });
   }
 
+  function onboardingLogin() {
+    keycloak.login({ redirectUri: window.location.origin + '/onboarding' });
+  }
+
   function logout() {
     keycloak.logout({ redirectUri: window.location.origin + '/login' });
   }
@@ -91,6 +96,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         role,
         domainError,
         login,
+        onboardingLogin,
         logout,
       }}
     >

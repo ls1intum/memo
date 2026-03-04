@@ -1,6 +1,7 @@
 import { Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useState } from 'react';
+import { Toaster } from '@/components/ui/sonner';
 import { ThemeProvider } from './components/theme-provider';
 import { Layout } from './components/Layout';
 import { HomePage } from './pages/HomePage';
@@ -31,6 +32,7 @@ export function App() {
     <ThemeProvider defaultTheme="system" storageKey="memo-theme">
       <AuthProvider>
         <QueryClientProvider client={queryClient}>
+          <Toaster position="top-center" richColors />
           <Routes>
             <Route path="/login" element={<LoginPage />} />
             <Route element={<Layout />}>
@@ -38,10 +40,10 @@ export function App() {
               <Route path="/about" element={<AboutPage />} />
               <Route path="/imprint" element={<ImprintPage />} />
               <Route path="/privacy" element={<PrivacyPage />} />
+              <Route path="/onboarding" element={<OnboardingPage />} />
               <Route element={<ProtectedRoute />}>
                 <Route path="/dashboard" element={<DashboardPage />} />
                 <Route path="/session" element={<SessionPage />} />
-                <Route path="/onboarding" element={<OnboardingPage />} />
               </Route>
             </Route>
           </Routes>
