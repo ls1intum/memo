@@ -8,11 +8,14 @@ import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface CompetencyRelationshipVoteRepository extends JpaRepository<CompetencyRelationshipVote, String> {
 
     boolean existsByRelationshipIdAndUserId(String relationshipId, String userId);
+
+    Optional<CompetencyRelationshipVote> findByRelationshipIdAndUserId(String relationshipId, String userId);
 
     @Query(value = """
             SELECT CAST(v.created_at AS DATE) AS vote_date,

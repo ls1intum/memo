@@ -15,7 +15,7 @@ export interface VoteCounts {
 }
 
 export interface RelationshipTask {
-  relationshipId: string | null;
+  relationshipId: string;
   origin: CompetencyInfo;
   destination: CompetencyInfo;
   pipeline: string;
@@ -30,12 +30,22 @@ export interface VoteResponse {
 }
 
 export const schedulingApi = {
-  /** Fetches the next relationship task, or null if there are none left (HTTP 204). */
+  /**
+   * Get the next relationship task for a user.
+   * Returns null when there are no more tasks (HTTP 204).
+   */
   getNextRelationship: async (
-    userId: string
+    userId: string,
+    skippedIds?: string[]
   ): Promise<RelationshipTask | null> => {
+    const params = new URLSearchParams();
+    if (skippedIds && skippedIds.length > 0) {
+      skippedIds.forEach(id => params.append('skippedIds', id));
+    }
+    const queryString = params.toString() ? `?${params.toString()}` : '';
+
     const response = await apiClient.get<RelationshipTask>(
-      '/api/scheduling/next-relationship',
+      `/api/scheduling/next-relationship${queryString}`,
       { headers: { 'X-User-Id': userId } }
     );
     if (response.status === 204) {
@@ -44,18 +54,26 @@ export const schedulingApi = {
     return response.data;
   },
 
-  /** Submits a vote for the given competency pair. */
+  /**
+   * Submit a vote on a relationship.
+   * Pass relationshipId for normal votes, or originId+destinationId when swapped.
+   */
   submitVote: async (
     userId: string,
     relationshipType: RelationshipType,
-    originId: string,
-    destinationId: string
+    opts: { relationshipId?: string; originId?: string; destinationId?: string }
   ): Promise<VoteResponse> => {
     const response = await apiClient.post<VoteResponse>(
       '/api/scheduling/vote',
-      { originId, destinationId, relationshipType },
+      { ...opts, relationshipType },
       { headers: { 'X-User-Id': userId } }
     );
     return response.data;
+  },
+
+  unvote: async (userId: string, relationshipId: string): Promise<void> => {
+    await apiClient.delete(`/api/scheduling/vote/${relationshipId}`, {
+      headers: { 'X-User-Id': userId },
+    });
   },
 };

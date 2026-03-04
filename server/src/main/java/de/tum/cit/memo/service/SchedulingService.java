@@ -58,33 +58,42 @@ public class SchedulingService {
 
     /** Returns the next pair for a user to vote on, or empty if none left. */
     @Transactional
-    public Optional<RelationshipTaskResponse> getNextTask(String userId) {
+    public Optional<RelationshipTaskResponse> getNextTask(String userId, List<String> skippedIds) {
         assertUserExists(userId);
+        List<String> skipList;
+        if (skippedIds != null) {
+            skipList = skippedIds;
+        } else {
+            skipList = List.of();
+        }
+
         if (random.nextDouble() < COVERAGE_WEIGHT) {
             log.debug("Coverage pipeline for user {}", userId);
-            return coveragePipeline(userId);
+            return coveragePipeline(userId, skipList);
         }
 
         log.debug("Consensus pipeline for user {}", userId);
-        RelationshipTaskResponse task = consensusPipeline(userId);
+        RelationshipTaskResponse task = consensusPipeline(userId, skipList);
         if (task != null) {
             return Optional.of(task);
         }
 
         log.debug("No consensus candidates, falling back to coverage");
-        return coveragePipeline(userId);
+        return coveragePipeline(userId, skipList);
     }
 
     @Transactional
     public VoteResponse submitVote(String userId, VoteRequest request) {
         assertUserExists(userId);
-        String originId = request.getOriginId();
-        String destinationId = request.getDestinationId();
-        if (originId == null || destinationId == null) {
-            throw new InvalidOperationException("originId and destinationId are required");
-        }
 
-        CompetencyRelationship rel = findOrCreateRelationship(originId, destinationId);
+        CompetencyRelationship rel;
+        if (request.getRelationshipId() != null && !request.getRelationshipId().isBlank()) {
+            rel = relationshipRepository.findById(request.getRelationshipId())
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Relationship not found: " + request.getRelationshipId()));
+        } else {
+            rel = findOrCreateRelationship(request.getOriginId(), request.getDestinationId());
+        }
         if (!recordVoteIfAbsent(rel.getId(), userId, request.getRelationshipType())) {
             log.debug("Duplicate vote ignored for user {} on {}", userId, rel.getId());
             return toVoteResponse(rel);
@@ -101,7 +110,52 @@ public class SchedulingService {
         return toVoteResponse(rel);
     }
 
-    private Optional<RelationshipTaskResponse> coveragePipeline(String userId) {
+    @Transactional
+    public void unvote(String userId, String relationshipId) {
+        assertUserExists(userId);
+
+        CompetencyRelationship rel = relationshipRepository.findById(relationshipId)
+                .orElseThrow(() -> new ResourceNotFoundException("Relationship not found: " + relationshipId));
+
+        CompetencyRelationshipVote vote = voteRepository.findByRelationshipIdAndUserId(relationshipId, userId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "No vote found for user " + userId + " on relationship " + relationshipId));
+
+        voteRepository.delete(vote);
+        removeVote(rel, vote.getRelationshipType());
+
+        // If symmetric, also remove the mirrored vote on the reverse relationship
+        RelationshipType type = vote.getRelationshipType();
+        if (type == RelationshipType.MATCHES || type == RelationshipType.UNRELATED) {
+            relationshipRepository.findByOriginIdAndDestinationId(rel.getDestinationId(), rel.getOriginId())
+                    .ifPresent(reverse -> {
+                        voteRepository.findByRelationshipIdAndUserId(reverse.getId(), userId)
+                                .ifPresent(mirrorVote -> {
+                                    voteRepository.delete(mirrorVote);
+                                    removeVote(reverse, mirrorVote.getRelationshipType());
+                                });
+                    });
+        }
+    }
+
+    private void removeVote(CompetencyRelationship rel, RelationshipType type) {
+        switch (type) {
+            case ASSUMES -> rel.setVoteAssumes(Math.max(0, rel.getVoteAssumes() - 1));
+            case EXTENDS -> rel.setVoteExtends(Math.max(0, rel.getVoteExtends() - 1));
+            case MATCHES -> rel.setVoteMatches(Math.max(0, rel.getVoteMatches() - 1));
+            case UNRELATED -> rel.setVoteUnrelated(Math.max(0, rel.getVoteUnrelated() - 1));
+        }
+        rel.recalculateEntropy();
+
+        if (rel.getTotalVotes() == 0) {
+            competencyRepository.decrementDegree(List.of(rel.getOriginId(), rel.getDestinationId()));
+            relationshipRepository.delete(rel);
+        } else {
+            relationshipRepository.save(rel);
+        }
+    }
+
+    private Optional<RelationshipTaskResponse> coveragePipeline(String userId, List<String> skippedIds) {
         List<String> poolIds = getLowDegreeCompetencyIds();
         if (poolIds.size() < 2) {
             log.debug("Not enough competencies to form pairs");
@@ -112,6 +166,17 @@ public class SchedulingService {
                 .flatMap(r -> Stream.of(pairKey(r.getOriginId(), r.getDestinationId()),
                         pairKey(r.getDestinationId(), r.getOriginId())))
                 .collect(Collectors.toSet());
+
+        // Also exclude skipped pairs so we don't present them again
+        if (skippedIds != null && !skippedIds.isEmpty()) {
+            for (String skippedId : skippedIds) {
+                String[] parts = skippedId.split(":");
+                if (parts.length == 2) {
+                    existingPairs.add(pairKey(parts[0], parts[1]));
+                    existingPairs.add(pairKey(parts[1], parts[0]));
+                }
+            }
+        }
 
         List<String> pool = new ArrayList<>(poolIds);
         Collections.shuffle(pool, random);
@@ -126,16 +191,16 @@ public class SchedulingService {
 
         log.debug("Pool fully connected, finding any unvoted relationship");
         return relationshipRepository
-                .findUnvotedByUser(userId, PageRequest.of(0, 1))
+                .findUnvotedByUserAndNotSkipped(userId, skippedIds, PageRequest.of(0, 1))
                 .stream().findFirst()
                 .map(rel -> toTaskResponse(rel, "COVERAGE"));
     }
 
-    private RelationshipTaskResponse consensusPipeline(String userId) {
+    private RelationshipTaskResponse consensusPipeline(String userId, List<String> skippedIds) {
         List<CompetencyRelationship> candidates = relationshipRepository
                 .findHighEntropyRelationshipsExcludingUser(
                         userId, CONSENSUS_MIN_VOTES, CONSENSUS_MAX_VOTES, CONSENSUS_MIN_ENTROPY,
-                        PageRequest.of(0, CONSENSUS_CANDIDATE_LIMIT));
+                        skippedIds, PageRequest.of(0, CONSENSUS_CANDIDATE_LIMIT));
 
         if (candidates.isEmpty()) {
             return null;

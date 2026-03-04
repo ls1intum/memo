@@ -25,6 +25,7 @@ public interface CompetencyRelationshipRepository extends JpaRepository<Competen
             SELECT 1 FROM CompetencyRelationshipVote v
             WHERE v.relationshipId = r.id AND v.userId = :userId
         )
+        AND (:skippedIds IS NULL OR r.id NOT IN :skippedIds)
       ORDER BY r.entropy DESC
       """)
   List<CompetencyRelationship> findHighEntropyRelationshipsExcludingUser(
@@ -32,6 +33,7 @@ public interface CompetencyRelationshipRepository extends JpaRepository<Competen
       @Param("minVotes") int minVotes,
       @Param("maxVotes") int maxVotes,
       @Param("minEntropy") double minEntropy,
+      @Param("skippedIds") List<String> skippedIds,
       org.springframework.data.domain.Pageable pageable);
 
   /** All relationships where both endpoints are within the given ID pool. */
@@ -45,7 +47,9 @@ public interface CompetencyRelationshipRepository extends JpaRepository<Competen
           SELECT 1 FROM CompetencyRelationshipVote v
           WHERE v.relationshipId = r.id AND v.userId = :userId
       )
+      AND (:skippedIds IS NULL OR r.id NOT IN :skippedIds)
       """)
-  List<CompetencyRelationship> findUnvotedByUser(@Param("userId") String userId,
+  List<CompetencyRelationship> findUnvotedByUserAndNotSkipped(@Param("userId") String userId,
+      @Param("skippedIds") List<String> skippedIds,
       org.springframework.data.domain.Pageable pageable);
 }

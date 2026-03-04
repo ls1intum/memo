@@ -1,14 +1,18 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
+import { toast } from 'sonner';
 
 import {
   getRandomCompetenciesAction,
   getNextRelationshipTaskAction,
   submitCompetencyVoteAction,
+  unvoteAction,
   createCompetencyResourceLinkAction,
   deleteCompetencyResourceLinkAction,
   getRandomLearningResourceAction,
   getOrCreateDemoUserAction,
 } from '@/lib/api/session-helpers';
+import { contributorStatsApi } from '@/lib/api/contributor-stats';
+import { getNewlyEarnedMilestones } from '@/lib/milestones';
 import type { Competency, LearningResource } from '@/lib/api/types';
 import {
   RelationshipType,
@@ -108,11 +112,14 @@ export function SessionPage() {
     Array<{
       type: 'completed' | 'skipped';
       mode: MappingMode;
+      relationshipId?: string;
       resourceLinkId?: string;
       competencies?: Competency[];
       learningResource?: LearningResource;
     }>
   >([]);
+  const historyRef = useRef(history);
+  historyRef.current = history;
   const [competencies, setCompetencies] = useState<Competency[] | null>(null);
   const [learningResource, setLearningResource] =
     useState<LearningResource | null>(null);
@@ -123,7 +130,14 @@ export function SessionPage() {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [swapRotation, setSwapRotation] = useState(0);
   const [allDone, setAllDone] = useState(false);
+  const [isSwapped, setIsSwapped] = useState(false);
+  const [currentRelationshipId, setCurrentRelationshipId] = useState<
+    string | null
+  >(null);
   const [showSessionSummary, setShowSessionSummary] = useState(false);
+  const [initialTotalVotes, setInitialTotalVotes] = useState<number | null>(
+    null
+  );
 
   const {
     hoveredValue: hoveredRelation,
@@ -137,9 +151,49 @@ export function SessionPage() {
     handleMouseLeave: handleResourceMatchMouseLeave,
   } = useHoverWithTimeout<ResourceMatchType>();
 
+  const [relationshipToDelete, setRelationshipToDelete] = useState<
+    string | null
+  >(null);
   const [resourceLinkToDelete, setResourceLinkToDelete] = useState<
     string | null
   >(null);
+
+  // Track which milestones have been shown
+  const shownMilestonesRef = useRef<Set<string>>(new Set());
+
+  // Check for newly earned milestones and celebrate
+  const checkMilestones = useCallback(
+    (newCompletedCount: number) => {
+      if (initialTotalVotes === null) return;
+      const oldTotal = initialTotalVotes + newCompletedCount - 1;
+      const newTotal = initialTotalVotes + newCompletedCount;
+      const newMilestones = getNewlyEarnedMilestones(oldTotal, newTotal);
+
+      newMilestones.forEach(milestone => {
+        // Skip if already shown
+        if (shownMilestonesRef.current.has(milestone.id)) return;
+        shownMilestonesRef.current.add(milestone.id);
+
+        // Show toast with milestone info
+        const Icon = milestone.icon;
+        toast.success(
+          <div className="flex items-center gap-3">
+            <div
+              className={`flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${milestone.gradient}`}
+            >
+              <Icon className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <div className="text-base font-bold">{milestone.name}</div>
+              <div className="text-sm opacity-80">{milestone.description}</div>
+            </div>
+          </div>,
+          { duration: 2500 }
+        );
+      });
+    },
+    [initialTotalVotes]
+  );
 
   useEffect(() => {
     async function loadDemoUser() {
@@ -147,6 +201,15 @@ export function SessionPage() {
         const result = await getOrCreateDemoUserAction();
         if (result.success && result.user) {
           setUserId(result.user.id);
+          // Fetch initial stats for milestone tracking
+          try {
+            const userStats = await contributorStatsApi.getStats(
+              result.user.id
+            );
+            setInitialTotalVotes(userStats.totalVotes);
+          } catch {
+            setInitialTotalVotes(0);
+          }
         } else {
           setError(
             result.error ??
@@ -166,7 +229,7 @@ export function SessionPage() {
   }, []);
 
   const loadMappingPair = useCallback(
-    async (isInitialLoad = false) => {
+    async (isInitialLoad = false, currentSkipId?: string) => {
       setError(null);
 
       if (isInitialLoad) {
@@ -178,6 +241,7 @@ export function SessionPage() {
 
       setRelation(null);
       setResourceMatchType(null);
+      setIsSwapped(false);
 
       if (mappingMode === 'competency') {
         if (!userId) {
@@ -185,7 +249,25 @@ export function SessionPage() {
           return;
         }
 
-        const result = await getNextRelationshipTaskAction(userId);
+        const skippedIds = historyRef.current
+          .filter(
+            h =>
+              h.type === 'skipped' &&
+              h.mode === 'competency' &&
+              h.competencies &&
+              h.competencies.length === 2
+          )
+          .map(h => {
+            if (h.relationshipId) return h.relationshipId;
+            return `${h.competencies![0]!.id}:${h.competencies![1]!.id}`;
+          });
+
+        // Include the current skip ID if provided (handles async state update)
+        if (currentSkipId && !skippedIds.includes(currentSkipId)) {
+          skippedIds.push(currentSkipId);
+        }
+
+        const result = await getNextRelationshipTaskAction(userId, skippedIds);
 
         if (!result.success) {
           setError(
@@ -200,6 +282,7 @@ export function SessionPage() {
         if (result.allDone) {
           setAllDone(true);
           setCompetencies([]);
+          setCurrentRelationshipId(null);
           setIsTransitioning(false);
           return;
         }
@@ -211,6 +294,7 @@ export function SessionPage() {
         }
 
         setAllDone(false);
+        setCurrentRelationshipId(result.task.relationshipId);
         setCompetencies([
           {
             id: result.task.origin.id,
@@ -294,13 +378,20 @@ export function SessionPage() {
 
           try {
             const startTime = Date.now();
-            const originId = competencies[0]!.id;
-            const destinationId = competencies[1]!.id;
+            const voteOpts = isSwapped
+              ? {
+                  originId: competencies[0]!.id,
+                  destinationId: competencies[1]!.id,
+                }
+              : {
+                  relationshipId: currentRelationshipId ?? undefined,
+                  originId: competencies[0]!.id,
+                  destinationId: competencies[1]!.id,
+                };
             const result = await submitCompetencyVoteAction(
               userId,
               relation,
-              originId,
-              destinationId
+              voteOpts
             );
 
             const elapsed = Date.now() - startTime;
@@ -314,12 +405,21 @@ export function SessionPage() {
               return;
             }
 
-            setStats(prev => ({ ...prev, completed: prev.completed + 1 }));
+            setStats(prev => {
+              const newCompleted = prev.completed + 1;
+              // Call checkMilestones after state update (outside updater to avoid React Strict Mode double-call)
+              setTimeout(() => checkMilestones(newCompleted), 0);
+              return { ...prev, completed: newCompleted };
+            });
             setHistory(prev => [
               ...prev,
               {
                 type: 'completed',
                 mode: 'competency',
+                relationshipId:
+                  result.voteResponse?.relationshipId ??
+                  currentRelationshipId ??
+                  undefined,
                 competencies: competencies ? [...competencies] : undefined,
               },
             ]);
@@ -348,13 +448,14 @@ export function SessionPage() {
           setError(null);
 
           try {
+            const formData = new FormData();
+            formData.set('competencyId', competencies[0]!.id);
+            formData.set('resourceId', learningResource.id);
+            formData.set('userId', userId);
+            formData.set('matchType', resourceMatchType);
+
             const startTime = Date.now();
-            const result = await createCompetencyResourceLinkAction({
-              competencyId: competencies[0]!.id,
-              resourceId: learningResource.id,
-              userId,
-              matchType: resourceMatchType,
-            });
+            const result = await createCompetencyResourceLinkAction(formData);
 
             const elapsed = Date.now() - startTime;
             if (elapsed < 300) {
@@ -367,7 +468,12 @@ export function SessionPage() {
               return;
             }
 
-            setStats(prev => ({ ...prev, completed: prev.completed + 1 }));
+            setStats(prev => {
+              const newCompleted = prev.completed + 1;
+              // Call checkMilestones after state update (outside updater to avoid React Strict Mode double-call)
+              setTimeout(() => checkMilestones(newCompleted), 0);
+              return { ...prev, completed: newCompleted };
+            });
             setHistory(prev => [
               ...prev,
               {
@@ -393,19 +499,28 @@ export function SessionPage() {
         setIsTransitioning(true);
         await new Promise(resolve => setTimeout(resolve, 300));
 
+        // Build the skip ID before updating history
+        const currentSkipId =
+          mappingMode === 'competency' && competencies?.length === 2
+            ? (currentRelationshipId ??
+              `${competencies[0]!.id}:${competencies[1]!.id}`)
+            : undefined;
+
         setStats(prev => ({ ...prev, skipped: prev.skipped + 1 }));
         setHistory(prev => [
           ...prev,
           {
             type: 'skipped',
             mode: mappingMode,
+            relationshipId: currentRelationshipId ?? undefined,
             competencies: competencies ? [...competencies] : undefined,
             learningResource: learningResource ?? undefined,
           },
         ]);
         setRelation(null);
         try {
-          await loadMappingPair();
+          // Pass the current skip ID directly to avoid stale closure issue
+          await loadMappingPair(false, currentSkipId);
         } catch (err) {
           setError(
             err instanceof Error
@@ -424,6 +539,9 @@ export function SessionPage() {
       userId,
       mappingMode,
       loadMappingPair,
+      currentRelationshipId,
+      isSwapped,
+      checkMilestones,
     ]
   );
 
@@ -443,7 +561,9 @@ export function SessionPage() {
         }));
 
         if (last.type === 'completed') {
-          if (last.mode === 'resource' && last.resourceLinkId) {
+          if (last.mode === 'competency' && last.relationshipId) {
+            setRelationshipToDelete(last.relationshipId);
+          } else if (last.mode === 'resource' && last.resourceLinkId) {
             setResourceLinkToDelete(last.resourceLinkId);
           }
         }
@@ -470,6 +590,23 @@ export function SessionPage() {
       setIsTransitioning(false);
     }, 300);
   }, [history]);
+
+  useEffect(() => {
+    if (relationshipToDelete && userId) {
+      unvoteAction(userId, relationshipToDelete)
+        .then(result => {
+          if (!result.success) {
+            setError(result.error ?? 'Failed to undo vote');
+          }
+        })
+        .catch((err: unknown) => {
+          setError(err instanceof Error ? err.message : 'Failed to undo vote');
+        })
+        .finally(() => {
+          setRelationshipToDelete(null);
+        });
+    }
+  }, [relationshipToDelete, userId]);
 
   useEffect(() => {
     if (resourceLinkToDelete) {
@@ -868,6 +1005,7 @@ export function SessionPage() {
                           size="sm"
                           onClick={() => {
                             setSwapRotation(prev => prev + 180);
+                            setIsSwapped(prev => !prev);
                             setIsTransitioning(true);
                             setTimeout(() => {
                               if (competencies && competencies.length >= 2) {
@@ -1165,6 +1303,7 @@ export function SessionPage() {
         </section>
       </main>
 
+      {/* ─── Session Summary Overlay ─── */}
       {showSessionSummary && (
         <SessionSummary stats={stats} onContinue={handleContinueSession} />
       )}

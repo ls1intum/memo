@@ -1,8 +1,9 @@
 package de.tum.cit.memo.dto;
 
-import io.swagger.v3.oas.annotations.media.Schema;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.tum.cit.memo.enums.RelationshipType;
-import jakarta.validation.constraints.NotBlank;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,20 +16,24 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class VoteRequest {
 
-    /**
-     * Origin competency ID.
-     */
-    @NotBlank(message = "originId is required")
-    @Schema(description = "Origin competency ID", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Existing relationship ID (alternative to originId+destinationId)")
+    private String relationshipId;
+
+    @Schema(description = "Origin competency ID (required if relationshipId is absent)")
     private String originId;
 
-    /**
-     * Destination competency ID.
-     */
-    @NotBlank(message = "destinationId is required")
-    @Schema(description = "Destination competency ID", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Destination competency ID (required if relationshipId is absent)")
     private String destinationId;
 
     @NotNull(message = "Relationship type is required")
     private RelationshipType relationshipType;
+
+    @JsonIgnore
+    @AssertTrue(message = "Either relationshipId or both originId and destinationId must be provided")
+    private boolean isIdentifiable() {
+        boolean hasRelationshipId = relationshipId != null && !relationshipId.isBlank();
+        boolean hasOriginAndDestination = originId != null && !originId.isBlank()
+                && destinationId != null && !destinationId.isBlank();
+        return hasRelationshipId || hasOriginAndDestination;
+    }
 }

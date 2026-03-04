@@ -1,10 +1,13 @@
--- New competency_relationships table with aggregated vote counters + entropy
+-- Create scheduling tables for competency mapping
+
+-- competency_relationships: One row per unique (origin, destination) pair
+-- Stores aggregated vote counters and precomputed entropy for scheduling
 CREATE TABLE "competency_relationships" (
     "id" VARCHAR(30) NOT NULL,
     "origin_id" VARCHAR(30) NOT NULL,
     "destination_id" VARCHAR(30) NOT NULL,
     
-    -- vote counters (denormalized for fast reads)
+    -- Aggregated vote counters (denormalized for fast reads)
     "vote_assumes" INT NOT NULL DEFAULT 0,
     "vote_extends" INT NOT NULL DEFAULT 0,
     "vote_matches" INT NOT NULL DEFAULT 0,
@@ -24,7 +27,7 @@ CREATE TABLE "competency_relationships" (
     CONSTRAINT "chk_origin_ne_dest" CHECK ("origin_id" <> "destination_id")
 );
 
--- individual votes (one per user per relationship)
+-- competency_relationships_votes: Raw vote log (one vote per user per relationship)
 CREATE TABLE "competency_relationships_votes" (
     "id" VARCHAR(30) NOT NULL,
     "relationship_id" VARCHAR(30) NOT NULL,
@@ -36,7 +39,7 @@ CREATE TABLE "competency_relationships_votes" (
     CONSTRAINT "uk_relationship_user" UNIQUE ("relationship_id", "user_id")
 );
 
--- indexes for scheduling queries
+-- Indexes for efficient scheduling queries
 CREATE INDEX "idx_rel_entropy" ON "competency_relationships"("entropy" DESC) WHERE "total_votes" > 0;
 CREATE INDEX "idx_rel_total_votes" ON "competency_relationships"("total_votes");
 CREATE INDEX "idx_rel_origin" ON "competency_relationships"("origin_id");

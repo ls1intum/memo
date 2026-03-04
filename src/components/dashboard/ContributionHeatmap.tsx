@@ -18,100 +18,44 @@ const MONTHS = [
 ];
 const WEEKS_PER_COLUMN = 4;
 const SQUARE_SIZE = 26;
-const DEFAULT_HISTORY_DAYS = 365;
-const MAX_HISTORY_DAYS = 3 * 366;
-const LOCAL_DATE_KEY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
-
-type HeatmapWeek = {
-  date: Date;
-  count: number;
-};
-
-function formatDateKeyUTC(date: Date): string {
-  const year = date.getUTCFullYear();
-  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
-  const day = String(date.getUTCDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-}
-
-function parseDateKeyUTC(dateKey: string): Date | null {
-  if (!LOCAL_DATE_KEY_PATTERN.test(dateKey)) {
-    return null;
-  }
-
-  const [year, month, day] = dateKey.split('-').map(Number);
-  const parsed = new Date(Date.UTC(year, month - 1, day));
-
-  return formatDateKeyUTC(parsed) === dateKey ? parsed : null;
-}
-
-function startOfTodayUTC(): Date {
-  const now = new Date();
-  return new Date(
-    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
-  );
-}
-
-function addDaysUTC(date: Date, days: number): Date {
-  const next = new Date(date);
-  next.setUTCDate(next.getUTCDate() + days);
-  return next;
-}
-
-function startOfIsoWeekUTC(date: Date): Date {
-  const daysSinceMonday = (date.getUTCDay() + 6) % 7;
-  return addDaysUTC(date, -daysSinceMonday);
-}
-
-function endOfIsoWeekUTC(date: Date): Date {
-  return addDaysUTC(startOfIsoWeekUTC(date), 6);
-}
 
 // calculate the grid data for the heatmap
 function buildGrid(dailyCounts: DailyCount[]) {
   const countByDate = new Map<string, number>();
-  let earliestDataDate: Date | null = null;
-  const today = startOfTodayUTC();
-
   for (const dc of dailyCounts) {
-    const parsedDate = parseDateKeyUTC(dc.date);
-    if (!parsedDate || parsedDate > today) {
-      continue;
-    }
-
-    const dateKey = formatDateKeyUTC(parsedDate);
-    countByDate.set(dateKey, (countByDate.get(dateKey) ?? 0) + dc.count);
-    if (!earliestDataDate || parsedDate < earliestDataDate) {
-      earliestDataDate = parsedDate;
-    }
+    countByDate.set(dc.date, dc.count);
   }
 
-  const defaultRangeStart = addDaysUTC(today, -DEFAULT_HISTORY_DAYS);
-  const oldestAllowedStart = addDaysUTC(today, -MAX_HISTORY_DAYS);
-  const rawRangeStart =
-    earliestDataDate && earliestDataDate < defaultRangeStart
-      ? earliestDataDate
-      : defaultRangeStart;
-  const rangeStart =
-    rawRangeStart < oldestAllowedStart ? oldestAllowedStart : rawRangeStart;
-  const startDate = startOfIsoWeekUTC(rangeStart);
-  const endDate = endOfIsoWeekUTC(today);
+  const today = new Date();
 
-  const columns: HeatmapWeek[][] = [];
-  let currentColumn: HeatmapWeek[] = [];
+  // end at sunday of this week
+  const daysSinceMondayEnd = (today.getDay() + 6) % 7;
+  const endDate = new Date(today);
+  endDate.setDate(today.getDate() + (6 - daysSinceMondayEnd));
 
-  for (
-    let currentWeekStart = startDate;
-    currentWeekStart <= endDate;
-    currentWeekStart = addDaysUTC(currentWeekStart, 7)
-  ) {
+  // start around april 1st 2024
+  const april1st2024 = new Date(2024, 3, 1);
+  const daysSinceMondayStart = (april1st2024.getDay() + 6) % 7;
+  const startDate = new Date(april1st2024);
+  startDate.setDate(april1st2024.getDate() - daysSinceMondayStart);
+
+  const columns: { date: Date; count: number }[][] = [];
+  let currentColumn: { date: Date; count: number }[] = [];
+
+  const currentWeekStart = new Date(startDate);
+
+  while (currentWeekStart <= endDate) {
     let weeklyCount = 0;
 
     // add up all the days in the week
     for (let d = 0; d < 7; d++) {
-      const day = addDaysUTC(currentWeekStart, d);
-      const dateString = formatDateKeyUTC(day);
-      weeklyCount += countByDate.get(dateString) ?? 0;
+      const day = new Date(currentWeekStart);
+      day.setDate(currentWeekStart.getDate() + d);
+      const dateString = day.toISOString().split('T')[0];
+
+      if (dateString && countByDate.has(dateString)) {
+        weeklyCount += countByDate.get(dateString)!;
+      }
     }
 
     currentColumn.push({
@@ -124,6 +68,8 @@ function buildGrid(dailyCounts: DailyCount[]) {
       columns.push(currentColumn);
       currentColumn = [];
     }
+
+    currentWeekStart.setDate(currentWeekStart.getDate() + 7);
   }
 
   // add whatever is left
@@ -136,14 +82,14 @@ function buildGrid(dailyCounts: DailyCount[]) {
 
 // helper to figure out if we need to show a month label
 function getColumnLabel(
-  column: HeatmapWeek[],
-  prevColumn: HeatmapWeek[] | undefined,
+  column: { date: Date }[],
+  prevColumn: { date: Date }[] | undefined,
   colIndex: number
 ) {
-  const currentMonth = column[0].date.getUTCMonth();
-  const currentYear = column[0].date.getUTCFullYear();
+  const currentMonth = column[0].date.getMonth();
+  const currentYear = column[0].date.getFullYear();
 
-  const prevMonth = prevColumn ? prevColumn[0].date.getUTCMonth() : -1;
+  const prevMonth = prevColumn ? prevColumn[0].date.getMonth() : -1;
   const isMonthChange = currentMonth !== prevMonth;
 
   // only show label every 3 months or on the very first column
@@ -191,9 +137,9 @@ export function ContributionHeatmap({
                 i
               );
 
-              const currentYear = col[0].date.getUTCFullYear();
+              const currentYear = col[0].date.getFullYear();
               const prevYear =
-                i > 0 ? columns[i - 1][0].date.getUTCFullYear() : currentYear;
+                i > 0 ? columns[i - 1][0].date.getFullYear() : currentYear;
               const isYearChange = currentYear !== prevYear;
 
               return (
@@ -212,13 +158,13 @@ export function ContributionHeatmap({
             })}
           </div>
 
-          {}
+          {/* grid body */}
           <div className="flex" style={{ gap: 4 }}>
             {columns.map((col, colIndex) => {
-              const currentYear = col[0].date.getUTCFullYear();
+              const currentYear = col[0].date.getFullYear();
               const prevYear =
                 colIndex > 0
-                  ? columns[colIndex - 1][0].date.getUTCFullYear()
+                  ? columns[colIndex - 1][0].date.getFullYear()
                   : currentYear;
               const isYearChange = currentYear !== prevYear;
 
@@ -238,7 +184,7 @@ export function ContributionHeatmap({
                       key={weekIndex}
                       className={`rounded-[4px] transition-all duration-200 hover:scale-110 hover:ring-2 hover:ring-slate-400 hover:z-10 ${heatmapColor(week.count)}`}
                       style={{ width: SQUARE_SIZE, height: SQUARE_SIZE }}
-                      title={`Week of ${formatDateKeyUTC(week.date)}: ${week.count} mapping${week.count !== 1 ? 's' : ''}`}
+                      title={`Week of ${week.date.toLocaleDateString()}: ${week.count} mapping${week.count !== 1 ? 's' : ''}`}
                     />
                   ))}
                 </div>
