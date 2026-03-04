@@ -742,9 +742,18 @@ function StepConsent({
             <span className="font-semibold text-slate-900">
               ground-truth benchmark data
             </span>{' '}
-            for evaluating competency-aware recommender systems. My
-            contributions are private and will only be accessible anonymized
-            during this research project.
+            to evaluate competency-aware recommender systems. My contributions
+            will remain private and, within this research project, will only be
+            used in anonymized form. I agree to the{' '}
+            <a
+              href="/privacy"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-semibold text-[#0a4da2] underline underline-offset-2 hover:text-[#0d56b5]"
+            >
+              privacy policy
+            </a>
+            .
           </span>
         </label>
       </div>
