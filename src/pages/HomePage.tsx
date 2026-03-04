@@ -104,7 +104,7 @@ export function HomePage() {
 
         <section
           id="challenges"
-          className="relative isolate left-1/2 right-1/2 w-screen -translate-x-1/2 transform px-6 pb-12 pt-32 lg:px-0 -mt-24"
+          className="relative isolate left-1/2 right-1/2 w-screen -translate-x-1/2 transform px-6 pb-30 pt-32 lg:px-0 -mt-24"
         >
           <div className="absolute inset-0 bg-white" aria-hidden />
           <div
