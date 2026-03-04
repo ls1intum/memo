@@ -54,6 +54,8 @@ export function OnboardingPage() {
   const {
     isAuthenticated,
     isLoading: isAuthLoading,
+    domainError,
+    logout,
     onboardingLogin,
   } = useAuth();
   const [step, setStep] = useState(() => {
@@ -147,6 +149,28 @@ export function OnboardingPage() {
         : step === 4
           ? consentChecked
           : true;
+
+  if (domainError) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-8 px-4">
+        <div className="flex flex-col items-center gap-2">
+          <GraduationCap className="h-12 w-12" />
+          <h1 className="text-2xl font-semibold tracking-tight">
+            Access denied
+          </h1>
+          <p className="max-w-xs text-center text-sm text-muted-foreground">
+            Your email domain is not permitted. Please use a university email
+            address.
+          </p>
+        </div>
+        <div className="w-full max-w-sm rounded-lg border p-6">
+          <Button variant="outline" className="w-full" onClick={() => logout()}>
+            Sign out and try a different account
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#d7e3ff] via-[#f3f5ff] to-[#e8ecff] text-slate-900">
