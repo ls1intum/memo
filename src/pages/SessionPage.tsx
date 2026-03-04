@@ -4,7 +4,6 @@ import {
   getRandomCompetenciesAction,
   getNextRelationshipTaskAction,
   submitCompetencyVoteAction,
-  deleteCompetencyRelationshipAction,
   createCompetencyResourceLinkAction,
   deleteCompetencyResourceLinkAction,
   getRandomLearningResourceAction,
@@ -18,7 +17,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Kbd } from '@/components/ui/kbd';
-import { ArrowRight, ArrowLeftRight, Check, Link2 } from 'lucide-react';
+import { ArrowRight, ArrowLeftRight, Check, Link2, LogOut } from 'lucide-react';
 import {
   Card,
   CardDescription,
@@ -45,6 +44,7 @@ import {
   RESOURCE_ICONS,
   RESOURCE_MATCH_TYPE_TEXT_COLORS,
 } from '@/components/session/session-constants';
+import { SessionSummary } from '@/components/session/SessionSummary';
 
 type SessionStats = {
   completed: number;
@@ -108,7 +108,6 @@ export function SessionPage() {
     Array<{
       type: 'completed' | 'skipped';
       mode: MappingMode;
-      relationshipId?: string;
       resourceLinkId?: string;
       competencies?: Competency[];
       learningResource?: LearningResource;
@@ -124,7 +123,7 @@ export function SessionPage() {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [swapRotation, setSwapRotation] = useState(0);
   const [allDone, setAllDone] = useState(false);
-  const [isSwapped, setIsSwapped] = useState(false);
+  const [showSessionSummary, setShowSessionSummary] = useState(false);
 
   const {
     hoveredValue: hoveredRelation,
@@ -138,9 +137,6 @@ export function SessionPage() {
     handleMouseLeave: handleResourceMatchMouseLeave,
   } = useHoverWithTimeout<ResourceMatchType>();
 
-  const [relationshipToDelete, setRelationshipToDelete] = useState<
-    string | null
-  >(null);
   const [resourceLinkToDelete, setResourceLinkToDelete] = useState<
     string | null
   >(null);
@@ -182,7 +178,6 @@ export function SessionPage() {
 
       setRelation(null);
       setResourceMatchType(null);
-      setIsSwapped(false);
 
       if (mappingMode === 'competency') {
         if (!userId) {
@@ -273,6 +268,13 @@ export function SessionPage() {
     void loadMappingPair(isInitialLoad);
   }, [mappingMode, loadMappingPair]);
 
+  const handleContinueSession = useCallback(() => {
+    setShowSessionSummary(false);
+    setStats({ completed: 0, skipped: 0 });
+    setHistory([]);
+    void loadMappingPair(true);
+  }, [loadMappingPair]);
+
   const handleAction = useCallback(
     async (type: 'completed' | 'skipped') => {
       if (type === 'completed') {
@@ -292,14 +294,8 @@ export function SessionPage() {
 
           try {
             const startTime = Date.now();
-
-            const originId = isSwapped
-              ? competencies[1]!.id
-              : competencies[0]!.id;
-            const destinationId = isSwapped
-              ? competencies[0]!.id
-              : competencies[1]!.id;
-
+            const originId = competencies[0]!.id;
+            const destinationId = competencies[1]!.id;
             const result = await submitCompetencyVoteAction(
               userId,
               relation,
@@ -324,8 +320,6 @@ export function SessionPage() {
               {
                 type: 'completed',
                 mode: 'competency',
-                relationshipId:
-                  result.voteResponse?.relationshipId ?? undefined,
                 competencies: competencies ? [...competencies] : undefined,
               },
             ]);
@@ -354,14 +348,13 @@ export function SessionPage() {
           setError(null);
 
           try {
-            const formData = new FormData();
-            formData.set('competencyId', competencies[0]!.id);
-            formData.set('resourceId', learningResource.id);
-            formData.set('userId', userId);
-            formData.set('matchType', resourceMatchType);
-
             const startTime = Date.now();
-            const result = await createCompetencyResourceLinkAction(formData);
+            const result = await createCompetencyResourceLinkAction({
+              competencyId: competencies[0]!.id,
+              resourceId: learningResource.id,
+              userId,
+              matchType: resourceMatchType,
+            });
 
             const elapsed = Date.now() - startTime;
             if (elapsed < 300) {
@@ -429,7 +422,6 @@ export function SessionPage() {
       relation,
       resourceMatchType,
       userId,
-      isSwapped,
       mappingMode,
       loadMappingPair,
     ]
@@ -451,9 +443,7 @@ export function SessionPage() {
         }));
 
         if (last.type === 'completed') {
-          if (last.mode === 'competency' && last.relationshipId) {
-            setRelationshipToDelete(last.relationshipId);
-          } else if (last.mode === 'resource' && last.resourceLinkId) {
+          if (last.mode === 'resource' && last.resourceLinkId) {
             setResourceLinkToDelete(last.resourceLinkId);
           }
         }
@@ -480,25 +470,6 @@ export function SessionPage() {
       setIsTransitioning(false);
     }, 300);
   }, [history]);
-
-  useEffect(() => {
-    if (relationshipToDelete) {
-      deleteCompetencyRelationshipAction(relationshipToDelete)
-        .then(result => {
-          if (!result.success) {
-            setError(result.error ?? 'Failed to delete relationship');
-          }
-        })
-        .catch(err => {
-          setError(
-            err instanceof Error ? err.message : 'Failed to delete relationship'
-          );
-        })
-        .finally(() => {
-          setRelationshipToDelete(null);
-        });
-    }
-  }, [relationshipToDelete]);
 
   useEffect(() => {
     if (resourceLinkToDelete) {
@@ -667,42 +638,52 @@ export function SessionPage() {
                 </span>
               </div>
             </div>
-            <div className="flex items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 p-1">
+            <div className="flex items-center gap-3">
+              <div className="flex h-9 items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 p-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (mappingMode !== 'competency') {
+                      setMappingMode('competency');
+                    }
+                  }}
+                  className={`
+                    h-full px-3 text-xs font-semibold rounded-md transition-all duration-200 flex items-center justify-center
+                    ${
+                      mappingMode === 'competency'
+                        ? 'bg-white text-slate-900 shadow-sm'
+                        : 'text-slate-500 hover:text-slate-700'
+                    }
+                  `}
+                >
+                  Competencies
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (mappingMode !== 'resource') {
+                      setMappingMode('resource');
+                    }
+                  }}
+                  className={`
+                    h-full px-3 text-xs font-semibold rounded-md transition-all duration-200 flex items-center justify-center
+                    ${
+                      mappingMode === 'resource'
+                        ? 'bg-white text-slate-900 shadow-sm'
+                        : 'text-slate-500 hover:text-slate-700'
+                    }
+                  `}
+                >
+                  Resources
+                </button>
+              </div>
               <button
                 type="button"
-                onClick={() => {
-                  if (mappingMode !== 'competency') {
-                    setMappingMode('competency');
-                  }
-                }}
-                className={`
-                  px-3 py-1.5 text-xs font-semibold rounded-md transition-all duration-200
-                  ${
-                    mappingMode === 'competency'
-                      ? 'bg-white text-slate-900 shadow-sm'
-                      : 'text-slate-500 hover:text-slate-700'
-                  }
-                `}
+                onClick={() => setShowSessionSummary(true)}
+                className="flex h-9 items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-4 text-xs font-semibold text-slate-600 transition-all duration-200 hover:bg-red-50 hover:text-red-600 hover:border-red-200"
               >
-                Competencies
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  if (mappingMode !== 'resource') {
-                    setMappingMode('resource');
-                  }
-                }}
-                className={`
-                  px-3 py-1.5 text-xs font-semibold rounded-md transition-all duration-200
-                  ${
-                    mappingMode === 'resource'
-                      ? 'bg-white text-slate-900 shadow-sm'
-                      : 'text-slate-500 hover:text-slate-700'
-                  }
-                `}
-              >
-                Resources
+                <LogOut className="h-3.5 w-3.5" />
+                End Session
               </button>
             </div>
           </div>
@@ -887,7 +868,6 @@ export function SessionPage() {
                           size="sm"
                           onClick={() => {
                             setSwapRotation(prev => prev + 180);
-                            setIsSwapped(prev => !prev);
                             setIsTransitioning(true);
                             setTimeout(() => {
                               if (competencies && competencies.length >= 2) {
@@ -1184,6 +1164,10 @@ export function SessionPage() {
           )}
         </section>
       </main>
+
+      {showSessionSummary && (
+        <SessionSummary stats={stats} onContinue={handleContinueSession} />
+      )}
     </div>
   );
 }

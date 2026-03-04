@@ -7,6 +7,7 @@ import { HomePage } from './pages/HomePage';
 import { AboutPage } from './pages/AboutPage';
 import { SessionPage } from './pages/SessionPage';
 import { OnboardingPage } from './pages/OnboardingPage';
+import { DashboardPage } from './pages/DashboardPage';
 import { LoginPage } from './pages/LoginPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { AuthProvider } from './contexts/AuthContext';
@@ -34,6 +35,7 @@ export function App() {
               <Route path="/" element={<HomePage />} />
               <Route path="/about" element={<AboutPage />} />
               <Route element={<ProtectedRoute />}>
+                <Route path="/dashboard" element={<DashboardPage />} />
                 <Route path="/session" element={<SessionPage />} />
                 <Route path="/onboarding" element={<OnboardingPage />} />
               </Route>

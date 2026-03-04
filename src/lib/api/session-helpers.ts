@@ -2,7 +2,6 @@
 
 import { apiClient } from './client';
 import { competenciesApi } from './competencies';
-import { competencyRelationshipsApi } from './competency-relationships';
 import { competencyResourceLinksApi } from './competency-resource-links';
 import { learningResourcesApi } from './learning-resources';
 import { schedulingApi } from './scheduling';
@@ -15,8 +14,10 @@ import type {
   LearningResource,
   CompetencyResourceLink,
 } from './types';
-import type { RelationshipType } from '@/components/session/session-constants';
-import { keycloak } from '../auth/keycloak';
+import type {
+  RelationshipType,
+  ResourceMatchType,
+} from '@/components/session/session-constants';
 
 export async function getCurrentUserAction(): Promise<{
   success: boolean;
@@ -133,48 +134,22 @@ export async function getRandomLearningResourceAction(): Promise<{
   }
 }
 
-export async function deleteCompetencyRelationshipAction(
-  id: string
-): Promise<{ success: boolean; error?: string }> {
-  try {
-    await competencyRelationshipsApi.delete(id);
-    return { success: true };
-  } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : 'Failed to delete relationship',
-    };
-  }
-}
-
-export async function createCompetencyResourceLinkAction(
-  formData: FormData
-): Promise<{
+export async function createCompetencyResourceLinkAction(input: {
+  competencyId: string;
+  resourceId: string;
+  userId: string;
+  matchType: ResourceMatchType;
+}): Promise<{
   success: boolean;
   link?: CompetencyResourceLink;
   error?: string;
 }> {
   try {
-    const competencyId = formData.get('competencyId') as string;
-    const resourceId = formData.get('resourceId') as string;
-    const matchType = formData.get('matchType') as string;
-
     const link = await competencyResourceLinksApi.create({
-      competencyId,
-      resourceId,
-      userId:
-        keycloak.tokenParsed?.sub ??
-        (() => {
-          throw new Error('User not authenticated');
-        })(),
-      matchType: matchType as
-        | 'UNRELATED'
-        | 'WEAK'
-        | 'GOOD_FIT'
-        | 'PERFECT_MATCH',
+      competencyId: input.competencyId,
+      resourceId: input.resourceId,
+      userId: input.userId,
+      matchType: input.matchType,
     });
     return { success: true, link };
   } catch (error) {
