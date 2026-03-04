@@ -16,8 +16,7 @@ import type {
   CompetencyResourceLink,
 } from './types';
 import type { RelationshipType } from '@/components/session/session-constants';
-
-const GUEST_USER_ID = 'guest';
+import { keycloak } from '../auth/keycloak';
 
 export async function getOrCreateDemoUserAction(): Promise<{
   success: boolean;

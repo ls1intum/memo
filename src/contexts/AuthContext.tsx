@@ -15,7 +15,8 @@ interface AuthContextValue {
   isLoading: boolean;
   userId: string | null;
   role: string | null;
-  login: (idpHint?: string) => void;
+  domainError: boolean;
+  login: () => void;
   logout: () => void;
 }
 
@@ -26,6 +27,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
   const [role, setRole] = useState<string | null>(null);
+  const [domainError, setDomainError] = useState(false);
   const initialised = useRef(false);
 
   useEffect(() => {
@@ -68,17 +70,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const data = await res.json();
         setUserId(data.id);
         setRole(data.role);
+      } else if (res.status === 403) {
+        setDomainError(true);
       }
     } catch {
       // non-critical: user is still authenticated, just not synced
     }
   }
 
-  function login(idpHint?: string) {
-    keycloak.login({
-      ...(idpHint ? { idpHint } : {}),
-      redirectUri: window.location.origin,
-    });
+  function login() {
+    keycloak.login({ redirectUri: window.location.origin + '/session' });
   }
 
   function logout() {
@@ -87,7 +88,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ isAuthenticated, isLoading, userId, role, login, logout }}
+      value={{ isAuthenticated, isLoading, userId, role, domainError, login, logout }}
     >
       {children}
     </AuthContext.Provider>

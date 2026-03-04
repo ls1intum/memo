@@ -1,0 +1,32 @@
+sequenceDiagram
+    participant B as Browser
+    participant KC as Keycloak
+    participant Mail as Email (Mailpit dev)
+    participant API as Spring Boot
+    participant DB as PostgreSQL
+
+    B->>KC: login() redirect + PKCE
+    KC-->>B: login / register form
+
+    alt First-time registration
+        B->>KC: submit university email + password
+        KC->>Mail: send verification email
+        B->>KC: click verification link
+    else Returning user
+        B->>KC: submit credentials
+    end
+
+    KC-->>B: JWT access token
+
+    B->>API: GET /api/auth/me + Bearer JWT
+    API->>KC: validate via JWK Set
+    API->>API: check email domain in allowlist
+
+    alt Domain not allowed
+        API-->>B: 403 Forbidden
+        B->>B: domainError = true (Access denied)
+    else Domain allowed
+        API->>DB: findOrCreate user by sub
+        API-->>B: {id, role}
+        B->>B: isAuthenticated = true
+    end

@@ -5,6 +5,10 @@ ALTER TABLE users ALTER COLUMN email DROP NOT NULL;
 -- Extend id column to hold Keycloak UUID (36 chars)
 ALTER TABLE users ALTER COLUMN id TYPE VARCHAR(36);
 
--- Make the unique constraint on email deferrable to allow null values
+-- Replace the email unique index with a deferrable constraint (handles both index and constraint forms)
+DROP INDEX IF EXISTS users_email_key CASCADE;
 ALTER TABLE users DROP CONSTRAINT IF EXISTS users_email_key;
 ALTER TABLE users ADD CONSTRAINT users_email_key UNIQUE (email) DEFERRABLE INITIALLY DEFERRED;
+
+-- Extend user_id FK columns in related tables to also hold 36-char Keycloak UUIDs
+ALTER TABLE competency_relationships_votes ALTER COLUMN user_id TYPE VARCHAR(36);
