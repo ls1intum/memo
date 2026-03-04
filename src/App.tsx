@@ -36,6 +36,8 @@ export function App() {
             <Route element={<Layout />}>
               <Route path="/" element={<HomePage />} />
               <Route path="/about" element={<AboutPage />} />
+              <Route path="/imprint" element={<ImprintPage />} />
+              <Route path="/privacy" element={<PrivacyPage />} />
               <Route element={<ProtectedRoute />}>
                 <Route path="/dashboard" element={<DashboardPage />} />
                 <Route path="/session" element={<SessionPage />} />

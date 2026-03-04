@@ -36,6 +36,7 @@ public class ContributorStatsService {
         // pre-window total
         List<DailyVoteCount> rawCounts = voteRepository.findDailyVoteCountsWithPreWindowTotal(userId, sinceInstant);
 
+        Map<LocalDate, Integer> countMap = new LinkedHashMap<>();
         long windowVotes = 0;
         long preWindowVotes = 0;
         for (DailyVoteCount row : rawCounts) {
