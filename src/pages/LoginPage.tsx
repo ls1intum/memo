@@ -26,7 +26,9 @@ export function LoginPage() {
     <div className="flex min-h-screen flex-col items-center justify-center gap-8 px-4">
       <div className="flex flex-col items-center gap-2">
         <GraduationCap className="h-12 w-12" />
-        <h1 className="text-2xl font-semibold tracking-tight">Sign in to Memo</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">
+          Sign in to Memo
+        </h1>
         <p className="text-sm text-muted-foreground">
           Use your university email address to continue
         </p>

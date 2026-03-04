@@ -41,17 +41,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           await syncUser();
         }
       })
-      .catch(console.error)
+      .catch(() => {})
       .finally(() => setIsLoading(false));
 
     keycloak.onTokenExpired = () => {
-      keycloak
-        .updateToken(60)
-        .catch(() => {
-          setIsAuthenticated(false);
-          setUserId(null);
-          setRole(null);
-        });
+      keycloak.updateToken(60).catch(() => {
+        setIsAuthenticated(false);
+        setUserId(null);
+        setRole(null);
+      });
     };
   }, []);
 
@@ -88,7 +86,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ isAuthenticated, isLoading, userId, role, domainError, login, logout }}
+      value={{
+        isAuthenticated,
+        isLoading,
+        userId,
+        role,
+        domainError,
+        login,
+        logout,
+      }}
     >
       {children}
     </AuthContext.Provider>
