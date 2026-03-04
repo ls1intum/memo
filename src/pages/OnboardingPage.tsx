@@ -51,7 +51,11 @@ const SESSION_DEGREE_KEY = 'onboarding-degree';
 const SESSION_FIELD_KEY = 'onboarding-field';
 
 export function OnboardingPage() {
-  const { isAuthenticated, isLoading: isAuthLoading, onboardingLogin } = useAuth();
+  const {
+    isAuthenticated,
+    isLoading: isAuthLoading,
+    onboardingLogin,
+  } = useAuth();
   const [step, setStep] = useState(0);
   const [direction, setDirection] = useState(1);
   const [consentChecked, setConsentChecked] = useState(false);
@@ -125,7 +129,9 @@ export function OnboardingPage() {
 
   const canAdvance =
     step === 2
-      ? isAuthenticated && selectedDegree !== null && fieldOfStudy.trim().length > 0
+      ? isAuthenticated &&
+        selectedDegree !== null &&
+        fieldOfStudy.trim().length > 0
       : step === 3
         ? practiceCompleted || currentPracticeCorrect
         : step === 4
@@ -462,7 +468,9 @@ function StepProfile({
             while keeping your data private.
           </p>
           {isAuthLoading ? (
-            <span className="mt-2 text-sm text-slate-500">Checking authentication…</span>
+            <span className="mt-2 text-sm text-slate-500">
+              Checking authentication…
+            </span>
           ) : isAuthenticated ? (
             <div className="flex items-center gap-2 mt-2 text-sm font-semibold text-emerald-700">
               <CheckCircle2 className="h-4 w-4" />

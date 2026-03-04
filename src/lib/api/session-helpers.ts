@@ -18,6 +18,8 @@ import type {
 } from './types';
 import type { RelationshipType } from '@/components/session/session-constants';
 
+const GUEST_USER_ID = 'guest';
+
 export async function getCurrentUserAction(): Promise<{
   success: boolean;
   user?: { id: string; role: string };
