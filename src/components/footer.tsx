@@ -2,26 +2,26 @@ import { Link } from 'react-router-dom';
 
 export function Footer() {
   return (
-    <footer className="relative z-20 border-t border-slate-200/70 bg-white/80 text-sm text-slate-500 shadow-[0_-15px_60px_-45px_rgba(7,30,84,0.35)] backdrop-blur-xl">
+    <footer className="relative z-20 border-t border-slate-200/70 bg-white/80 text-sm text-slate-500 shadow-[0_-15px_60px_-45px_rgba(7,30,84,0.35)] backdrop-blur-xl dark:border-slate-700/50 dark:bg-slate-900/80 dark:text-slate-400 dark:shadow-[0_-15px_60px_-45px_rgba(0,0,0,0.5)]">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-6 py-8 lg:flex-row lg:items-center lg:justify-between lg:px-0">
-        <div className="flex items-center gap-2 text-slate-700">
+        <div className="flex items-center gap-2 text-slate-700 dark:text-slate-200">
           <span className="text-sm font-semibold">Memo Benchmark Platform</span>
         </div>
-        <div className="flex flex-wrap gap-4 text-sm font-semibold text-slate-700">
-          <Link className="transition hover:text-slate-900" to="/#overview">
+        <div className="flex flex-wrap gap-4 text-sm font-semibold text-slate-700 dark:text-slate-300">
+          <Link className="transition hover:text-slate-900 dark:hover:text-white" to="/#overview">
             Overview
           </Link>
-          <Link className="transition hover:text-slate-900" to="/about">
+          <Link className="transition hover:text-slate-900 dark:hover:text-white" to="/about">
             About
           </Link>
-          <Link className="transition hover:text-slate-900" to="/imprint">
+          <Link className="transition hover:text-slate-900 dark:hover:text-white" to="/imprint">
             Imprint
           </Link>
-          <Link className="transition hover:text-slate-900" to="/privacy">
+          <Link className="transition hover:text-slate-900 dark:hover:text-white" to="/privacy">
             Privacy Policy
           </Link>
         </div>
-        <div className="text-slate-400">© {new Date().getFullYear()} Memo</div>
+        <div className="text-slate-400 dark:text-slate-500">© {new Date().getFullYear()} Memo</div>
       </div>
     </footer>
   );

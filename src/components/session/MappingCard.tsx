@@ -11,7 +11,6 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { SCROLLBAR_STYLES } from '@/components/session/session-constants';
 
 interface ThemeColors {
   primary: string;
@@ -60,7 +59,7 @@ export function MappingCard(props: MappingCardProps) {
     const { url } = props as ResourceCardProps;
     return (
       <Card
-        className={`relative flex h-[280px] flex-col border-2 ${borderColorClass} bg-gradient-to-br ${gradientFromClass} to-white shadow-lg transition-all duration-300 overflow-hidden ${transitionClasses}`}
+        className={`relative flex h-[280px] flex-col border-2 ${borderColorClass} bg-gradient-to-br ${gradientFromClass} to-white dark:to-slate-800 shadow-lg transition-all duration-300 overflow-hidden ${transitionClasses}`}
       >
         <div
           className="absolute left-0 top-0 h-full w-1.5 rounded-r-full"
@@ -81,14 +80,14 @@ export function MappingCard(props: MappingCardProps) {
             </Badge>
           </div>
           <div className="flex-1 flex flex-col min-h-0 space-y-3">
-            <CardTitle className="text-xl font-bold text-slate-900 flex-shrink-0">
+            <CardTitle className="text-xl font-bold text-slate-900 dark:text-slate-100 flex-shrink-0">
               {title}
             </CardTitle>
             <a
               href={url}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-sm text-pink-600 hover:text-pink-700 hover:underline transition-colors"
+              className="inline-flex items-center gap-2 text-sm text-pink-600 hover:text-pink-700 dark:text-pink-400 dark:hover:text-pink-300 hover:underline transition-colors"
             >
               <ExternalLink className="h-4 w-4" />
               {url}
@@ -107,7 +106,7 @@ export function MappingCard(props: MappingCardProps) {
 
   return (
     <Card
-      className={`relative flex h-[280px] flex-col border-2 ${borderColorClass} bg-gradient-to-br ${gradientFromClass} to-white shadow-lg transition-all duration-300 overflow-hidden ${transitionClasses}`}
+      className={`relative flex h-[280px] flex-col border-2 ${borderColorClass} bg-gradient-to-br ${gradientFromClass} to-white dark:to-slate-800 shadow-lg transition-all duration-300 overflow-hidden ${transitionClasses}`}
     >
       <div
         className="absolute left-0 top-0 h-full w-1.5 rounded-r-full"
@@ -132,7 +131,7 @@ export function MappingCard(props: MappingCardProps) {
             <TooltipTrigger asChild>
               <Badge
                 tabIndex={0}
-                className="bg-slate-100 text-slate-700 border border-slate-300 cursor-help hover:bg-slate-200 transition-colors"
+                className="bg-slate-100 text-slate-700 border border-slate-300 cursor-help hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:border-slate-600 dark:hover:bg-slate-600 transition-colors"
               >
                 {bloomLevel}
                 <Info className="h-3 w-3 ml-1.5" />
@@ -147,25 +146,22 @@ export function MappingCard(props: MappingCardProps) {
                 → {bloomLevel}: use knowledge in practice (implement, execute,
                 solve).
               </p>
-              <p className="mt-1 text-[11px] text-slate-200">
+              <p className="mt-1 text-[11px] text-slate-200 dark:text-slate-400">
                 Levels: Remember • Understand • Apply • Analyze • Evaluate •
                 Create
               </p>
             </TooltipContent>
           </Tooltip>
-          <Badge className="bg-slate-100 text-slate-700 border border-slate-300">
+          <Badge className="bg-slate-100 text-slate-700 border border-slate-300 dark:bg-slate-700 dark:text-slate-300 dark:border-slate-600">
             {category}
           </Badge>
         </div>
         <div className="flex-1 flex flex-col min-h-0 space-y-2">
-          <CardTitle className="text-xl font-bold text-slate-900 flex-shrink-0">
+          <CardTitle className="text-xl font-bold text-slate-900 dark:text-slate-100 flex-shrink-0">
             {title}
           </CardTitle>
-          <div
-            className="flex-1 overflow-y-scroll pr-2 scrollbar-thin"
-            style={SCROLLBAR_STYLES}
-          >
-            <CardDescription className="text-base leading-relaxed text-slate-600">
+          <div className="flex-1 overflow-y-scroll pr-2 scrollbar-thin">
+            <CardDescription className="text-base leading-relaxed text-slate-600 dark:text-slate-400">
               {description}
             </CardDescription>
           </div>

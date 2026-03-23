@@ -106,11 +106,11 @@ export function CompetencyNetworkViz({
 
   return (
     <div
-      className={`relative rounded-2xl border border-[#0a4da2]/20 bg-gradient-to-br from-blue-50/90 via-white/80 to-indigo-50/70 p-5 shadow-[0_8px_30px_-10px_rgba(7,30,84,0.15)] overflow-hidden ${className}`}
+      className={`relative rounded-2xl border border-[#0a4da2]/20 dark:border-[#6b9fff]/20 bg-gradient-to-br from-blue-50/90 via-white/80 to-indigo-50/70 dark:from-blue-950/40 dark:via-slate-800/80 dark:to-indigo-950/30 p-5 shadow-[0_8px_30px_-10px_rgba(7,30,84,0.15)] overflow-hidden ${className}`}
     >
       {showTitle && (
         <div className="flex items-center gap-2 mb-3">
-          <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+          <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
             Competency Network Preview
           </span>
         </div>
@@ -249,12 +249,12 @@ export function CompetencyNetworkViz({
           </motion.g>
         ))}
       </svg>
-      <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-5 mt-3 md:mt-4 text-xs font-medium text-slate-500">
+      <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-5 mt-3 md:mt-4 text-xs font-medium text-slate-500 dark:text-slate-400">
         <span className="flex items-center gap-1.5">
-          <span className="inline-block h-3 w-3 rounded-full border-2 border-[#0a4da2] bg-white shadow-sm" />
+          <span className="inline-block h-3 w-3 rounded-full border-2 border-[#0a4da2] bg-white dark:bg-slate-800 shadow-sm" />
           Competency
         </span>
-        <div className="hidden sm:block h-3.5 w-px bg-slate-300/80 rounded-full" />
+        <div className="hidden sm:block h-3.5 w-px bg-slate-300/80 dark:bg-slate-600/80 rounded-full" />
         <span className="flex items-center gap-1.5">
           <div className="flex items-center">
             <span
