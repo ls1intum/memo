@@ -53,19 +53,25 @@ export function AboutPage() {
         {/* Quick Stats */}
         <section className="grid gap-4 sm:grid-cols-3">
           <div className="rounded-2xl border border-white/70 bg-white/80 p-6 text-center backdrop-blur-sm dark:border-slate-700/50 dark:bg-slate-800/60">
-            <div className="text-3xl font-bold text-[#0a4da2] dark:text-[#6b9fff]">4 Months</div>
+            <div className="text-3xl font-bold text-[#0a4da2] dark:text-[#6b9fff]">
+              4 Months
+            </div>
             <div className="mt-1 text-sm font-medium text-slate-600 dark:text-slate-400">
               Development Timeline
             </div>
           </div>
           <div className="rounded-2xl border border-white/70 bg-white/80 p-6 text-center backdrop-blur-sm dark:border-slate-700/50 dark:bg-slate-800/60">
-            <div className="text-3xl font-bold text-[#0a4da2] dark:text-[#6b9fff]">2 Students</div>
+            <div className="text-3xl font-bold text-[#0a4da2] dark:text-[#6b9fff]">
+              2 Students
+            </div>
             <div className="mt-1 text-sm font-medium text-slate-600 dark:text-slate-400">
               Collaborative Effort
             </div>
           </div>
           <div className="rounded-2xl border border-white/70 bg-white/80 p-6 text-center backdrop-blur-sm dark:border-slate-700/50 dark:bg-slate-800/60">
-            <div className="text-3xl font-bold text-[#0a4da2] dark:text-[#6b9fff]">TUM</div>
+            <div className="text-3xl font-bold text-[#0a4da2] dark:text-[#6b9fff]">
+              TUM
+            </div>
             <div className="mt-1 text-sm font-medium text-slate-600 dark:text-slate-400">
               Technical University of Munich
             </div>

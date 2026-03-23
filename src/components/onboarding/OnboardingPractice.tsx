@@ -208,7 +208,9 @@ export const OnboardingPractice = forwardRef<
             {i < TUTORIAL_ROUNDS.length - 1 && (
               <div
                 className={`h-0.5 w-8 rounded-full transition-all duration-300 ${
-                  i < round ? 'bg-emerald-400 dark:bg-emerald-500' : 'bg-slate-200 dark:bg-slate-700'
+                  i < round
+                    ? 'bg-emerald-400 dark:bg-emerald-500'
+                    : 'bg-slate-200 dark:bg-slate-700'
                 }`}
               />
             )}

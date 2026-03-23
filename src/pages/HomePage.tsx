@@ -124,7 +124,10 @@ export function HomePage() {
           id="challenges"
           className="relative isolate left-1/2 right-1/2 w-screen -translate-x-1/2 transform px-6 pb-30 pt-32 lg:px-0 -mt-24"
         >
-          <div className="absolute inset-0 bg-white dark:bg-slate-900/90" aria-hidden />
+          <div
+            className="absolute inset-0 bg-white dark:bg-slate-900/90"
+            aria-hidden
+          />
           <div
             className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,0)_0%,rgba(255,255,255,1)_20%,rgba(255,255,255,1)_80%,rgba(255,255,255,0)_100%)] dark:bg-[linear-gradient(to_bottom,rgba(15,23,41,0)_0%,rgba(15,23,41,1)_20%,rgba(15,23,41,1)_80%,rgba(15,23,41,0)_100%)]"
             aria-hidden

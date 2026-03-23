@@ -8,20 +8,34 @@ export function Footer() {
           <span className="text-sm font-semibold">Memo Benchmark Platform</span>
         </div>
         <div className="flex flex-wrap gap-4 text-sm font-semibold text-slate-700 dark:text-slate-300">
-          <Link className="transition hover:text-slate-900 dark:hover:text-white" to="/#overview">
+          <Link
+            className="transition hover:text-slate-900 dark:hover:text-white"
+            to="/#overview"
+          >
             Overview
           </Link>
-          <Link className="transition hover:text-slate-900 dark:hover:text-white" to="/about">
+          <Link
+            className="transition hover:text-slate-900 dark:hover:text-white"
+            to="/about"
+          >
             About
           </Link>
-          <Link className="transition hover:text-slate-900 dark:hover:text-white" to="/imprint">
+          <Link
+            className="transition hover:text-slate-900 dark:hover:text-white"
+            to="/imprint"
+          >
             Imprint
           </Link>
-          <Link className="transition hover:text-slate-900 dark:hover:text-white" to="/privacy">
+          <Link
+            className="transition hover:text-slate-900 dark:hover:text-white"
+            to="/privacy"
+          >
             Privacy Policy
           </Link>
         </div>
-        <div className="text-slate-400 dark:text-slate-500">© {new Date().getFullYear()} Memo</div>
+        <div className="text-slate-400 dark:text-slate-500">
+          © {new Date().getFullYear()} Memo
+        </div>
       </div>
     </footer>
   );

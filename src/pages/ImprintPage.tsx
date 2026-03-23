@@ -33,15 +33,21 @@ export function ImprintPage() {
             </address>
             <div className="mt-4 space-y-1 text-slate-600 dark:text-slate-400">
               <p>
-                <span className="font-medium text-slate-700 dark:text-slate-300">Phone:</span>{' '}
+                <span className="font-medium text-slate-700 dark:text-slate-300">
+                  Phone:
+                </span>{' '}
                 +49-(0)89-289-01
               </p>
               <p>
-                <span className="font-medium text-slate-700 dark:text-slate-300">Fax:</span>{' '}
+                <span className="font-medium text-slate-700 dark:text-slate-300">
+                  Fax:
+                </span>{' '}
                 +49-(0)89-289-22000
               </p>
               <p>
-                <span className="font-medium text-slate-700 dark:text-slate-300">Email:</span>{' '}
+                <span className="font-medium text-slate-700 dark:text-slate-300">
+                  Email:
+                </span>{' '}
                 <a
                   href="mailto:poststelle@tum.de"
                   className="text-[#0a4da2] hover:underline dark:text-[#6b9fff]"
@@ -97,7 +103,9 @@ export function ImprintPage() {
               <p className="text-slate-600 dark:text-slate-400">
                 TUM School of Computation, Information and Technology
               </p>
-              <p className="text-slate-600 dark:text-slate-400">Department of Computer Science</p>
+              <p className="text-slate-600 dark:text-slate-400">
+                Department of Computer Science
+              </p>
               <address className="mt-2 not-italic text-slate-600 dark:text-slate-400">
                 Boltzmannstrasse 3
                 <br />
@@ -113,7 +121,9 @@ export function ImprintPage() {
               contact:
             </p>
             <p className="mt-2">
-              <span className="font-medium text-slate-700 dark:text-slate-300">Email:</span>{' '}
+              <span className="font-medium text-slate-700 dark:text-slate-300">
+                Email:
+              </span>{' '}
               <a
                 href="mailto:ls1.admin@in.tum.de"
                 className="text-[#0a4da2] hover:underline dark:text-[#6b9fff]"
@@ -209,7 +219,9 @@ export function ImprintPage() {
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="space-y-3">
-      <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">{title}</h2>
+      <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
+        {title}
+      </h2>
       <div>{children}</div>
     </section>
   );

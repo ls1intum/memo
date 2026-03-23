@@ -35,7 +35,9 @@ export function PrivacyPage() {
                 </h3>
               ),
               p: ({ children }) => (
-                <p className="mt-3 text-slate-600 dark:text-slate-400">{children}</p>
+                <p className="mt-3 text-slate-600 dark:text-slate-400">
+                  {children}
+                </p>
               ),
               ul: ({ children }) => (
                 <ul className="mt-3 list-disc space-y-2 pl-5 text-slate-600 dark:text-slate-400">
@@ -60,9 +62,13 @@ export function PrivacyPage() {
                   {children}
                 </a>
               ),
-              hr: () => <hr className="my-8 border-slate-200 dark:border-slate-700" />,
+              hr: () => (
+                <hr className="my-8 border-slate-200 dark:border-slate-700" />
+              ),
               em: ({ children }) => (
-                <em className="text-slate-500 dark:text-slate-400">{children}</em>
+                <em className="text-slate-500 dark:text-slate-400">
+                  {children}
+                </em>
               ),
             }}
           >

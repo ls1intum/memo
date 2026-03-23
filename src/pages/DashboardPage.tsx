@@ -43,9 +43,13 @@ function BadgeCard({
         </div>
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">{badge.name}</h3>
+            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+              {badge.name}
+            </h3>
           </div>
-          <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{badge.description}</p>
+          <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+            {badge.description}
+          </p>
         </div>
       </div>
       {earned && (
@@ -91,7 +95,9 @@ function StatCard({
             {label}
           </span>
         </div>
-        <p className="text-3xl font-bold text-slate-900 dark:text-slate-100">{value}</p>
+        <p className="text-3xl font-bold text-slate-900 dark:text-slate-100">
+          {value}
+        </p>
       </div>
     </div>
   );
@@ -173,7 +179,9 @@ export function DashboardPage() {
         {error && (
           <div className="rounded-2xl border border-red-200 bg-red-50/80 px-6 py-5 text-red-800 shadow-sm dark:border-red-800/50 dark:bg-red-900/30 dark:text-red-300">
             <p className="font-semibold">Failed to load statistics</p>
-            <p className="mt-1 text-sm text-red-700 dark:text-red-400">{error}</p>
+            <p className="mt-1 text-sm text-red-700 dark:text-red-400">
+              {error}
+            </p>
           </div>
         )}
 
@@ -226,7 +234,9 @@ export function DashboardPage() {
                     Contribution Activity
                   </h2>
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-slate-400 dark:text-slate-500">Less</span>
+                    <span className="text-xs text-slate-400 dark:text-slate-500">
+                      Less
+                    </span>
                     {[0, 2, 5, 10, 15].map(level => (
                       <div
                         key={level}
@@ -234,7 +244,9 @@ export function DashboardPage() {
                         style={{ width: 12, height: 12 }}
                       />
                     ))}
-                    <span className="text-xs text-slate-400 dark:text-slate-500">More</span>
+                    <span className="text-xs text-slate-400 dark:text-slate-500">
+                      More
+                    </span>
                   </div>
                 </div>
                 <div className="flex-1 flex items-center min-h-0">
