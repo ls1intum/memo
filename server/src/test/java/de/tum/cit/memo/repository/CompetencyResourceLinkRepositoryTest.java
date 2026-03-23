@@ -20,6 +20,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Sql(statements = {
+    "DELETE FROM competency_relationships_votes",
     "DELETE FROM competency_resource_links",
     "DELETE FROM competency_relationships",
     "DELETE FROM competencies",

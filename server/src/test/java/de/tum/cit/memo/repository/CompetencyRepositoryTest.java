@@ -6,6 +6,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.jdbc.Sql;
 
 import java.util.List;
@@ -14,6 +15,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Sql(statements = {
+    "DELETE FROM competency_relationships_votes",
     "DELETE FROM competency_resource_links",
     "DELETE FROM competency_relationships",
     "DELETE FROM competencies"
@@ -48,6 +50,7 @@ class CompetencyRepositoryTest extends AbstractRepositoryTest {
             assertThat(saved.getTitle()).isEqualTo("Java Programming");
             assertThat(saved.getDescription()).isEqualTo("Learn Java fundamentals");
             assertThat(saved.getCreatedAt()).isNotNull();
+            assertThat(saved.getDegree()).isZero();
         }
 
         @Test
@@ -133,6 +136,219 @@ class CompetencyRepositoryTest extends AbstractRepositoryTest {
             List<Competency> random = competencyRepository.findRandomCompetencies(5);
 
             assertThat(random).isEmpty();
+        }
+    }
+
+    @Nested
+    @DisplayName("findRandomCompetencyIds")
+    class FindRandomCompetencyIds {
+
+        @Test
+        @DisplayName("should return requested number of random competency ids")
+        void shouldReturnRequestedCount() {
+            for (int i = 0; i < 10; i++) {
+                competencyRepository.save(createCompetency("Competency " + i, "Description " + i));
+            }
+
+            List<String> ids = competencyRepository.findRandomCompetencyIds(5);
+
+            assertThat(ids).hasSize(5);
+        }
+
+        @Test
+        @DisplayName("should return all ids when count exceeds total")
+        void shouldReturnAllWhenCountExceedsTotal() {
+            competencyRepository.save(createCompetency("Competency 1", "Description 1"));
+            competencyRepository.save(createCompetency("Competency 2", "Description 2"));
+
+            List<String> ids = competencyRepository.findRandomCompetencyIds(10);
+
+            assertThat(ids).hasSize(2);
+        }
+
+        @Test
+        @DisplayName("should return strings not competency objects")
+        void shouldReturnStrings() {
+            Competency saved = competencyRepository.save(createCompetency("Test", "Desc"));
+
+            List<String> ids = competencyRepository.findRandomCompetencyIds(1);
+
+            assertThat(ids).hasSize(1);
+            assertThat(ids.get(0)).isEqualTo(saved.getId());
+        }
+
+        @Test
+        @DisplayName("should return empty list when no competencies exist")
+        void shouldReturnEmptyWhenNoCompetencies() {
+            List<String> ids = competencyRepository.findRandomCompetencyIds(5);
+
+            assertThat(ids).isEmpty();
+        }
+    }
+
+    @Nested
+    @DisplayName("findIdsByDegreeAsc")
+    class FindIdsByDegreeAsc {
+
+        @Test
+        @DisplayName("should return ids ordered by degree ascending")
+        void shouldReturnIdsOrderedByDegreeAsc() {
+            Competency c1 = competencyRepository.save(Competency.builder()
+                .id(IdGenerator.generateCuid())
+                .title("High Degree")
+                .degree(5)
+                .build());
+            Competency c2 = competencyRepository.save(Competency.builder()
+                .id(IdGenerator.generateCuid())
+                .title("Low Degree")
+                .degree(1)
+                .build());
+            Competency c3 = competencyRepository.save(Competency.builder()
+                .id(IdGenerator.generateCuid())
+                .title("Mid Degree")
+                .degree(3)
+                .build());
+            entityManager.flush();
+
+            List<String> ids = competencyRepository.findIdsByDegreeAsc(PageRequest.of(0, 3));
+
+            assertThat(ids).containsExactly(c2.getId(), c3.getId(), c1.getId());
+        }
+
+        @Test
+        @DisplayName("should respect pageable limit")
+        void shouldRespectPageableLimit() {
+            for (int i = 0; i < 5; i++) {
+                competencyRepository.save(Competency.builder()
+                    .id(IdGenerator.generateCuid())
+                    .title("Competency " + i)
+                    .degree(i)
+                    .build());
+            }
+            entityManager.flush();
+
+            List<String> ids = competencyRepository.findIdsByDegreeAsc(PageRequest.of(0, 2));
+
+            assertThat(ids).hasSize(2);
+        }
+
+        @Test
+        @DisplayName("should return empty when no competencies exist")
+        void shouldReturnEmptyWhenNoCompetencies() {
+            List<String> ids = competencyRepository.findIdsByDegreeAsc(PageRequest.of(0, 10));
+
+            assertThat(ids).isEmpty();
+        }
+    }
+
+    @Nested
+    @DisplayName("incrementDegree")
+    class IncrementDegree {
+
+        @Test
+        @DisplayName("should increment degree for given ids")
+        void shouldIncrementDegree() {
+            Competency c1 = competencyRepository.save(Competency.builder()
+                .id(IdGenerator.generateCuid())
+                .title("Competency 1")
+                .degree(0)
+                .build());
+            Competency c2 = competencyRepository.save(Competency.builder()
+                .id(IdGenerator.generateCuid())
+                .title("Competency 2")
+                .degree(2)
+                .build());
+            entityManager.flush();
+
+            competencyRepository.incrementDegree(List.of(c1.getId(), c2.getId()));
+
+            Competency updated1 = competencyRepository.findById(c1.getId()).orElseThrow();
+            Competency updated2 = competencyRepository.findById(c2.getId()).orElseThrow();
+            assertThat(updated1.getDegree()).isEqualTo(1);
+            assertThat(updated2.getDegree()).isEqualTo(3);
+        }
+
+        @Test
+        @DisplayName("should only increment specified ids")
+        void shouldOnlyIncrementSpecifiedIds() {
+            Competency c1 = competencyRepository.save(Competency.builder()
+                .id(IdGenerator.generateCuid())
+                .title("Competency 1")
+                .degree(0)
+                .build());
+            Competency c2 = competencyRepository.save(Competency.builder()
+                .id(IdGenerator.generateCuid())
+                .title("Competency 2")
+                .degree(0)
+                .build());
+            entityManager.flush();
+
+            competencyRepository.incrementDegree(List.of(c1.getId()));
+
+            Competency updated1 = competencyRepository.findById(c1.getId()).orElseThrow();
+            Competency updated2 = competencyRepository.findById(c2.getId()).orElseThrow();
+            assertThat(updated1.getDegree()).isEqualTo(1);
+            assertThat(updated2.getDegree()).isZero();
+        }
+    }
+
+    @Nested
+    @DisplayName("decrementDegree")
+    class DecrementDegree {
+
+        @Test
+        @DisplayName("should decrement degree for given ids")
+        void shouldDecrementDegree() {
+            Competency c1 = competencyRepository.save(Competency.builder()
+                .id(IdGenerator.generateCuid())
+                .title("Competency 1")
+                .degree(3)
+                .build());
+            entityManager.flush();
+
+            competencyRepository.decrementDegree(List.of(c1.getId()));
+
+            Competency updated = competencyRepository.findById(c1.getId()).orElseThrow();
+            assertThat(updated.getDegree()).isEqualTo(2);
+        }
+
+        @Test
+        @DisplayName("should not go below zero (floor at 0)")
+        void shouldFloorAtZero() {
+            Competency c1 = competencyRepository.save(Competency.builder()
+                .id(IdGenerator.generateCuid())
+                .title("Competency 1")
+                .degree(0)
+                .build());
+            entityManager.flush();
+
+            competencyRepository.decrementDegree(List.of(c1.getId()));
+
+            Competency updated = competencyRepository.findById(c1.getId()).orElseThrow();
+            assertThat(updated.getDegree()).isZero();
+        }
+
+        @Test
+        @DisplayName("should only decrement specified ids")
+        void shouldOnlyDecrementSpecifiedIds() {
+            Competency c1 = competencyRepository.save(Competency.builder()
+                .id(IdGenerator.generateCuid())
+                .title("Competency 1")
+                .degree(5)
+                .build());
+            Competency c2 = competencyRepository.save(Competency.builder()
+                .id(IdGenerator.generateCuid())
+                .title("Competency 2")
+                .degree(5)
+                .build());
+            entityManager.flush();
+
+            competencyRepository.decrementDegree(List.of(c1.getId()));
+
+            Competency updated1 = competencyRepository.findById(c1.getId()).orElseThrow();
+            Competency updated2 = competencyRepository.findById(c2.getId()).orElseThrow();
+            assertThat(updated1.getDegree()).isEqualTo(4);
+            assertThat(updated2.getDegree()).isEqualTo(5);
         }
     }
 
