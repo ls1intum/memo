@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { CompetencyNetworkViz } from '@/components/competency-network/CompetencyNetworkViz';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/useAuth';
 
 const ONBOARDED_KEY = 'memo-onboarded';
 

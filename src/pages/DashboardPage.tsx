@@ -8,7 +8,7 @@ import {
 import { BookOpen, Flame } from 'lucide-react';
 import { ContributionHeatmap } from '@/components/dashboard/ContributionHeatmap';
 import { heatmapColor } from '@/lib/heatmap-helpers';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/useAuth';
 import { MILESTONES, type MilestoneDef } from '@/lib/milestones';
 
 const ONBOARDED_KEY = 'memo-onboarded';

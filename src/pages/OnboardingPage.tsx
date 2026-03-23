@@ -43,7 +43,7 @@ import {
   OnboardingPractice,
   OnboardingPracticeRef,
 } from '@/components/onboarding/OnboardingPractice';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/useAuth';
 
 const TOTAL_STEPS = 5;
 const ONBOARDED_KEY = 'memo-onboarded';

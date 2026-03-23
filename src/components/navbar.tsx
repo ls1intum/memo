@@ -3,7 +3,7 @@ import { useTheme } from './use-theme';
 import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { CircleUser } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../contexts/useAuth';
 
 const navItems = [
   { href: '/', label: 'Home' },
