@@ -1,20 +1,7 @@
 import { apiClient } from './client';
-import type {
-  CompetencyRelationship,
-  CreateCompetencyRelationshipRequest,
-} from './types';
+import type { CompetencyRelationship } from './types';
 
 export const competencyRelationshipsApi = {
-  create: async (
-    data: CreateCompetencyRelationshipRequest
-  ): Promise<CompetencyRelationship> => {
-    const response = await apiClient.post<CompetencyRelationship>(
-      '/api/competency-relationships',
-      data
-    );
-    return response.data;
-  },
-
   getById: async (id: string): Promise<CompetencyRelationship> => {
     const response = await apiClient.get<CompetencyRelationship>(
       `/api/competency-relationships/${id}`

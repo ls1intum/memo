@@ -3,15 +3,19 @@
  */
 
 import { competenciesApi } from './competencies';
-import { competencyRelationshipsApi } from './competency-relationships';
 import { competencyResourceLinksApi } from './competency-resource-links';
 import { learningResourcesApi } from './learning-resources';
+import { schedulingApi } from './scheduling';
+import type {
+  RelationshipTask,
+  VoteResponse as SchedulingVoteResponse,
+} from './scheduling';
 import type {
   Competency,
   LearningResource,
-  CompetencyRelationship,
   CompetencyResourceLink,
 } from './types';
+import type { RelationshipType } from '@/components/session/session-constants';
 
 const GUEST_USER_ID = 'guest';
 
@@ -49,6 +53,64 @@ export async function getRandomCompetenciesAction(count: number): Promise<{
   }
 }
 
+/**
+ * Get the next relationship task from the scheduling pipeline.
+ * Returns allDone: true when there are no more pairs to vote on.
+ */
+export async function getNextRelationshipTaskAction(
+  userId: string,
+  skippedIds?: string[]
+): Promise<{
+  success: boolean;
+  task?: RelationshipTask;
+  allDone?: boolean;
+  error?: string;
+}> {
+  try {
+    const task = await schedulingApi.getNextRelationship(userId, skippedIds);
+    if (task === null) {
+      return { success: true, allDone: true };
+    }
+    return { success: true, task };
+  } catch (error) {
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to fetch next relationship task',
+    };
+  }
+}
+
+/**
+ * Submit a vote on a competency relationship via the scheduling pipeline.
+ * Pass opts.relationshipId for normal votes, or opts.originId+opts.destinationId when swapped.
+ */
+export async function submitCompetencyVoteAction(
+  userId: string,
+  relationshipType: RelationshipType,
+  opts: { relationshipId?: string; originId?: string; destinationId?: string }
+): Promise<{
+  success: boolean;
+  voteResponse?: SchedulingVoteResponse;
+  error?: string;
+}> {
+  try {
+    const voteResponse = await schedulingApi.submitVote(
+      userId,
+      relationshipType,
+      opts
+    );
+    return { success: true, voteResponse };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to submit vote',
+    };
+  }
+}
+
 export async function getRandomLearningResourceAction(): Promise<{
   success: boolean;
   resource?: LearningResource;
@@ -71,49 +133,17 @@ export async function getRandomLearningResourceAction(): Promise<{
   }
 }
 
-export async function createCompetencyRelationshipAction(
-  formData: FormData
-): Promise<{
-  success: boolean;
-  relationship?: CompetencyRelationship;
-  error?: string;
-}> {
-  try {
-    const relationshipType = formData.get('relationshipType') as string;
-    const originId = formData.get('originId') as string;
-    const destinationId = formData.get('destinationId') as string;
-
-    const relationship = await competencyRelationshipsApi.create({
-      relationshipType: relationshipType as 'ASSUMES' | 'EXTENDS' | 'MATCHES',
-      originId,
-      destinationId,
-      userId: GUEST_USER_ID,
-    });
-    return { success: true, relationship };
-  } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : 'Failed to create relationship',
-    };
-  }
-}
-
-export async function deleteCompetencyRelationshipAction(
-  id: string
+export async function unvoteAction(
+  userId: string,
+  relationshipId: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    await competencyRelationshipsApi.delete(id);
+    await schedulingApi.unvote(userId, relationshipId);
     return { success: true };
   } catch (error) {
     return {
       success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : 'Failed to delete relationship',
+      error: error instanceof Error ? error.message : 'Failed to undo vote',
     };
   }
 }

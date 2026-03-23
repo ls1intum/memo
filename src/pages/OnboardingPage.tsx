@@ -1,10 +1,119 @@
-import { Link } from 'react-router-dom';
+import { useCallback, useEffect, useState, useRef, forwardRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { motion } from 'motion/react';
+import { CompetencyNetworkViz } from '@/components/competency-network/CompetencyNetworkViz';
+import {
+  ArrowLeft,
+  ArrowRight,
+  BookOpen,
+  Brain,
+  CheckCircle2,
+  GraduationCap,
+  Layers,
+  LogIn,
+  MousePointerClick,
+  Users,
+  Check,
+  ChevronsUpDown,
+} from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import {
+  Command,
+  CommandInput,
+  CommandList,
+  CommandEmpty,
+  CommandGroup,
+  CommandItem,
+} from '@/components/ui/command';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { OnboardingStep } from '@/components/onboarding/OnboardingStep';
+import {
+  OnboardingPractice,
+  OnboardingPracticeRef,
+} from '@/components/onboarding/OnboardingPractice';
 
-const experienceOptions = ['Beginner', 'Intermediate', 'Expert'];
+const TOTAL_STEPS = 5;
+const ONBOARDED_KEY = 'memo-onboarded';
 
 export function OnboardingPage() {
+  const [step, setStep] = useState(0);
+  const [direction, setDirection] = useState(1);
+  const [consentChecked, setConsentChecked] = useState(false);
+  const [practiceCompleted, setPracticeCompleted] = useState(false);
+  const [currentPracticeCorrect, setCurrentPracticeCorrect] = useState(false);
+  const [isPracticeLastRound, setIsPracticeLastRound] = useState(false);
+  const [selectedDegree, setSelectedDegree] = useState<string | null>(null);
+  const [fieldOfStudy, setFieldOfStudy] = useState<string>('');
+  const practiceRef = useRef<OnboardingPracticeRef>(null);
+  const navigate = useNavigate();
+
+  const goNext = useCallback(() => {
+    if (step === 3 && currentPracticeCorrect && !practiceCompleted) {
+      practiceRef.current?.nextRound();
+      return;
+    }
+    if (step < TOTAL_STEPS - 1) {
+      setDirection(1);
+      setStep(s => s + 1);
+    }
+  }, [step, currentPracticeCorrect, practiceCompleted]);
+
+  const goBack = useCallback(() => {
+    if (step > 0) {
+      setDirection(-1);
+      setStep(s => s - 1);
+    }
+  }, [step]);
+
+  // Arrow key navigation
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      const target = e.target as HTMLElement;
+      if (
+        target.tagName === 'INPUT' ||
+        target.tagName === 'TEXTAREA' ||
+        target.isContentEditable
+      ) {
+        return;
+      }
+
+      if (e.key === 'ArrowRight' && step < TOTAL_STEPS - 1) {
+        // Don't advance past practice unless completed
+        if (step === 3 && !practiceCompleted && !currentPracticeCorrect) return;
+        e.preventDefault();
+        goNext();
+      }
+      if (e.key === 'ArrowLeft' && step > 0) {
+        e.preventDefault();
+        goBack();
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [step, practiceCompleted, currentPracticeCorrect, goNext, goBack]);
+
+  const canAdvance =
+    step === 2
+      ? selectedDegree !== null && fieldOfStudy.trim().length > 0
+      : step === 3
+        ? practiceCompleted || currentPracticeCorrect
+        : step === 4
+          ? consentChecked
+          : true;
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#d7e3ff] via-[#f3f5ff] to-[#e8ecff] text-slate-900">
       <div className="absolute inset-0 -z-10 opacity-70">
@@ -13,107 +122,579 @@ export function OnboardingPage() {
         <div className="absolute right-[14%] top-[28%] h-[22rem] w-[22rem] rounded-[40%] bg-gradient-to-br from-[#ffdff3]/55 via-[#fff3f8]/35 to-transparent blur-[140px]" />
       </div>
 
-      <header className="relative z-10 mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-10 lg:px-0">
-        <div className="flex items-center gap-3">
-          <span className="text-sm font-bold tracking-[0.08em] text-slate-900">
-            Competency Benchmark Mapping Platform
-          </span>
-        </div>
-        <div className="flex items-center gap-4">
-          <Button
-            className="hidden h-12 rounded-full border border-white/70 bg-white/80 px-7 text-sm font-semibold text-slate-900 shadow-[0_14px_38px_-30px_rgba(7,30,84,0.55)] transition hover:border-slate-200 hover:bg-white md:inline-flex"
-            asChild
-          >
-            <Link to="/">Back to Start</Link>
-          </Button>
-          <Button
-            className="h-12 rounded-full bg-[#0a4da2] px-7 text-sm font-semibold text-white shadow-[0_18px_45px_-26px_rgba(7,30,84,0.75)] transition hover:bg-[#0d56b5]"
-            asChild
-          >
-            <Link to="/dashboard">Open Dashboard</Link>
-          </Button>
-        </div>
-      </header>
-
-      <main className="relative z-10 mx-auto mt-8 flex min-h-screen w-full max-w-6xl flex-col gap-12 px-6 pb-20 lg:mt-12 lg:px-0">
-        <section className="space-y-3 rounded-[32px] border border-white/70 bg-white/85 p-8 shadow-[0_26px_90px_-55px_rgba(7,30,84,0.5)] backdrop-blur-xl">
-          <Badge className="w-fit rounded-full border border-[#0a4da2]/30 bg-[#0a4da2]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-[#0a4da2]">
-            Onboarding
-          </Badge>
-          <h1 className="text-3xl font-semibold text-slate-900 sm:text-4xl">
-            Tell us how you want to map
-          </h1>
-          <p className="max-w-3xl text-base leading-relaxed text-slate-700">
-            Map competency–competency relations and align resources one focused
-            task at a time. Your inputs help build reproducible benchmark data.
-          </p>
-        </section>
-
-        <section className="grid gap-6 rounded-[32px] border border-white/70 bg-white/85 p-8 shadow-[0_26px_90px_-55px_rgba(7,30,84,0.5)] backdrop-blur-xl sm:grid-cols-2">
-          <form className="space-y-5">
-            <label className="block space-y-2 text-sm font-medium text-slate-800">
-              Alias or name
-              <input
-                type="text"
-                placeholder="Optional"
-                className="w-full rounded-xl border border-slate-200 bg-white/80 px-3 py-2 text-sm text-slate-800 shadow-sm focus:border-[#0a4da2] focus:outline-none"
-              />
-            </label>
-
-            <label className="block space-y-2 text-sm font-medium text-slate-800">
-              Experience level (optional)
-              <select className="w-full rounded-xl border border-slate-200 bg-white/80 px-3 py-2 text-sm text-slate-800 shadow-sm focus:border-[#0a4da2] focus:outline-none font-sans">
-                <option value="">Select level</option>
-                {experienceOptions.map(option => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label className="flex items-start gap-3 text-sm text-slate-700">
-              <input
-                type="checkbox"
-                className="mt-1 h-4 w-4 rounded border-slate-300 text-[#0a4da2] focus:ring-[#0a4da2]"
-              />
-              <span>
-                I consent to my mappings being used as ground-truth benchmark
-                data.
-              </span>
-            </label>
-          </form>
-
-          <div className="space-y-4 text-sm text-slate-700">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-              Quick primer
-            </p>
-            <ul className="mt-2 list-disc space-y-2 pl-5">
-              <li>
-                Competency ↔ Competency: prerequisite, similarity, part-of
-                relations.
-              </li>
-              <li>
-                Competency ↔ Resource: align exercises, quizzes, and papers to
-                the best competency fit.
-              </li>
-              <li>
-                Short sessions: we queue focused tasks; you decide add, skip, or
-                undo.
-              </li>
-            </ul>
-            <p className="rounded-xl bg-slate-50/80 px-4 py-3 text-xs text-slate-600">
-              No account needed. Data is mock-only for now.
-            </p>
+      <main className="relative z-10 mx-auto mt-16 flex w-full max-w-5xl flex-col gap-8 px-6 pb-20 lg:mt-24 lg:px-0">
+        <div className="mx-auto w-full max-w-md">
+          <div className="flex items-center justify-between mb-2 px-1">
+            <span className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+              Step {step + 1} of {TOTAL_STEPS}
+            </span>
+            <span className="text-xs font-medium text-slate-400">
+              {
+                ['Welcome', 'Our Mission', 'Profile', 'Practice', 'Guidelines'][
+                  step
+                ]
+              }
+            </span>
           </div>
-        </section>
+          <div className="h-1.5 w-full rounded-full bg-slate-200/60 overflow-hidden">
+            <motion.div
+              className="h-full rounded-full bg-gradient-to-r from-[#0a4da2] to-[#7c6cff]"
+              initial={false}
+              animate={{ width: `${((step + 1) / TOTAL_STEPS) * 100}%` }}
+              transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
+            />
+          </div>
+        </div>
 
-        <div className="flex justify-end">
-          <Button className="rounded-full bg-[#0a4da2] px-6 text-sm font-semibold text-white shadow-[0_18px_45px_-26px_rgba(7,30,84,0.75)] hover:bg-[#0d56b5]">
-            <Link to="/session">Start Session</Link>
+        <OnboardingStep stepKey={`step-${step}`} direction={direction}>
+          {step === 0 && <StepWelcome />}
+          {step === 1 && <StepHowItWorks />}
+          {step === 2 && (
+            <StepProfile
+              selectedDegree={selectedDegree}
+              onSelectDegree={setSelectedDegree}
+              fieldOfStudy={fieldOfStudy}
+              onFieldOfStudyChange={setFieldOfStudy}
+              onSignIn={goNext}
+            />
+          )}
+          {step === 3 && (
+            <StepPractice
+              ref={practiceRef}
+              onComplete={() => {
+                setPracticeCompleted(true);
+                setDirection(1);
+                setStep(s => s + 1);
+              }}
+              onCorrectStateChange={setCurrentPracticeCorrect}
+              onLastRoundChange={setIsPracticeLastRound}
+              completed={practiceCompleted}
+            />
+          )}
+          {step === 4 && (
+            <StepConsent
+              checked={consentChecked}
+              onToggle={() => setConsentChecked(c => !c)}
+            />
+          )}
+        </OnboardingStep>
+
+        <div className="mx-auto flex w-full max-w-md items-center justify-between pt-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={goBack}
+            disabled={step === 0}
+            className="flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-5 py-5 text-sm font-semibold text-slate-700 shadow-sm transition-all hover:-translate-y-0.5 hover:bg-white hover:border-slate-300 disabled:opacity-0 disabled:pointer-events-none"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back
           </Button>
+
+          {step < TOTAL_STEPS - 1 ? (
+            <Button
+              type="button"
+              onClick={goNext}
+              disabled={!canAdvance}
+              className={`flex items-center gap-2 rounded-full bg-gradient-to-r from-[#0a4da2] to-[#5538d1] px-6 py-5 text-sm font-bold text-white shadow-[0_18px_45px_-26px_rgba(7,30,84,0.75)] transition-all hover:-translate-y-0.5 hover:shadow-[0_22px_55px_-28px_rgba(7,30,84,0.85)] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0`}
+            >
+              {step === 3 && !practiceCompleted
+                ? isPracticeLastRound
+                  ? 'Continue'
+                  : 'Next Round'
+                : 'Continue'}
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          ) : (
+            <Button
+              className="flex items-center gap-2 rounded-full bg-gradient-to-r from-emerald-500 to-emerald-600 px-7 py-2.5 text-sm font-bold text-white shadow-lg shadow-emerald-500/20 transition-all hover:-translate-y-0.5 hover:shadow-xl disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+              disabled={!canAdvance}
+              onClick={() => {
+                try {
+                  localStorage.setItem(ONBOARDED_KEY, '1');
+                } catch (e) {
+                  // eslint-disable-next-line no-console
+                  console.warn('localStorage unavailable', e);
+                }
+                void navigate('/session');
+              }}
+            >
+              Start Your First Session
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          )}
         </div>
       </main>
     </div>
+  );
+}
+
+function StepWelcome() {
+  return (
+    <section className="space-y-6 rounded-[32px] border border-white/70 bg-white/85 p-10 shadow-[0_26px_90px_-55px_rgba(7,30,84,0.5)] backdrop-blur-xl">
+      <div className="space-y-3 text-center">
+        <motion.div
+          initial={{ scale: 0.6, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.5, ease: 'easeOut' }}
+          className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#0a4da2] to-[#7c6cff] shadow-xl shadow-blue-500/20"
+        >
+          <Brain className="h-8 w-8 text-white" />
+        </motion.div>
+        <motion.h1
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15, duration: 0.4 }}
+          className="text-3xl font-bold text-slate-900 sm:text-4xl"
+        >
+          Welcome to{' '}
+          <span className="bg-gradient-to-r from-[#0a4da2] via-[#5538d1] to-[#9b5dfa] bg-clip-text text-transparent">
+            Memo
+          </span>
+        </motion.h1>
+        <motion.p
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25, duration: 0.4 }}
+          className="mx-auto max-w-xl text-base leading-relaxed text-slate-600"
+        >
+          A <strong className="text-slate-700">competency network</strong> maps
+          how skills relate to each other - which ones are prerequisites, which
+          extend others, and which are equivalent. These networks power
+          personalized learning recommendations.
+        </motion.p>
+      </div>
+
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 0.3, duration: 0.5 }}
+        className="mx-auto w-full"
+      >
+        <CompetencyNetworkViz idPrefix="onboarding" />
+      </motion.div>
+    </section>
+  );
+}
+
+const HOW_IT_WORKS_TILES = [
+  {
+    icon: Layers,
+    color: 'from-[#0a4da2] to-[#4263eb]',
+    iconBg: 'bg-blue-100 text-blue-600',
+    title: 'See Two Competencies',
+    desc: 'We show you a pair of skills from a knowledge domain like "Recursion" and "Divide and Conquer".',
+  },
+  {
+    icon: MousePointerClick,
+    color: 'from-[#7c3aed] to-[#9775fa]',
+    iconBg: 'bg-purple-100 text-purple-600',
+    title: 'Pick a Relationship',
+    desc: 'Decide how they relate: prerequisite, extension, equivalent, or unrelated. Use buttons or keyboard shortcuts.',
+  },
+  {
+    icon: CheckCircle2,
+    color: 'from-emerald-500 to-emerald-600',
+    iconBg: 'bg-emerald-100 text-emerald-600',
+    title: 'Build the Benchmark',
+    desc: 'Your label joins a crowd-sourced dataset for fair, reproducible evaluation of recommender systems.',
+  },
+];
+
+function StepHowItWorks() {
+  return (
+    <section className="space-y-6 rounded-[32px] border border-white/70 bg-white/85 p-10 shadow-[0_26px_90px_-55px_rgba(7,30,84,0.5)] backdrop-blur-xl">
+      <div className="text-center space-y-3">
+        <Badge className="w-fit mx-auto rounded-full border border-[#0a4da2]/30 bg-[#0a4da2]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-[#0a4da2]">
+          Our Mission
+        </Badge>
+        <h2 className="text-2xl font-bold text-slate-900 sm:text-3xl">
+          Building a Better Benchmark
+        </h2>
+        <p className="mx-auto max-w-2xl text-base text-slate-600 leading-relaxed">
+          Memo crowd-sources how competencies relate to each other to create an{' '}
+          <strong className="text-slate-700">open benchmark dataset</strong>.
+          Researchers can use it to fairly evaluate and compare competency-aware
+          learning recommender systems.
+        </p>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-3">
+        {HOW_IT_WORKS_TILES.map((tile, i) => (
+          <div
+            key={tile.title}
+            className="group relative overflow-hidden rounded-2xl border border-slate-200/60 bg-white/80 p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+          >
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <div
+                  className={`flex h-10 w-10 items-center justify-center rounded-xl ${tile.iconBg} transition group-hover:scale-110`}
+                >
+                  <tile.icon className="h-5 w-5" />
+                </div>
+                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br text-xs font-bold text-white ${tile.color}">
+                  <span
+                    className="flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold text-white"
+                    style={{
+                      backgroundImage: `linear-gradient(to bottom right, ${tile.color.includes('0a4da2') ? '#0a4da2, #4263eb' : tile.color.includes('7c3aed') ? '#7c3aed, #9775fa' : '#10b981, #059669'})`,
+                    }}
+                  >
+                    {i + 1}
+                  </span>
+                </span>
+              </div>
+              <h3 className="text-lg font-bold text-slate-900">{tile.title}</h3>
+              <p className="text-sm text-slate-600 leading-relaxed">
+                {tile.desc}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <p className="mx-auto max-w-xl text-center text-base text-slate-600 leading-relaxed">
+        Your contribution is simple. Just map relationships between pairs of
+        skills.
+      </p>
+
+      <div className="flex flex-wrap items-center justify-center gap-4 text-xs text-slate-500 pt-1">
+        <span className="flex items-center gap-1.5">
+          <Users className="h-3.5 w-3.5" /> Community-Driven
+        </span>
+        <span className="flex items-center gap-1.5">
+          <BookOpen className="h-3.5 w-3.5" /> Open-Source Research
+        </span>
+      </div>
+    </section>
+  );
+}
+
+const DEGREES = [
+  { id: 'undergrad', label: 'Undergraduate Student' },
+  { id: 'grad', label: 'Graduate Student' },
+  { id: 'doc', label: 'Doctoral Student' },
+  { id: 'postdoc', label: 'Postdoc / Researcher' },
+  { id: 'industry', label: 'Industry Professional' },
+  { id: 'other', label: 'Other' },
+];
+
+const COMMON_DOMAINS = [
+  'Computer Science',
+  'Business Administration',
+  'Data Science',
+  'Mathematics',
+];
+
+function StepProfile({
+  selectedDegree,
+  onSelectDegree,
+  fieldOfStudy,
+  onFieldOfStudyChange,
+  onSignIn,
+}: {
+  selectedDegree: string | null;
+  onSelectDegree: (degree: string) => void;
+  fieldOfStudy: string;
+  onFieldOfStudyChange: (field: string) => void;
+  onSignIn: () => void;
+}) {
+  const [domainOpen, setDomainOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  return (
+    <section className="space-y-6 rounded-[32px] border border-white/70 bg-white/85 p-8 sm:p-10 shadow-[0_26px_90px_-55px_rgba(7,30,84,0.5)] backdrop-blur-xl">
+      <div className="text-center space-y-3">
+        <Badge className="w-fit mx-auto rounded-full border border-indigo-400/30 bg-indigo-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-indigo-700">
+          Your Profile
+        </Badge>
+        <h2 className="text-2xl font-bold text-slate-900 sm:text-3xl">
+          Set Everything Up
+        </h2>
+        <p className="mx-auto max-w-xl text-base text-slate-600 leading-relaxed">
+          Link your university account and share your academic background to
+          help us better understand the diverse perspectives shaping our
+          dataset.
+        </p>
+      </div>
+
+      <div className="mx-auto w-full max-w-4xl mt-8 grid gap-6 md:grid-cols-2">
+        {/* Authentication Card */}
+        <div className="flex flex-col rounded-2xl border border-slate-200/60 bg-white p-6 sm:p-7 space-y-4 shadow-sm relative overflow-hidden">
+          <div className="absolute right-0 top-0 rounded-bl-xl bg-amber-50 px-3 py-1 border-b border-l border-amber-200/50">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700">
+              Required
+            </span>
+          </div>
+          <div className="flex items-center justify-between pt-1">
+            <h3 className="font-bold text-slate-900 flex items-center gap-2">
+              <LogIn className="h-4 w-4 text-[#0a4da2]" />
+              Authentication
+            </h3>
+          </div>
+          <p className="text-sm text-slate-600 leading-relaxed flex-grow">
+            We use your university account to securely record your contributions
+            while keeping your data private.
+          </p>
+          <button
+            type="button"
+            onClick={onSignIn}
+            className="flex w-full sm:w-auto self-start mt-2 items-center justify-center gap-2 rounded-xl bg-white border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 hover:border-slate-300 hover:-translate-y-0.5"
+          >
+            <span>Sign in via University</span>
+          </button>
+        </div>
+
+        {/* Demographics Card */}
+        <div className="flex flex-col rounded-2xl border border-slate-200/60 bg-white p-6 sm:p-7 space-y-4 shadow-sm relative overflow-hidden">
+          <div className="absolute right-0 top-0 rounded-bl-xl bg-amber-50 px-3 py-1 border-b border-l border-amber-200/50">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700">
+              Required
+            </span>
+          </div>
+          <div className="flex items-center justify-between pt-1">
+            <h3 className="font-bold text-slate-900 flex items-center gap-2">
+              <GraduationCap className="h-4 w-4 text-[#0a4da2]" />
+              Academic Status
+            </h3>
+          </div>
+          <p className="text-sm text-slate-600 leading-relaxed">
+            Please select your current academic progress or highest degree so we
+            can better understand the demographics of our contributors.
+          </p>
+
+          <div className="space-y-4 mt-2">
+            <div className="relative">
+              <Select
+                value={selectedDegree || undefined}
+                onValueChange={onSelectDegree}
+              >
+                <SelectTrigger className="w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 h-auto text-sm font-medium text-slate-700 transition shadow-sm focus:border-[#0a4da2] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#0a4da2] data-[placeholder]:text-slate-500">
+                  <SelectValue placeholder="Select Your Status..." />
+                </SelectTrigger>
+                <SelectContent className="rounded-xl border border-slate-200 bg-white shadow-xl z-50 overflow-hidden">
+                  {DEGREES.map(degree => (
+                    <SelectItem
+                      key={degree.id}
+                      value={degree.id}
+                      className="cursor-pointer font-medium py-2.5"
+                    >
+                      {degree.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="relative">
+              <Popover open={domainOpen} onOpenChange={setDomainOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={domainOpen}
+                    className={`w-full justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 h-auto text-sm transition shadow-sm hover:bg-slate-50 focus:border-[#0a4da2] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#0a4da2] ${
+                      !fieldOfStudy
+                        ? 'text-slate-500 font-medium'
+                        : 'text-slate-700 font-medium'
+                    }`}
+                  >
+                    {fieldOfStudy ||
+                      'Domain / Field of Study (e.g. Computer Science)'}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent
+                  className="w-[var(--radix-popover-trigger-width)] p-0 rounded-xl bg-white shadow-xl border border-slate-200 z-50 overflow-hidden"
+                  align="start"
+                >
+                  <Command>
+                    <CommandInput
+                      placeholder="Search or enter domain..."
+                      value={searchQuery}
+                      onValueChange={setSearchQuery}
+                      className="h-11"
+                    />
+                    <CommandList>
+                      <CommandEmpty className="p-2">
+                        {searchQuery.trim() !== '' ? (
+                          <Button
+                            variant="ghost"
+                            className="w-full justify-start text-sm h-auto py-2 px-2 text-slate-700 font-normal hover:bg-slate-100"
+                            onClick={() => {
+                              onFieldOfStudyChange(searchQuery.trim());
+                              setDomainOpen(false);
+                            }}
+                          >
+                            <span className="truncate">
+                              Use &quot;{searchQuery}&quot;
+                            </span>
+                          </Button>
+                        ) : (
+                          <span className="text-sm text-slate-500 py-2 px-2">
+                            Type your domain...
+                          </span>
+                        )}
+                      </CommandEmpty>
+                      <CommandGroup heading="Common Domains">
+                        {COMMON_DOMAINS.map(domain => (
+                          <CommandItem
+                            key={domain}
+                            value={domain}
+                            onSelect={currentValue => {
+                              onFieldOfStudyChange(currentValue);
+                              setSearchQuery('');
+                              setDomainOpen(false);
+                            }}
+                            className="cursor-pointer font-medium"
+                          >
+                            <Check
+                              className={`mr-2 h-4 w-4 ${fieldOfStudy === domain ? 'opacity-100 text-[#0a4da2]' : 'opacity-0'}`}
+                            />
+                            {domain}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+const StepPractice = forwardRef<
+  OnboardingPracticeRef,
+  {
+    onComplete: () => void;
+    onCorrectStateChange: (isCorrect: boolean) => void;
+    onLastRoundChange: (isLastRound: boolean) => void;
+    completed: boolean;
+  }
+>(function StepPractice(
+  { onComplete, onCorrectStateChange, onLastRoundChange, completed },
+  ref
+) {
+  return (
+    <section className="space-y-4 rounded-[32px] border border-white/70 bg-white/85 p-8 shadow-[0_26px_90px_-55px_rgba(7,30,84,0.5)] backdrop-blur-xl">
+      <div className="text-center space-y-2">
+        <Badge className="w-fit mx-auto rounded-full border border-amber-400/40 bg-amber-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-amber-700">
+          Practice Round
+        </Badge>
+        <h2 className="text-2xl font-bold text-slate-900 sm:text-3xl">
+          Try It Yourself
+        </h2>
+      </div>
+
+      {completed ? (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="mx-auto max-w-sm rounded-2xl border border-emerald-200 bg-emerald-50/80 p-6 text-center"
+        >
+          <CheckCircle2 className="mx-auto h-10 w-10 text-emerald-500 mb-3" />
+          <p className="text-base font-semibold text-emerald-800">
+            Practice complete!
+          </p>
+          <p className="text-sm text-emerald-600 mt-1">
+            Hit Continue to proceed to the guidelines.
+          </p>
+        </motion.div>
+      ) : (
+        <OnboardingPractice
+          ref={ref}
+          onComplete={onComplete}
+          onCorrectStateChange={onCorrectStateChange}
+          onLastRoundChange={onLastRoundChange}
+        />
+      )}
+    </section>
+  );
+});
+
+const GUIDELINES = [
+  {
+    emoji: '🎯',
+    title: 'Accuracy Over Speed',
+    desc: 'Take your time. One thoughtful label is better than many rushed ones.',
+  },
+  {
+    emoji: '⏭️',
+    title: 'Skip When Unsure',
+    desc: 'No penalty for skipping. If a pair is ambiguous, move on.',
+  },
+  {
+    emoji: '🤝',
+    title: 'No Competition',
+    desc: 'This is a collaboration, not a race. Every contribution matters.',
+  },
+  {
+    emoji: '↩️',
+    title: 'Undo Is Available',
+    desc: 'Made a mistake? Use the undo button or Shift+Z to fix it.',
+  },
+];
+
+function StepConsent({
+  checked,
+  onToggle,
+}: {
+  checked: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <section className="space-y-6 rounded-[32px] border border-white/70 bg-white/85 p-10 shadow-[0_26px_90px_-55px_rgba(7,30,84,0.5)] backdrop-blur-xl">
+      <div className="text-center space-y-3">
+        <Badge className="w-fit mx-auto rounded-full border border-[#0a4da2]/30 bg-[#0a4da2]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-[#0a4da2]">
+          Guidelines
+        </Badge>
+        <h2 className="text-2xl font-bold text-slate-900 sm:text-3xl">
+          Quality Over Quantity
+        </h2>
+        <p className="mx-auto max-w-xl text-base text-slate-600 leading-relaxed">
+          Great benchmark data comes from careful, honest mappings.
+          <br className="hidden sm:block" />
+          Here are a few principles to keep in mind.
+        </p>
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2">
+        {GUIDELINES.map(g => (
+          <div
+            key={g.title}
+            className="rounded-xl border border-slate-200/60 bg-slate-50/60 p-5 space-y-2"
+          >
+            <div className="flex items-center gap-2.5">
+              <span className="text-lg">{g.emoji}</span>
+              <h3 className="text-sm font-bold text-slate-900">{g.title}</h3>
+            </div>
+            <p className="text-sm text-slate-600 leading-relaxed">{g.desc}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="mx-auto max-w-2xl rounded-2xl border border-[#0a4da2]/20 bg-[#0a4da2]/5 p-6 space-y-4">
+        <label className="flex items-start gap-3 cursor-pointer group">
+          <input
+            type="checkbox"
+            checked={checked}
+            onChange={onToggle}
+            className="mt-1 h-5 w-5 rounded border-slate-300 text-[#0a4da2] accent-[#0a4da2] focus:ring-[#0a4da2] transition"
+          />
+          <span className="text-sm text-slate-700 leading-relaxed">
+            I understand that my mappings will be used as{' '}
+            <span className="font-semibold text-slate-900">
+              ground-truth benchmark data
+            </span>{' '}
+            for evaluating competency-aware recommender systems. My
+            contributions are private and will only be accessible anonymized
+            during this research project.
+          </span>
+        </label>
+      </div>
+    </section>
   );
 }

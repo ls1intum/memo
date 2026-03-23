@@ -1,12 +1,16 @@
 import { Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useState } from 'react';
+import { Toaster } from '@/components/ui/sonner';
 import { ThemeProvider } from './components/theme-provider';
 import { Layout } from './components/Layout';
 import { HomePage } from './pages/HomePage';
 import { AboutPage } from './pages/AboutPage';
 import { SessionPage } from './pages/SessionPage';
 import { OnboardingPage } from './pages/OnboardingPage';
+import { ImprintPage } from './pages/ImprintPage';
+import { PrivacyPage } from './pages/PrivacyPage';
+import { DashboardPage } from './pages/DashboardPage';
 
 export function App() {
   const [queryClient] = useState(
@@ -24,12 +28,16 @@ export function App() {
   return (
     <ThemeProvider defaultTheme="system" storageKey="memo-theme">
       <QueryClientProvider client={queryClient}>
+        <Toaster position="top-center" richColors />
         <Routes>
           <Route element={<Layout />}>
             <Route path="/" element={<HomePage />} />
+            <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/session" element={<SessionPage />} />
             <Route path="/onboarding" element={<OnboardingPage />} />
+            <Route path="/imprint" element={<ImprintPage />} />
+            <Route path="/privacy" element={<PrivacyPage />} />
           </Route>
         </Routes>
       </QueryClientProvider>

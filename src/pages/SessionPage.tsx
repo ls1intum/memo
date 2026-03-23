@@ -1,14 +1,18 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { toast } from 'sonner';
+
 import {
   getRandomCompetenciesAction,
-  createCompetencyRelationshipAction,
-  deleteCompetencyRelationshipAction,
+  getNextRelationshipTaskAction,
+  submitCompetencyVoteAction,
+  unvoteAction,
   createCompetencyResourceLinkAction,
   deleteCompetencyResourceLinkAction,
   getRandomLearningResourceAction,
   getOrCreateDemoUserAction,
 } from '@/lib/api/session-helpers';
+import { contributorStatsApi } from '@/lib/api/contributor-stats';
+import { getNewlyEarnedMilestones } from '@/lib/milestones';
 import type { Competency, LearningResource } from '@/lib/api/types';
 import {
   RelationshipType,
@@ -17,7 +21,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Kbd } from '@/components/ui/kbd';
-import { ArrowRight, ArrowLeftRight, Check, Link2 } from 'lucide-react';
+import { ArrowRight, ArrowLeftRight, Check, Link2, LogOut } from 'lucide-react';
 import {
   Card,
   CardDescription,
@@ -44,6 +48,7 @@ import {
   RESOURCE_ICONS,
   RESOURCE_MATCH_TYPE_TEXT_COLORS,
 } from '@/components/session/session-constants';
+import { SessionSummary } from '@/components/session/SessionSummary';
 
 type SessionStats = {
   completed: number;
@@ -96,12 +101,6 @@ const getRelationshipDescription = (
 };
 
 export function SessionPage() {
-  const [searchParams] = useSearchParams();
-  const countParam = searchParams.get('count');
-  const parsedCount = countParam ? Number(countParam) : NaN;
-  const count =
-    Number.isFinite(parsedCount) && parsedCount > 0 ? parsedCount : 2;
-
   const [relation, setRelation] = useState<RelationshipType | null>(null);
   const [resourceMatchType, setResourceMatchType] =
     useState<ResourceMatchType | null>(null);
@@ -119,6 +118,8 @@ export function SessionPage() {
       learningResource?: LearningResource;
     }>
   >([]);
+  const historyRef = useRef(history);
+  historyRef.current = history;
   const [competencies, setCompetencies] = useState<Competency[] | null>(null);
   const [learningResource, setLearningResource] =
     useState<LearningResource | null>(null);
@@ -128,6 +129,15 @@ export function SessionPage() {
   const [isCreating, setIsCreating] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [swapRotation, setSwapRotation] = useState(0);
+  const [allDone, setAllDone] = useState(false);
+  const [isSwapped, setIsSwapped] = useState(false);
+  const [currentRelationshipId, setCurrentRelationshipId] = useState<
+    string | null
+  >(null);
+  const [showSessionSummary, setShowSessionSummary] = useState(false);
+  const [initialTotalVotes, setInitialTotalVotes] = useState<number | null>(
+    null
+  );
 
   const {
     hoveredValue: hoveredRelation,
@@ -148,12 +158,58 @@ export function SessionPage() {
     string | null
   >(null);
 
+  // Track which milestones have been shown
+  const shownMilestonesRef = useRef<Set<string>>(new Set());
+
+  // Check for newly earned milestones and celebrate
+  const checkMilestones = useCallback(
+    (newCompletedCount: number) => {
+      if (initialTotalVotes === null) return;
+      const oldTotal = initialTotalVotes + newCompletedCount - 1;
+      const newTotal = initialTotalVotes + newCompletedCount;
+      const newMilestones = getNewlyEarnedMilestones(oldTotal, newTotal);
+
+      newMilestones.forEach(milestone => {
+        // Skip if already shown
+        if (shownMilestonesRef.current.has(milestone.id)) return;
+        shownMilestonesRef.current.add(milestone.id);
+
+        // Show toast with milestone info
+        const Icon = milestone.icon;
+        toast.success(
+          <div className="flex items-center gap-3">
+            <div
+              className={`flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${milestone.gradient}`}
+            >
+              <Icon className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <div className="text-base font-bold">{milestone.name}</div>
+              <div className="text-sm opacity-80">{milestone.description}</div>
+            </div>
+          </div>,
+          { duration: 2500 }
+        );
+      });
+    },
+    [initialTotalVotes]
+  );
+
   useEffect(() => {
     async function loadDemoUser() {
       try {
         const result = await getOrCreateDemoUserAction();
         if (result.success && result.user) {
           setUserId(result.user.id);
+          // Fetch initial stats for milestone tracking
+          try {
+            const userStats = await contributorStatsApi.getStats(
+              result.user.id
+            );
+            setInitialTotalVotes(userStats.totalVotes);
+          } catch {
+            setInitialTotalVotes(0);
+          }
         } else {
           setError(
             result.error ??
@@ -173,7 +229,7 @@ export function SessionPage() {
   }, []);
 
   const loadMappingPair = useCallback(
-    async (isInitialLoad = false) => {
+    async (isInitialLoad = false, currentSkipId?: string) => {
       setError(null);
 
       if (isInitialLoad) {
@@ -185,35 +241,72 @@ export function SessionPage() {
 
       setRelation(null);
       setResourceMatchType(null);
+      setIsSwapped(false);
 
       if (mappingMode === 'competency') {
-        const result = await getRandomCompetenciesAction(count);
+        if (!userId) {
+          setIsTransitioning(false);
+          return;
+        }
+
+        const skippedIds = historyRef.current
+          .filter(
+            h =>
+              h.type === 'skipped' &&
+              h.mode === 'competency' &&
+              h.competencies &&
+              h.competencies.length === 2
+          )
+          .map(h => {
+            if (h.relationshipId) return h.relationshipId;
+            return `${h.competencies![0]!.id}:${h.competencies![1]!.id}`;
+          });
+
+        // Include the current skip ID if provided (handles async state update)
+        if (currentSkipId && !skippedIds.includes(currentSkipId)) {
+          skippedIds.push(currentSkipId);
+        }
+
+        const result = await getNextRelationshipTaskAction(userId, skippedIds);
 
         if (!result.success) {
           setError(
             result.error ??
-              'An unexpected error occurred while fetching competencies.'
+              'An unexpected error occurred while fetching the next task.'
           );
           if (isInitialLoad) setCompetencies([]);
           setIsTransitioning(false);
           return;
         }
 
-        if (!result.competencies || result.competencies.length === 0) {
+        if (result.allDone) {
+          setAllDone(true);
+          setCompetencies([]);
+          setCurrentRelationshipId(null);
+          setIsTransitioning(false);
+          return;
+        }
+
+        if (!result.task) {
           if (isInitialLoad) setCompetencies([]);
           setIsTransitioning(false);
           return;
         }
 
-        if (
-          result.competencies.length >= 2 &&
-          result.competencies[0]!.id === result.competencies[1]!.id
-        ) {
-          await loadMappingPair(isInitialLoad);
-          return;
-        }
-
-        setCompetencies(result.competencies);
+        setAllDone(false);
+        setCurrentRelationshipId(result.task.relationshipId);
+        setCompetencies([
+          {
+            id: result.task.origin.id,
+            title: result.task.origin.title,
+            description: result.task.origin.description,
+          },
+          {
+            id: result.task.destination.id,
+            title: result.task.destination.title,
+            description: result.task.destination.description,
+          },
+        ] as Competency[]);
         setLearningResource(null);
       } else {
         const [compResult, resourceResult] = await Promise.all([
@@ -248,7 +341,7 @@ export function SessionPage() {
 
       setIsTransitioning(false);
     },
-    [count, mappingMode]
+    [mappingMode, userId]
   );
 
   const prevModeRef = useRef<MappingMode | null>(null);
@@ -258,6 +351,13 @@ export function SessionPage() {
     prevModeRef.current = mappingMode;
     void loadMappingPair(isInitialLoad);
   }, [mappingMode, loadMappingPair]);
+
+  const handleContinueSession = useCallback(() => {
+    setShowSessionSummary(false);
+    setStats({ completed: 0, skipped: 0 });
+    setHistory([]);
+    void loadMappingPair(true);
+  }, [loadMappingPair]);
 
   const handleAction = useCallback(
     async (type: 'completed' | 'skipped') => {
@@ -269,7 +369,7 @@ export function SessionPage() {
             !relation ||
             !userId
           ) {
-            setError('Missing required data to create relationship');
+            setError('Missing required data to submit vote');
             return;
           }
 
@@ -277,14 +377,22 @@ export function SessionPage() {
           setError(null);
 
           try {
-            const formData = new FormData();
-            formData.set('relationshipType', relation);
-            formData.set('originId', competencies[0]!.id);
-            formData.set('destinationId', competencies[1]!.id);
-            formData.set('userId', userId);
-
             const startTime = Date.now();
-            const result = await createCompetencyRelationshipAction(formData);
+            const voteOpts = isSwapped
+              ? {
+                  originId: competencies[0]!.id,
+                  destinationId: competencies[1]!.id,
+                }
+              : {
+                  relationshipId: currentRelationshipId ?? undefined,
+                  originId: competencies[0]!.id,
+                  destinationId: competencies[1]!.id,
+                };
+            const result = await submitCompetencyVoteAction(
+              userId,
+              relation,
+              voteOpts
+            );
 
             const elapsed = Date.now() - startTime;
             if (elapsed < 300) {
@@ -292,18 +400,26 @@ export function SessionPage() {
             }
 
             if (!result.success) {
-              setError(result.error ?? 'Failed to create relationship');
+              setError(result.error ?? 'Failed to submit vote');
               setIsCreating(false);
               return;
             }
 
-            setStats(prev => ({ ...prev, completed: prev.completed + 1 }));
+            setStats(prev => {
+              const newCompleted = prev.completed + 1;
+              // Call checkMilestones after state update (outside updater to avoid React Strict Mode double-call)
+              setTimeout(() => checkMilestones(newCompleted), 0);
+              return { ...prev, completed: newCompleted };
+            });
             setHistory(prev => [
               ...prev,
               {
                 type: 'completed',
                 mode: 'competency',
-                relationshipId: result.relationship?.id,
+                relationshipId:
+                  result.voteResponse?.relationshipId ??
+                  currentRelationshipId ??
+                  undefined,
                 competencies: competencies ? [...competencies] : undefined,
               },
             ]);
@@ -352,7 +468,12 @@ export function SessionPage() {
               return;
             }
 
-            setStats(prev => ({ ...prev, completed: prev.completed + 1 }));
+            setStats(prev => {
+              const newCompleted = prev.completed + 1;
+              // Call checkMilestones after state update (outside updater to avoid React Strict Mode double-call)
+              setTimeout(() => checkMilestones(newCompleted), 0);
+              return { ...prev, completed: newCompleted };
+            });
             setHistory(prev => [
               ...prev,
               {
@@ -378,19 +499,28 @@ export function SessionPage() {
         setIsTransitioning(true);
         await new Promise(resolve => setTimeout(resolve, 300));
 
+        // Build the skip ID before updating history
+        const currentSkipId =
+          mappingMode === 'competency' && competencies?.length === 2
+            ? (currentRelationshipId ??
+              `${competencies[0]!.id}:${competencies[1]!.id}`)
+            : undefined;
+
         setStats(prev => ({ ...prev, skipped: prev.skipped + 1 }));
         setHistory(prev => [
           ...prev,
           {
             type: 'skipped',
             mode: mappingMode,
+            relationshipId: currentRelationshipId ?? undefined,
             competencies: competencies ? [...competencies] : undefined,
             learningResource: learningResource ?? undefined,
           },
         ]);
         setRelation(null);
         try {
-          await loadMappingPair();
+          // Pass the current skip ID directly to avoid stale closure issue
+          await loadMappingPair(false, currentSkipId);
         } catch (err) {
           setError(
             err instanceof Error
@@ -409,6 +539,9 @@ export function SessionPage() {
       userId,
       mappingMode,
       loadMappingPair,
+      currentRelationshipId,
+      isSwapped,
+      checkMilestones,
     ]
   );
 
@@ -459,23 +592,21 @@ export function SessionPage() {
   }, [history]);
 
   useEffect(() => {
-    if (relationshipToDelete) {
-      deleteCompetencyRelationshipAction(relationshipToDelete)
+    if (relationshipToDelete && userId) {
+      unvoteAction(userId, relationshipToDelete)
         .then(result => {
           if (!result.success) {
-            setError(result.error ?? 'Failed to delete relationship');
+            setError(result.error ?? 'Failed to undo vote');
           }
         })
-        .catch(err => {
-          setError(
-            err instanceof Error ? err.message : 'Failed to delete relationship'
-          );
+        .catch((err: unknown) => {
+          setError(err instanceof Error ? err.message : 'Failed to undo vote');
         })
         .finally(() => {
           setRelationshipToDelete(null);
         });
     }
-  }, [relationshipToDelete]);
+  }, [relationshipToDelete, userId]);
 
   useEffect(() => {
     if (resourceLinkToDelete) {
@@ -618,7 +749,7 @@ export function SessionPage() {
   );
 
   return (
-    <div className="relative overflow-hidden bg-gradient-to-br from-[#d7e3ff] via-[#f3f5ff] to-[#e8ecff] text-slate-900">
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#d7e3ff] via-[#f3f5ff] to-[#e8ecff] text-slate-900">
       <div className="absolute inset-0 -z-10 opacity-70">
         <div className="absolute left-1/2 top-[-6rem] h-[36rem] w-[36rem] -translate-x-1/2 rounded-full bg-white/80 blur-[140px]" />
         <div className="absolute left-[10%] top-[22%] h-80 w-80 rounded-full bg-[#7fb0ff]/35 blur-[120px]" />
@@ -644,42 +775,52 @@ export function SessionPage() {
                 </span>
               </div>
             </div>
-            <div className="flex items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 p-1">
+            <div className="flex items-center gap-3">
+              <div className="flex h-9 items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 p-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (mappingMode !== 'competency') {
+                      setMappingMode('competency');
+                    }
+                  }}
+                  className={`
+                    h-full px-3 text-xs font-semibold rounded-md transition-all duration-200 flex items-center justify-center
+                    ${
+                      mappingMode === 'competency'
+                        ? 'bg-white text-slate-900 shadow-sm'
+                        : 'text-slate-500 hover:text-slate-700'
+                    }
+                  `}
+                >
+                  Competencies
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (mappingMode !== 'resource') {
+                      setMappingMode('resource');
+                    }
+                  }}
+                  className={`
+                    h-full px-3 text-xs font-semibold rounded-md transition-all duration-200 flex items-center justify-center
+                    ${
+                      mappingMode === 'resource'
+                        ? 'bg-white text-slate-900 shadow-sm'
+                        : 'text-slate-500 hover:text-slate-700'
+                    }
+                  `}
+                >
+                  Resources
+                </button>
+              </div>
               <button
                 type="button"
-                onClick={() => {
-                  if (mappingMode !== 'competency') {
-                    setMappingMode('competency');
-                  }
-                }}
-                className={`
-                  px-3 py-1.5 text-xs font-semibold rounded-md transition-all duration-200
-                  ${
-                    mappingMode === 'competency'
-                      ? 'bg-white text-slate-900 shadow-sm'
-                      : 'text-slate-500 hover:text-slate-700'
-                  }
-                `}
+                onClick={() => setShowSessionSummary(true)}
+                className="flex h-9 items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-4 text-xs font-semibold text-slate-600 transition-all duration-200 hover:bg-red-50 hover:text-red-600 hover:border-red-200"
               >
-                Competencies
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  if (mappingMode !== 'resource') {
-                    setMappingMode('resource');
-                  }
-                }}
-                className={`
-                  px-3 py-1.5 text-xs font-semibold rounded-md transition-all duration-200
-                  ${
-                    mappingMode === 'resource'
-                      ? 'bg-white text-slate-900 shadow-sm'
-                      : 'text-slate-500 hover:text-slate-700'
-                  }
-                `}
-              >
-                Resources
+                <LogOut className="h-3.5 w-3.5" />
+                End Session
               </button>
             </div>
           </div>
@@ -697,7 +838,19 @@ export function SessionPage() {
             </Card>
           )}
 
-          {noCompetencies && !error && (
+          {allDone && !error && (
+            <Card className="border border-emerald-200 bg-emerald-50/80">
+              <CardHeader>
+                <CardTitle className="text-emerald-800">🎉 All done!</CardTitle>
+                <CardDescription className="text-emerald-700">
+                  You've voted on every available competency pair. Great work!
+                  Check back later when more competencies have been added.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          )}
+
+          {noCompetencies && !allDone && !error && (
             <Card className="border border-red-100 bg-red-50/80">
               <CardHeader>
                 <CardTitle className="text-red-800">
@@ -726,7 +879,7 @@ export function SessionPage() {
             </Card>
           )}
 
-          {!error && !noCompetencies && !notEnough && (
+          {!error && !allDone && !noCompetencies && !notEnough && (
             <>
               <div className="flex flex-col items-center justify-center text-center space-y-2 mx-auto w-full">
                 {isLoading || !competencies?.length ? (
@@ -852,6 +1005,7 @@ export function SessionPage() {
                           size="sm"
                           onClick={() => {
                             setSwapRotation(prev => prev + 180);
+                            setIsSwapped(prev => !prev);
                             setIsTransitioning(true);
                             setTimeout(() => {
                               if (competencies && competencies.length >= 2) {
@@ -1148,6 +1302,11 @@ export function SessionPage() {
           )}
         </section>
       </main>
+
+      {/* ─── Session Summary Overlay ─── */}
+      {showSessionSummary && (
+        <SessionSummary stats={stats} onContinue={handleContinueSession} />
+      )}
     </div>
   );
 }
