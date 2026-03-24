@@ -36,7 +36,7 @@ export function AboutPage() {
           </div>
           <div className="flex flex-wrap items-center justify-center gap-3">
             <Button
-              className="h-12 rounded-full bg-[#0a4da2] px-7 text-base font-semibold text-white shadow-[0_18px_45px_-26px_rgba(7,30,84,0.75)] transition hover:bg-[#0d56b5] dark:bg-[#3b7dd8] dark:hover:bg-[#4a8de5]"
+              className="h-12 rounded-full bg-gradient-to-r from-[#0a4da2] to-[#7c6cff] px-7 text-base font-semibold text-white shadow-[0_18px_45px_-26px_rgba(7,30,84,0.75)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_55px_-30px_rgba(7,30,84,0.6)]"
               asChild
             >
               <Link to="/session">Try the Platform</Link>

@@ -36,9 +36,9 @@ export function Navbar() {
     <header
       role="banner"
       className={cn(
-        'sticky top-0 z-50 border-b border-white/30 bg-white/15 backdrop-blur-xl dark:border-slate-800/30 dark:bg-slate-900/15 supports-[backdrop-filter]:bg-white/12 transition-shadow duration-200',
+        'sticky top-0 z-50 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl dark:border-slate-700/70 dark:bg-slate-900/90 transition-shadow duration-200',
         scrolled
-          ? 'shadow-[0_10px_30px_-12px_rgba(15,23,42,0.35)]'
+          ? 'shadow-[0_8px_32px_-8px_rgba(15,23,42,0.18)] dark:shadow-[0_8px_32px_-8px_rgba(0,0,0,0.5)]'
           : 'shadow-none'
       )}
       style={{ maxHeight: '5rem' }}
@@ -56,11 +56,15 @@ export function Navbar() {
               className="group inline-flex items-center gap-2 rounded-md px-1.5 py-1 text-slate-900 transition hover:text-[#0a4da2] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0a4da2] focus-visible:ring-offset-2 dark:text-white dark:hover:text-[#b3c8ff]"
               aria-label="Memo - Home"
             >
-              <img src="/logoV4.svg" alt="Memo logo" className="h-13 w-13" />
+              <img
+                src="/logoV4.svg"
+                alt="Memo logo"
+                className="h-13 w-13 drop-shadow-sm dark:brightness-0 dark:invert"
+              />
               <span className="font-bold text-lg">Memo</span>
             </Link>
             <span
-              className="rounded-full border border-slate-200/80 bg-white/70 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-600 shadow-sm dark:border-slate-800/80 dark:bg-slate-900/80 dark:text-slate-300"
+              className="rounded-full border border-slate-200 bg-slate-100/90 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-600 shadow-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
               aria-label={`Version ${APP_VERSION}`}
             >
               v{APP_VERSION}
@@ -69,7 +73,7 @@ export function Navbar() {
 
           {/* Center - Sliding nav */}
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-            <div className="pointer-events-auto relative flex w-[16rem] max-w-full items-center justify-between rounded-full border border-slate-200/80 bg-white/70 px-[0px] py-[8px] shadow-inner backdrop-blur dark:border-slate-800/70 dark:bg-slate-900/70">
+            <div className="pointer-events-auto relative flex w-[16rem] max-w-full items-center justify-between rounded-full border border-slate-200 bg-slate-100/90 px-[0px] py-[8px] shadow-inner backdrop-blur dark:border-slate-700 dark:bg-slate-800/90">
               {activeIndex >= 0 && (
                 <div
                   className="absolute inset-y-1 rounded-full bg-gradient-to-r from-[#0a4da2] to-[#7c6cff] shadow-md transition-all duration-300 ease-out"
@@ -103,7 +107,7 @@ export function Navbar() {
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
               className={cn(
                 'flex h-9 w-9 items-center justify-center rounded-full border shadow-sm transition hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0a4da2] focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900',
-                'border-slate-200/80 bg-white/70 text-slate-700 hover:bg-white/100 dark:border-slate-800/70 dark:bg-slate-900/80 dark:text-slate-200 dark:hover:bg-slate-800/80'
+                'border-slate-200 bg-slate-100/90 text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700'
               )}
               aria-label={
                 mounted
@@ -154,7 +158,7 @@ export function Navbar() {
                 'group flex h-9 items-center justify-center gap-2 rounded-full border px-4 shadow-sm transition hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0a4da2] focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900',
                 pathname === '/dashboard'
                   ? 'border-[#0a4da2]/50 bg-gradient-to-br from-[#0a4da2]/10 to-[#7c6cff]/10 text-[#0a4da2] ring-1 ring-[#0a4da2]/20 dark:border-[#7c6cff]/50 dark:text-[#b3c8ff] dark:ring-[#7c6cff]/20'
-                  : 'border-slate-200/80 bg-white/70 text-slate-700 hover:bg-white/100 dark:border-slate-800/70 dark:bg-slate-900/80 dark:text-slate-200 dark:hover:bg-slate-800/80'
+                  : 'border-slate-200 bg-slate-100/90 text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700'
               )}
               aria-label="Your Dashboard"
             >

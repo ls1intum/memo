@@ -15,12 +15,12 @@ export interface NetworkEdge {
 }
 
 const NETWORK_NODES: NetworkNode[] = [
-  { id: 'methods', label: 'Methods', x: 80, y: 50, color: '#0a4da2' },
-  { id: 'functions', label: 'Functions', x: 80, y: 150, color: '#0a4da2' },
-  { id: 'recursion', label: 'Recursion', x: 280, y: 100, color: '#5538d1' },
-  { id: 'mergesort', label: 'Merge Sort', x: 480, y: 50, color: '#7c3aed' },
-  { id: 'sorting', label: 'Sorting', x: 600, y: 50, color: '#7c3aed' },
-  { id: 'trees', label: 'Tree Traversal', x: 480, y: 155, color: '#9b5dfa' },
+  { id: 'methods', label: 'Methods', x: 80, y: 50, color: '#3b82f6' },
+  { id: 'functions', label: 'Functions', x: 80, y: 150, color: '#3b82f6' },
+  { id: 'recursion', label: 'Recursion', x: 280, y: 100, color: '#8b5cf6' },
+  { id: 'mergesort', label: 'Merge Sort', x: 480, y: 50, color: '#a855f7' },
+  { id: 'sorting', label: 'Sorting', x: 600, y: 50, color: '#a855f7' },
+  { id: 'trees', label: 'Tree Traversal', x: 480, y: 155, color: '#c084fc' },
 ];
 
 const NETWORK_EDGES: NetworkEdge[] = [
@@ -32,9 +32,9 @@ const NETWORK_EDGES: NetworkEdge[] = [
 ];
 
 const EDGE_COLORS: Record<string, string> = {
-  assumes: '#0a4da2',
-  extends: '#7c3aed',
-  matches: '#10b981',
+  assumes: '#60a5fa',
+  extends: '#a78bfa',
+  matches: '#34d399',
 };
 
 export interface CompetencyNetworkVizProps {
@@ -126,7 +126,7 @@ export function CompetencyNetworkViz({
             markerHeight="6"
             orient="auto-start-reverse"
           >
-            <path d="M0,0 L10,3 L0,6" fill="#0a4da2" fillOpacity="0.5" />
+            <path d="M0,0 L10,3 L0,6" fill="#60a5fa" fillOpacity="0.9" />
           </marker>
           <marker
             id={`${idPrefix}-arrow-extends`}
@@ -137,7 +137,7 @@ export function CompetencyNetworkViz({
             markerHeight="6"
             orient="auto-start-reverse"
           >
-            <path d="M0,0 L10,3 L0,6" fill="#7c3aed" fillOpacity="0.5" />
+            <path d="M0,0 L10,3 L0,6" fill="#a78bfa" fillOpacity="0.9" />
           </marker>
           <filter
             id={`${idPrefix}-node-shadow`}
@@ -150,7 +150,7 @@ export function CompetencyNetworkViz({
               dx="0"
               dy="2"
               stdDeviation="3"
-              floodColor="#0a4da2"
+              floodColor="#2563eb"
               floodOpacity="0.12"
             />
           </filter>
@@ -187,8 +187,8 @@ export function CompetencyNetworkViz({
                 x2={x2}
                 y2={y2}
                 stroke={EDGE_COLORS[edge.label] ?? '#94a3b8'}
-                strokeWidth={1.5}
-                strokeOpacity={0.4}
+                strokeWidth={2}
+                strokeOpacity={0.75}
                 markerEnd={isDirectional ? markerId : undefined}
                 {...lineAnimation}
                 transition={{ delay: 0.3 + i * 0.08, duration: 0.4 }}
@@ -199,9 +199,9 @@ export function CompetencyNetworkViz({
                 textAnchor="middle"
                 fill={EDGE_COLORS[edge.label] ?? '#94a3b8'}
                 fontSize={9}
-                fontWeight={600}
+                fontWeight={700}
                 fontFamily="Geist, system-ui, sans-serif"
-                opacity={0.6}
+                opacity={0.9}
                 {...textAnimation}
                 transition={{ delay: 0.7 + i * 0.08, duration: 0.4 }}
               >
@@ -218,7 +218,7 @@ export function CompetencyNetworkViz({
               cx={node.x}
               cy={node.y}
               r={32}
-              fill="white"
+              fill="var(--network-node-fill, white)"
               stroke={node.color}
               strokeWidth={2}
               filter={`url(#${idPrefix}-node-shadow)`}
@@ -228,7 +228,7 @@ export function CompetencyNetworkViz({
               y={node.y}
               textAnchor="middle"
               dominantBaseline="middle"
-              fill={node.color}
+              fill="var(--network-text, #1e293b)"
               fontSize={9}
               fontWeight={700}
               fontFamily="Geist, system-ui, sans-serif"
@@ -251,7 +251,7 @@ export function CompetencyNetworkViz({
       </svg>
       <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-5 mt-3 md:mt-4 text-xs font-medium text-slate-500 dark:text-slate-400">
         <span className="flex items-center gap-1.5">
-          <span className="inline-block h-3 w-3 rounded-full border-2 border-[#0a4da2] bg-white dark:bg-slate-800 shadow-sm" />
+          <span className="inline-block h-3 w-3 rounded-full border-2 border-[#3b82f6] bg-white dark:bg-slate-800 shadow-sm" />
           Competency
         </span>
         <div className="hidden sm:block h-3.5 w-px bg-slate-300/80 dark:bg-slate-600/80 rounded-full" />

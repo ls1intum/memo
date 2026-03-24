@@ -199,7 +199,7 @@ export const OnboardingPractice = forwardRef<
                 i < round
                   ? 'bg-emerald-500 text-white'
                   : i === round
-                    ? 'bg-gradient-to-br from-[#0a4da2] to-[#5538d1] text-white ring-2 ring-[#0a4da2]/30 ring-offset-2 dark:ring-offset-slate-800'
+                    ? 'bg-gradient-to-br from-[#0a4da2] to-[#7c6cff] text-white ring-2 ring-[#0a4da2]/30 ring-offset-2 dark:ring-offset-slate-800'
                     : 'bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400'
               }`}
             >

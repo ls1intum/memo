@@ -1292,7 +1292,7 @@ export function SessionPage() {
                         ${
                           mappingMode === 'resource'
                             ? 'bg-gradient-to-r from-pink-600 to-pink-500 shadow-lg shadow-pink-500/20 hover:shadow-xl hover:shadow-pink-500/30 dark:shadow-pink-950/40 dark:hover:shadow-pink-950/50'
-                            : 'bg-gradient-to-r from-[#0a4da2] to-[#5538d1] shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/30 dark:shadow-blue-950/40 dark:hover:shadow-blue-950/50'
+                            : 'bg-gradient-to-r from-[#0a4da2] to-[#7c6cff] shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/30'
                         }
                         transition-all duration-200 ease-out
                         hover:scale-[1.02]

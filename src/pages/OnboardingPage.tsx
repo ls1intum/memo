@@ -196,7 +196,7 @@ export function OnboardingPage() {
               type="button"
               onClick={goNext}
               disabled={!canAdvance}
-              className={`flex items-center gap-2 rounded-full bg-gradient-to-r from-[#0a4da2] to-[#5538d1] px-6 py-5 text-sm font-bold text-white shadow-[0_18px_45px_-26px_rgba(7,30,84,0.75)] transition-all hover:-translate-y-0.5 hover:shadow-[0_22px_55px_-28px_rgba(7,30,84,0.85)] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0 dark:from-[#3b7dd8] dark:to-[#7b6be5] dark:shadow-[0_18px_45px_-26px_rgba(0,0,0,0.75)]`}
+              className={`flex items-center gap-2 rounded-full bg-gradient-to-r from-[#0a4da2] to-[#7c6cff] px-6 py-5 text-sm font-bold text-white shadow-[0_18px_45px_-26px_rgba(7,30,84,0.75)] transition-all hover:-translate-y-0.5 hover:shadow-[0_22px_55px_-28px_rgba(7,30,84,0.85)] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0`}
             >
               {step === 3 && !practiceCompleted
                 ? isPracticeLastRound

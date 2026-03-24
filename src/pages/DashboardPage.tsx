@@ -168,7 +168,7 @@ export function DashboardPage() {
               Redo Onboarding
             </button>
             <Button
-              className="h-12 rounded-full bg-gradient-to-r from-[#0a4da2] to-[#7c6cff] px-7 text-base font-semibold text-white shadow-[0_18px_45px_-26px_rgba(7,30,84,0.75)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_55px_-30px_rgba(7,30,84,0.6)] dark:from-[#3b7dd8] dark:to-[#9b8aff] dark:shadow-[0_18px_45px_-26px_rgba(0,0,0,0.75)]"
+              className="h-12 rounded-full bg-gradient-to-r from-[#0a4da2] to-[#7c6cff] px-7 text-base font-semibold text-white shadow-[0_18px_45px_-26px_rgba(7,30,84,0.75)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_55px_-30px_rgba(7,30,84,0.6)]"
               asChild
             >
               <Link to="/session">Start Mapping Session</Link>

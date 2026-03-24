@@ -17,9 +17,9 @@ export type ResourceMatchType =
   | 'PERFECT_MATCH';
 
 export const THEME_COLORS = {
-  source: { primary: '#0a4da2', secondary: '#4263eb' },
-  destination: { primary: '#7c3aed', secondary: '#9775fa' },
-  resource: { primary: '#be185d', secondary: '#f472b6' },
+  source: { primary: '#1a5fd4', secondary: '#60a5fa' },
+  destination: { primary: '#6d28d9', secondary: '#c084fc' },
+  resource: { primary: '#db2777', secondary: '#fb7185' },
 } as const;
 
 export type RelationshipTypeOption = {
