@@ -27,4 +27,6 @@ public interface CompetencyRepository extends JpaRepository<Competency, String> 
     @org.springframework.data.jpa.repository.Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query(value = "UPDATE competencies SET degree = GREATEST(degree - 1, 0) WHERE id IN :ids", nativeQuery = true)
     void decrementDegree(@Param("ids") List<String> ids);
+
+    boolean existsByTitle(String title);
 }
