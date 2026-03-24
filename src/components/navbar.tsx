@@ -36,9 +36,9 @@ export function Navbar() {
     <header
       role="banner"
       className={cn(
-        'sticky top-0 z-50 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl dark:border-slate-700/70 dark:bg-slate-900/90 transition-shadow duration-200',
+        'sticky top-0 z-50 border-b border-white/30 bg-white/15 backdrop-blur-xl dark:border-slate-800/30 dark:bg-slate-900/15 supports-[backdrop-filter]:bg-white/12 transition-shadow duration-200',
         scrolled
-          ? 'shadow-[0_8px_32px_-8px_rgba(15,23,42,0.18)] dark:shadow-[0_8px_32px_-8px_rgba(0,0,0,0.5)]'
+          ? 'shadow-[0_10px_30px_-12px_rgba(15,23,42,0.35)]'
           : 'shadow-none'
       )}
       style={{ maxHeight: '5rem' }}
