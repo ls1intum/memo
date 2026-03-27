@@ -43,21 +43,55 @@ import {
   OnboardingPractice,
   OnboardingPracticeRef,
 } from '@/components/onboarding/OnboardingPractice';
+import { useAuth } from '@/contexts/useAuth';
 
 const TOTAL_STEPS = 5;
 const ONBOARDED_KEY = 'memo-onboarded';
+const SESSION_DEGREE_KEY = 'onboarding-degree';
+const SESSION_FIELD_KEY = 'onboarding-field';
 
 export function OnboardingPage() {
-  const [step, setStep] = useState(0);
+  const {
+    isAuthenticated,
+    isLoading: isAuthLoading,
+    domainError,
+    logout,
+    onboardingLogin,
+  } = useAuth();
+  const [step, setStep] = useState(() => {
+    try {
+      const s = parseInt(
+        new URLSearchParams(window.location.search).get('step') ?? '0',
+        10
+      );
+      return isNaN(s) || s < 0 || s >= TOTAL_STEPS ? 0 : s;
+    } catch {
+      return 0;
+    }
+  });
   const [direction, setDirection] = useState(1);
   const [consentChecked, setConsentChecked] = useState(false);
   const [practiceCompleted, setPracticeCompleted] = useState(false);
   const [currentPracticeCorrect, setCurrentPracticeCorrect] = useState(false);
   const [isPracticeLastRound, setIsPracticeLastRound] = useState(false);
-  const [selectedDegree, setSelectedDegree] = useState<string | null>(null);
-  const [fieldOfStudy, setFieldOfStudy] = useState<string>('');
+  const [selectedDegree, setSelectedDegree] = useState<string | null>(
+    () => sessionStorage.getItem(SESSION_DEGREE_KEY) || null
+  );
+  const [fieldOfStudy, setFieldOfStudy] = useState<string>(
+    () => sessionStorage.getItem(SESSION_FIELD_KEY) || ''
+  );
   const practiceRef = useRef<OnboardingPracticeRef>(null);
   const navigate = useNavigate();
+
+  function handleSelectDegree(degree: string) {
+    setSelectedDegree(degree);
+    sessionStorage.setItem(SESSION_DEGREE_KEY, degree);
+  }
+
+  function handleFieldOfStudyChange(field: string) {
+    setFieldOfStudy(field);
+    sessionStorage.setItem(SESSION_FIELD_KEY, field);
+  }
 
   const goNext = useCallback(() => {
     if (step === 3 && currentPracticeCorrect && !practiceCompleted) {
@@ -107,12 +141,36 @@ export function OnboardingPage() {
 
   const canAdvance =
     step === 2
-      ? selectedDegree !== null && fieldOfStudy.trim().length > 0
+      ? isAuthenticated &&
+        selectedDegree !== null &&
+        fieldOfStudy.trim().length > 0
       : step === 3
         ? practiceCompleted || currentPracticeCorrect
         : step === 4
           ? consentChecked
           : true;
+
+  if (domainError) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-8 px-4">
+        <div className="flex flex-col items-center gap-2">
+          <GraduationCap className="h-12 w-12" />
+          <h1 className="text-2xl font-semibold tracking-tight">
+            Access denied
+          </h1>
+          <p className="max-w-xs text-center text-sm text-muted-foreground">
+            Your email domain is not permitted. Please use a university email
+            address.
+          </p>
+        </div>
+        <div className="w-full max-w-sm rounded-lg border p-6">
+          <Button variant="outline" className="w-full" onClick={() => logout()}>
+            Sign out and try a different account
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#d7e3ff] via-[#f3f5ff] to-[#e8ecff] text-slate-900">
@@ -152,10 +210,12 @@ export function OnboardingPage() {
           {step === 2 && (
             <StepProfile
               selectedDegree={selectedDegree}
-              onSelectDegree={setSelectedDegree}
+              onSelectDegree={handleSelectDegree}
               fieldOfStudy={fieldOfStudy}
-              onFieldOfStudyChange={setFieldOfStudy}
-              onSignIn={goNext}
+              onFieldOfStudyChange={handleFieldOfStudyChange}
+              onSignIn={onboardingLogin}
+              isAuthenticated={isAuthenticated}
+              isAuthLoading={isAuthLoading}
             />
           )}
           {step === 3 && (
@@ -212,6 +272,8 @@ export function OnboardingPage() {
               onClick={() => {
                 try {
                   localStorage.setItem(ONBOARDED_KEY, '1');
+                  sessionStorage.removeItem(SESSION_DEGREE_KEY);
+                  sessionStorage.removeItem(SESSION_FIELD_KEY);
                 } catch (e) {
                   // eslint-disable-next-line no-console
                   console.warn('localStorage unavailable', e);
@@ -391,12 +453,16 @@ function StepProfile({
   fieldOfStudy,
   onFieldOfStudyChange,
   onSignIn,
+  isAuthenticated,
+  isAuthLoading,
 }: {
   selectedDegree: string | null;
   onSelectDegree: (degree: string) => void;
   fieldOfStudy: string;
   onFieldOfStudyChange: (field: string) => void;
   onSignIn: () => void;
+  isAuthenticated: boolean;
+  isAuthLoading: boolean;
 }) {
   const [domainOpen, setDomainOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -435,13 +501,24 @@ function StepProfile({
             We use your university account to securely record your contributions
             while keeping your data private.
           </p>
-          <button
-            type="button"
-            onClick={onSignIn}
-            className="flex w-full sm:w-auto self-start mt-2 items-center justify-center gap-2 rounded-xl bg-white border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 hover:border-slate-300 hover:-translate-y-0.5"
-          >
-            <span>Sign in via University</span>
-          </button>
+          {isAuthLoading ? (
+            <span className="mt-2 text-sm text-slate-500">
+              Checking authentication…
+            </span>
+          ) : isAuthenticated ? (
+            <div className="flex items-center gap-2 mt-2 text-sm font-semibold text-emerald-700">
+              <CheckCircle2 className="h-4 w-4" />
+              Signed in via University
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={onSignIn}
+              className="flex w-full sm:w-auto self-start mt-2 items-center justify-center gap-2 rounded-xl bg-white border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 hover:border-slate-300 hover:-translate-y-0.5"
+            >
+              <span>Sign in via University Email</span>
+            </button>
+          )}
         </div>
 
         {/* Demographics Card */}
@@ -689,9 +766,18 @@ function StepConsent({
             <span className="font-semibold text-slate-900">
               ground-truth benchmark data
             </span>{' '}
-            for evaluating competency-aware recommender systems. My
-            contributions are private and will only be accessible anonymized
-            during this research project.
+            to evaluate competency-aware recommender systems. My contributions
+            will remain private and, within this research project, will only be
+            used in anonymized form. I agree to the{' '}
+            <a
+              href="/privacy"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-semibold text-[#0a4da2] underline underline-offset-2 hover:text-[#0d56b5]"
+            >
+              privacy policy
+            </a>
+            .
           </span>
         </label>
       </div>

@@ -1,17 +1,10 @@
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { CompetencyNetworkViz } from '@/components/competency-network/CompetencyNetworkViz';
+import { useAuth } from '@/contexts/useAuth';
 
 const ONBOARDED_KEY = 'memo-onboarded';
-
-function getStartHref(): string {
-  try {
-    return localStorage.getItem(ONBOARDED_KEY) ? '/session' : '/onboarding';
-  } catch {
-    return '/onboarding';
-  }
-}
 
 type ProblemStatement = {
   headline: string;
@@ -42,6 +35,19 @@ const problemStatements: ProblemStatement[] = [
 const [leadProblem, ...otherProblems] = problemStatements;
 
 export function HomePage() {
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+
+  function handleStartContributing() {
+    let onboarded = false;
+    try {
+      onboarded = !!localStorage.getItem(ONBOARDED_KEY);
+    } catch {
+      /* ignore */
+    }
+    void navigate(isAuthenticated && onboarded ? '/session' : '/onboarding');
+  }
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#d7e3ff] via-[#f3f5ff] to-[#e8ecff] text-slate-900">
       <LiquidGlassGradient />
@@ -65,10 +71,10 @@ export function HomePage() {
             </div>
             <div className="flex flex-wrap gap-3">
               <Button
+                onClick={handleStartContributing}
                 className="h-12 rounded-full bg-[#0a4da2] px-7 text-base font-semibold text-white shadow-[0_18px_45px_-26px_rgba(7,30,84,0.75)] transition hover:bg-[#0d56b5]"
-                asChild
               >
-                <Link to={getStartHref()}>Start Contributing</Link>
+                Start Contributing
               </Button>
             </div>
             <div className="relative flex justify-center pt-20 pb-12">

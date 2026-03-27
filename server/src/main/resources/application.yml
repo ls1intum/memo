@@ -2,6 +2,13 @@ spring:
   application:
     name: memo-api
 
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8081/realms/memo}
+          jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:http://localhost:8081/realms/memo/protocol/openid-connect/certs}
+
   datasource:
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:memo}
     username: ${DB_USER:postgres}
@@ -22,6 +29,7 @@ spring:
   flyway:
     enabled: true
     baseline-on-migrate: true
+    validate-on-migrate: false
     locations: classpath:db/migration
 
 server:
@@ -36,6 +44,89 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
     enabled: true
+
+memo:
+  # Restrict access to specific email domains. Leave empty to allow all domains.
+  allowed-email-domains:
+    # --- TUM ---
+    - tum.de
+    - mytum.de
+    - in.tum.de
+    - mse.tum.de
+    - ma.tum.de
+    # --- LMU München ---
+    - lmu.de
+    - campus.lmu.de
+    # --- RWTH Aachen ---
+    - rwth-aachen.de
+    - stud.rwth-aachen.de
+    # --- KIT ---
+    - kit.edu
+    - student.kit.edu
+    # --- TU Berlin ---
+    - tu-berlin.de
+    - campus.tu-berlin.de
+    # --- TU Dresden ---
+    - tu-dresden.de
+    # --- TU Darmstadt ---
+    - tu-darmstadt.de
+    - stud.tu-darmstadt.de
+    # --- FU Berlin ---
+    - fu-berlin.de
+    - zedat.fu-berlin.de
+    # --- HU Berlin ---
+    - hu-berlin.de
+    # --- Universität Hamburg ---
+    - uni-hamburg.de
+    # --- Universität Freiburg ---
+    - uni-freiburg.de
+    # --- Leibniz Universität Hannover ---
+    - uni-hannover.de
+    - stud.uni-hannover.de
+    # --- Universität zu Köln ---
+    - uni-koeln.de
+    - smail.uni-koeln.de
+    # --- Goethe-Universität Frankfurt ---
+    - uni-frankfurt.de
+    - em.uni-frankfurt.de
+    # --- Universität Stuttgart ---
+    - uni-stuttgart.de
+    - stud.uni-stuttgart.de
+    # --- Universität Heidelberg ---
+    - uni-heidelberg.de
+    - stud.uni-heidelberg.de
+    # --- Universität Tübingen ---
+    - uni-tuebingen.de
+    - student.uni-tuebingen.de
+    # --- Universität Bonn ---
+    - uni-bonn.de
+    # --- Universität Münster ---
+    - uni-muenster.de
+    - uni-ms.de
+    # --- Universität Göttingen ---
+    - uni-goettingen.de
+    - stud.uni-goettingen.de
+    # --- Universität Konstanz ---
+    - uni-konstanz.de
+    - stu.uni-konstanz.de
+    # --- Universität Passau ---
+    - uni-passau.de
+    # --- Universität Bremen ---
+    - uni-bremen.de
+    # --- Universität Rostock ---
+    - uni-rostock.de
+    # --- Universität Würzburg ---
+    - uni-wuerzburg.de
+    # --- Universität Kiel ---
+    - uni-kiel.de
+    - email.uni-kiel.de
+    # --- Universität Bamberg ---
+    - uni-bamberg.de
+    # --- Universität Erlangen-Nürnberg ---
+    - fau.de
+    - fau.eu
+    # --- Dev / demo (remove in production) ---
+    - memo.local
 
 logging:
   level:

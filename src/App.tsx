@@ -11,6 +11,8 @@ import { OnboardingPage } from './pages/OnboardingPage';
 import { ImprintPage } from './pages/ImprintPage';
 import { PrivacyPage } from './pages/PrivacyPage';
 import { DashboardPage } from './pages/DashboardPage';
+import { ProtectedRoute } from './components/ProtectedRoute';
+import { AuthProvider } from './contexts/AuthContext';
 
 export function App() {
   const [queryClient] = useState(
@@ -27,20 +29,24 @@ export function App() {
 
   return (
     <ThemeProvider defaultTheme="system" storageKey="memo-theme">
-      <QueryClientProvider client={queryClient}>
-        <Toaster position="top-center" richColors />
-        <Routes>
-          <Route element={<Layout />}>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/about" element={<AboutPage />} />
-            <Route path="/session" element={<SessionPage />} />
-            <Route path="/onboarding" element={<OnboardingPage />} />
-            <Route path="/imprint" element={<ImprintPage />} />
-            <Route path="/privacy" element={<PrivacyPage />} />
-          </Route>
-        </Routes>
-      </QueryClientProvider>
+      <AuthProvider>
+        <QueryClientProvider client={queryClient}>
+          <Toaster position="top-center" richColors />
+          <Routes>
+            <Route element={<Layout />}>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/about" element={<AboutPage />} />
+              <Route path="/imprint" element={<ImprintPage />} />
+              <Route path="/privacy" element={<PrivacyPage />} />
+              <Route path="/onboarding" element={<OnboardingPage />} />
+              <Route element={<ProtectedRoute />}>
+                <Route path="/dashboard" element={<DashboardPage />} />
+                <Route path="/session" element={<SessionPage />} />
+              </Route>
+            </Route>
+          </Routes>
+        </QueryClientProvider>
+      </AuthProvider>
     </ThemeProvider>
   );
 }

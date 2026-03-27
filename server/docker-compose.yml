@@ -38,6 +38,15 @@ services:
     networks:
       - memo-network
 
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: memo-mailpit
+    ports:
+      - '1025:1025'
+      - '8025:8025'
+    networks:
+      - memo-network
+
   keycloak:
     image: quay.io/keycloak/keycloak:26.4
     container_name: memo-keycloak
@@ -83,7 +92,7 @@ services:
       DB_NAME: memo
       DB_USER: postgres
       DB_PASSWORD: memo
-      KEYCLOAK_ISSUER_URI: http://keycloak:8080/realms/memo
+      KEYCLOAK_ISSUER_URI: http://localhost:8081/realms/memo
       KEYCLOAK_JWK_SET_URI: http://keycloak:8080/realms/memo/protocol/openid-connect/certs
       SPRING_PROFILES_ACTIVE: local
     ports:
