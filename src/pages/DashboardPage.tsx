@@ -25,8 +25,8 @@ function BadgeCard({
     <div
       className={`relative overflow-hidden rounded-2xl border-2 p-5 transition-all duration-300 ${
         earned
-          ? 'border-white/80 bg-white/90 shadow-[0_16px_50px_-16px_rgba(7,30,84,0.4)] hover:-translate-y-1 hover:shadow-[0_20px_60px_-20px_rgba(7,30,84,0.5)]'
-          : 'border-slate-200/80 bg-slate-50/50 opacity-50 grayscale'
+          ? 'border-white/80 bg-white/90 shadow-[0_16px_50px_-16px_rgba(7,30,84,0.4)] hover:-translate-y-1 hover:shadow-[0_20px_60px_-20px_rgba(7,30,84,0.5)] dark:bg-slate-800/90 dark:border-slate-600/80 dark:shadow-[0_16px_50px_-16px_rgba(0,0,0,0.5)] dark:hover:shadow-[0_20px_60px_-20px_rgba(0,0,0,0.6)]'
+          : 'border-slate-200/80 bg-slate-50/50 opacity-50 grayscale dark:border-slate-700/50 dark:bg-slate-800/30'
       }`}
     >
       {earned && (
@@ -43,14 +43,18 @@ function BadgeCard({
         </div>
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <h3 className="text-sm font-bold text-slate-900">{badge.name}</h3>
+            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+              {badge.name}
+            </h3>
           </div>
-          <p className="mt-0.5 text-xs text-slate-500">{badge.description}</p>
+          <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+            {badge.description}
+          </p>
         </div>
       </div>
       {earned && (
         <div className="absolute right-3 top-3">
-          <div className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+          <div className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-900/50 dark:text-emerald-400">
             <svg className="h-3 w-3" viewBox="0 0 12 12" fill="none">
               <path
                 d="M2 6L5 9L10 3"
@@ -79,19 +83,21 @@ function StatCard({
   accentColor: string;
 }) {
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-white/70 bg-white/85 p-6 shadow-[0_16px_50px_-20px_rgba(7,30,84,0.3)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_60px_-24px_rgba(7,30,84,0.4)]">
+    <div className="relative overflow-hidden rounded-2xl border border-white/70 bg-white/85 p-6 shadow-[0_16px_50px_-20px_rgba(7,30,84,0.3)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_60px_-24px_rgba(7,30,84,0.4)] dark:border-slate-700/50 dark:bg-slate-800/60 dark:shadow-[0_16px_50px_-20px_rgba(0,0,0,0.5)] dark:hover:shadow-[0_20px_60px_-24px_rgba(0,0,0,0.6)]">
       <div
         className="pointer-events-none absolute -right-6 -top-6 h-20 w-20 rounded-full blur-[40px]"
         style={{ background: accentColor }}
       />
       <div className="relative z-10 space-y-3">
-        <div className="flex items-center gap-2 text-slate-500">
+        <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
           {icon}
           <span className="text-xs font-semibold uppercase tracking-wider">
             {label}
           </span>
         </div>
-        <p className="text-3xl font-bold text-slate-900">{value}</p>
+        <p className="text-3xl font-bold text-slate-900 dark:text-slate-100">
+          {value}
+        </p>
       </div>
     </div>
   );
@@ -128,20 +134,20 @@ export function DashboardPage() {
   );
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#d7e3ff] via-[#f3f5ff] to-[#e8ecff] text-slate-900">
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#d7e3ff] via-[#f3f5ff] to-[#e8ecff] text-slate-900 dark:from-[#0f1729] dark:via-[#111b30] dark:to-[#0f1729] dark:text-slate-100">
       <div className="absolute inset-0 -z-10 opacity-70">
-        <div className="absolute left-1/2 top-[-6rem] h-[36rem] w-[36rem] -translate-x-1/2 rounded-full bg-white/80 blur-[140px]" />
-        <div className="absolute left-[10%] top-[22%] h-80 w-80 rounded-full bg-[#7fb0ff]/35 blur-[120px]" />
-        <div className="absolute right-[14%] top-[28%] h-[22rem] w-[22rem] rounded-[40%] bg-gradient-to-br from-[#ffdff3]/55 via-[#fff3f8]/35 to-transparent blur-[140px]" />
+        <div className="absolute left-1/2 top-[-6rem] h-[36rem] w-[36rem] -translate-x-1/2 rounded-full bg-white/80 blur-[140px] dark:bg-slate-800/30" />
+        <div className="absolute left-[10%] top-[22%] h-80 w-80 rounded-full bg-[#7fb0ff]/35 blur-[120px] dark:bg-[#7fb0ff]/10" />
+        <div className="absolute right-[14%] top-[28%] h-[22rem] w-[22rem] rounded-[40%] bg-gradient-to-br from-[#ffdff3]/55 via-[#fff3f8]/35 to-transparent blur-[140px] dark:from-[#ffdff3]/10 dark:via-[#fff3f8]/5" />
       </div>
 
       <main className="relative z-10 mx-auto mt-20 flex w-full max-w-5xl flex-col gap-8 px-6 pb-24 lg:mt-24 lg:px-0">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="space-y-2">
-            <h1 className="text-3xl font-bold text-slate-900 sm:text-4xl">
+            <h1 className="text-3xl font-bold text-slate-900 sm:text-4xl dark:text-slate-100">
               Your Dashboard
             </h1>
-            <p className="text-base text-slate-600">
+            <p className="text-base text-slate-600 dark:text-slate-400">
               Track your contributions and unlock milestones.
             </p>
           </div>
@@ -156,7 +162,7 @@ export function DashboardPage() {
                 }
                 void navigate('/onboarding');
               }}
-              className="flex h-12 items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-5 text-sm font-semibold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-white hover:border-slate-300"
+              className="flex h-12 items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-5 text-sm font-semibold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-white hover:border-slate-300 dark:border-slate-600 dark:bg-slate-800/80 dark:text-slate-200 dark:hover:bg-slate-700/80 dark:hover:border-slate-500"
             >
               <BookOpen className="h-4 w-4" />
               Redo Onboarding
@@ -171,9 +177,11 @@ export function DashboardPage() {
         </div>
 
         {error && (
-          <div className="rounded-2xl border border-red-200 bg-red-50/80 px-6 py-5 text-red-800 shadow-sm">
+          <div className="rounded-2xl border border-red-200 bg-red-50/80 px-6 py-5 text-red-800 shadow-sm dark:border-red-800/50 dark:bg-red-900/30 dark:text-red-300">
             <p className="font-semibold">Failed to load statistics</p>
-            <p className="mt-1 text-sm text-red-700">{error}</p>
+            <p className="mt-1 text-sm text-red-700 dark:text-red-400">
+              {error}
+            </p>
           </div>
         )}
 
@@ -182,7 +190,7 @@ export function DashboardPage() {
             {[1, 2, 3].map(i => (
               <div
                 key={i}
-                className="h-32 animate-pulse rounded-2xl bg-white/60"
+                className="h-32 animate-pulse rounded-2xl bg-white/60 dark:bg-slate-800/40"
               />
             ))}
           </div>
@@ -220,13 +228,15 @@ export function DashboardPage() {
                 />
               </div>
 
-              <section className="flex flex-col overflow-hidden rounded-[24px] border border-white/70 bg-white/85 px-8 py-4 shadow-[0_20px_70px_-30px_rgba(7,30,84,0.35)] backdrop-blur-xl">
+              <section className="flex flex-col overflow-hidden rounded-[24px] border border-white/70 bg-white/85 px-8 py-4 shadow-[0_20px_70px_-30px_rgba(7,30,84,0.35)] backdrop-blur-xl dark:border-slate-700/50 dark:bg-slate-800/60 dark:shadow-[0_20px_70px_-30px_rgba(0,0,0,0.5)]">
                 <div className="mb-2 flex items-center justify-between">
-                  <h2 className="text-lg font-bold text-slate-800">
+                  <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">
                     Contribution Activity
                   </h2>
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-slate-400">Less</span>
+                    <span className="text-xs text-slate-400 dark:text-slate-500">
+                      Less
+                    </span>
                     {[0, 2, 5, 10, 15].map(level => (
                       <div
                         key={level}
@@ -234,7 +244,9 @@ export function DashboardPage() {
                         style={{ width: 12, height: 12 }}
                       />
                     ))}
-                    <span className="text-xs text-slate-400">More</span>
+                    <span className="text-xs text-slate-400 dark:text-slate-500">
+                      More
+                    </span>
                   </div>
                 </div>
                 <div className="flex-1 flex items-center min-h-0">
@@ -243,12 +255,12 @@ export function DashboardPage() {
               </section>
             </div>
 
-            <section className="rounded-[24px] border border-white/70 bg-white/85 px-8 py-6 shadow-[0_20px_70px_-30px_rgba(7,30,84,0.35)] backdrop-blur-xl">
+            <section className="rounded-[24px] border border-white/70 bg-white/85 px-8 py-6 shadow-[0_20px_70px_-30px_rgba(7,30,84,0.35)] backdrop-blur-xl dark:border-slate-700/50 dark:bg-slate-800/60 dark:shadow-[0_20px_70px_-30px_rgba(0,0,0,0.5)]">
               <div className="mb-5 flex items-center justify-between">
-                <h2 className="text-lg font-bold text-slate-800">
+                <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">
                   Milestone Badges
                 </h2>
-                <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
+                <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600 dark:bg-slate-700 dark:text-slate-300">
                   {earnedSet.size} / {MILESTONES.length} earned
                 </span>
               </div>
