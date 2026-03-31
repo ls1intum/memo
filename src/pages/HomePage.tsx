@@ -49,21 +49,21 @@ export function HomePage() {
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#d7e3ff] via-[#f3f5ff] to-[#e8ecff] text-slate-900">
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#d7e3ff] via-[#f3f5ff] to-[#e8ecff] text-slate-900 dark:from-[#0f1729] dark:via-[#111b30] dark:to-[#0f1729] dark:text-slate-100">
       <LiquidGlassGradient />
 
       <main className="relative z-20 mx-auto flex w-full max-w-6xl flex-col gap-28 px-6 pb-4 pt-[11.5rem] lg:px-0">
         <section id="overview" className="grid items-center gap-16 pb-8">
           <div className="space-y-12">
             <div className="space-y-8">
-              <h1 className="text-balance text-[3.2rem] font-semibold leading-[1.04] tracking-tight text-slate-900 sm:text-[3.9rem] lg:text-[4.9rem]">
+              <h1 className="text-balance text-[3.2rem] font-semibold leading-[1.04] tracking-tight text-slate-900 dark:text-slate-100 sm:text-[3.9rem] lg:text-[4.9rem]">
                 Personalized learning needs a{' '}
-                <span className="bg-gradient-to-r from-[#0a4da2] via-[#5538d1] to-[#9b5dfa] bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-[#0a4da2] via-[#5538d1] to-[#9b5dfa] bg-clip-text text-transparent dark:from-[#6b9fff] dark:via-[#9b7ff5] dark:to-[#c4a5ff]">
                   transparent competency benchmark
                 </span>
                 . Let&apos;s build it together.
               </h1>
-              <p className="max-w-4xl text-xl font-medium leading-relaxed text-slate-1000">
+              <p className="max-w-4xl text-xl font-medium leading-relaxed text-slate-1000 dark:text-slate-300">
                 Memo turns collaborative competency mapping into an open
                 benchmark dataset for fair, reproducible evaluation of
                 competency-aware recommender systems.
@@ -72,7 +72,7 @@ export function HomePage() {
             <div className="flex flex-wrap gap-3">
               <Button
                 onClick={handleStartContributing}
-                className="h-12 rounded-full bg-[#0a4da2] px-7 text-base font-semibold text-white shadow-[0_18px_45px_-26px_rgba(7,30,84,0.75)] transition hover:bg-[#0d56b5]"
+                className="h-12 rounded-full bg-gradient-to-r from-[#0a4da2] to-[#7c6cff] px-7 text-base font-semibold text-white shadow-[0_18px_45px_-26px_rgba(7,30,84,0.75)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_55px_-30px_rgba(7,30,84,0.6)]"
               >
                 Start Contributing
               </Button>
@@ -88,26 +88,26 @@ export function HomePage() {
                 />
               </div>
               <div className="pointer-events-none absolute left-1/2 bottom-10 flex w-screen -translate-x-1/2 items-end justify-center">
-                <div className="h-24 w-screen bg-gradient-to-b from-transparent via-white/70 to-white" />
+                <div className="h-24 w-screen bg-gradient-to-b from-transparent via-white/70 to-white dark:via-[#111b30]/70 dark:to-[#111b30]" />
               </div>
             </div>
           </div>
         </section>
 
-        <section className="relative isolate left-1/2 right-1/2 w-screen -translate-x-1/2 transform bg-white px-6 pb-[8.5rem] pt-32 lg:px-0 -mt-56">
+        <section className="relative isolate left-1/2 right-1/2 w-screen -translate-x-1/2 transform bg-white dark:bg-slate-900/90 px-6 pb-[8.5rem] pt-32 lg:px-0 -mt-56">
           <div className="relative mx-auto flex w-full max-w-5xl flex-col items-center gap-8 text-center">
-            <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-4 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-600">
+            <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-4 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400">
               Problem
             </span>
             <div className="space-y-4">
-              <h2 className="text-balance text-4xl font-semibold leading-tight text-slate-900 sm:text-[2.7rem] lg:text-[3rem]">
+              <h2 className="text-balance text-4xl font-semibold leading-tight text-slate-900 dark:text-slate-100 sm:text-[2.7rem] lg:text-[3rem]">
                 Missing Benchmarks for
                 <br />
                 Competency-Based Recommenders
               </h2>
-              <p className="text-lg leading-relaxed text-slate-700 line-clamp-2">
+              <p className="text-lg leading-relaxed text-slate-700 dark:text-slate-300 line-clamp-2">
                 Competency-based recommenders use{' '}
-                <span className="font-semibold text-slate-900">
+                <span className="font-semibold text-slate-900 dark:text-slate-100">
                   competency networks
                 </span>
                 —graphs of skills and their relationships—to suggest learning
@@ -130,20 +130,23 @@ export function HomePage() {
           id="challenges"
           className="relative isolate left-1/2 right-1/2 w-screen -translate-x-1/2 transform px-6 pb-30 pt-32 lg:px-0 -mt-24"
         >
-          <div className="absolute inset-0 bg-white" aria-hidden />
           <div
-            className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,0)_0%,rgba(255,255,255,1)_20%,rgba(255,255,255,1)_80%,rgba(255,255,255,0)_100%)]"
+            className="absolute inset-0 bg-white dark:bg-slate-900/90"
+            aria-hidden
+          />
+          <div
+            className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,0)_0%,rgba(255,255,255,1)_20%,rgba(255,255,255,1)_80%,rgba(255,255,255,0)_100%)] dark:bg-[linear-gradient(to_bottom,rgba(15,23,41,0)_0%,rgba(15,23,41,1)_20%,rgba(15,23,41,1)_80%,rgba(15,23,41,0)_100%)]"
             aria-hidden
           />
           <div className="relative mx-auto flex w-full max-w-6xl flex-col gap-12 px-6 lg:px-0">
             <div className="space-y-4 text-center">
-              <Badge className="mx-auto w-fit rounded-full border border-slate-200 bg-slate-50 px-4 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-[#0a4da2]">
+              <Badge className="mx-auto w-fit rounded-full border border-slate-200 bg-slate-50 px-4 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-[#0a4da2] dark:border-slate-700 dark:bg-slate-800 dark:text-[#6b9fff]">
                 Current Challenges
               </Badge>
-              <h2 className="text-balance text-4xl font-semibold leading-tight text-slate-900 sm:text-[2.7rem] lg:text-[3rem]">
+              <h2 className="text-balance text-4xl font-semibold leading-tight text-slate-900 dark:text-slate-100 sm:text-[2.7rem] lg:text-[3rem]">
                 Why Competency-Aware Recommenders Stall
               </h2>
-              <p className="mx-auto max-w-3xl text-lg leading-relaxed text-slate-700">
+              <p className="mx-auto max-w-3xl text-lg leading-relaxed text-slate-700 dark:text-slate-300">
                 Personalization is only as strong as the competency data beneath
                 it. Incompatible graphs and opaque recommendations keep research
                 and practice from compounding.
@@ -171,16 +174,16 @@ export function HomePage() {
                 {otherProblems.map(problem => (
                   <div
                     key={problem.headline}
-                    className="group relative overflow-hidden rounded-[32px] border border-white/70 bg-white/80 p-6 shadow-[0_26px_90px_-55px_rgba(7,30,84,0.5)] transition hover:-translate-y-1 hover:bg-white/90"
+                    className="group relative overflow-hidden rounded-[32px] border border-white/70 bg-white/80 p-6 shadow-[0_26px_90px_-55px_rgba(7,30,84,0.5)] transition hover:-translate-y-1 hover:bg-white/90 dark:border-slate-700/50 dark:bg-slate-800/60 dark:shadow-[0_26px_90px_-55px_rgba(0,0,0,0.7)] dark:hover:bg-slate-800/80"
                   >
                     <div className="relative z-10 space-y-4">
-                      <h3 className="text-xl font-semibold text-slate-900">
+                      <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
                         {problem.headline}
                       </h3>
-                      <div className="text-xs font-semibold uppercase tracking-[0.16em] text-[#0a4da2]">
+                      <div className="text-xs font-semibold uppercase tracking-[0.16em] text-[#0a4da2] dark:text-[#6b9fff]">
                         {problem.insight}
                       </div>
-                      <p className="text-base leading-relaxed text-slate-600">
+                      <p className="text-base leading-relaxed text-slate-600 dark:text-slate-400">
                         {problem.detail}
                       </p>
                     </div>
@@ -198,12 +201,12 @@ export function HomePage() {
 function LiquidGlassGradient() {
   return (
     <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.9),_rgba(237,242,255,0.55))]" />
-      <div className="absolute left-1/2 top-[-8rem] h-[44rem] w-[44rem] -translate-x-1/2 rounded-[50%] bg-white/80 blur-[140px] opacity-85 mix-blend-screen" />
-      <div className="absolute left-[12%] top-[22%] h-80 w-80 rounded-full bg-[#7fb0ff]/40 blur-[120px] mix-blend-screen" />
-      <div className="absolute right-[18%] top-[30%] h-[26rem] w-[24rem] rounded-[40%] bg-gradient-to-br from-[#ffdff3]/65 via-[#fff3f8]/45 to-transparent blur-[150px] mix-blend-screen" />
-      <div className="absolute bottom-[-10rem] left-1/2 h-[36rem] w-[50rem] -translate-x-1/2 rounded-[220px] bg-white/70 blur-[160px] opacity-95 mix-blend-screen" />
-      <div className="absolute left-1/3 top-[58%] h-72 w-72 rounded-full bg-[#9ce8d1]/35 blur-[130px] mix-blend-screen" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.9),_rgba(237,242,255,0.55))] dark:bg-[radial-gradient(circle_at_top,_rgba(20,30,60,0.9),_rgba(15,23,41,0.55))]" />
+      <div className="absolute left-1/2 top-[-8rem] h-[44rem] w-[44rem] -translate-x-1/2 rounded-[50%] bg-white/80 blur-[140px] opacity-85 mix-blend-screen dark:bg-slate-800/30 dark:opacity-40" />
+      <div className="absolute left-[12%] top-[22%] h-80 w-80 rounded-full bg-[#7fb0ff]/40 blur-[120px] mix-blend-screen dark:bg-[#7fb0ff]/10 dark:mix-blend-normal" />
+      <div className="absolute right-[18%] top-[30%] h-[26rem] w-[24rem] rounded-[40%] bg-gradient-to-br from-[#ffdff3]/65 via-[#fff3f8]/45 to-transparent blur-[150px] mix-blend-screen dark:from-[#ffdff3]/10 dark:via-[#fff3f8]/5 dark:mix-blend-normal" />
+      <div className="absolute bottom-[-10rem] left-1/2 h-[36rem] w-[50rem] -translate-x-1/2 rounded-[220px] bg-white/70 blur-[160px] opacity-95 mix-blend-screen dark:bg-slate-800/20 dark:opacity-40" />
+      <div className="absolute left-1/3 top-[58%] h-72 w-72 rounded-full bg-[#9ce8d1]/35 blur-[130px] mix-blend-screen dark:bg-[#9ce8d1]/8 dark:mix-blend-normal" />
     </div>
   );
 }

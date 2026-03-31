@@ -4,10 +4,40 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
     <meta
       name="description"
       content="Memo - Competency-Based Education Benchmark Platform"
     />
+    <script>
+      (() => {
+        const storageKey = 'memo-theme';
+        const root = document.documentElement;
+
+        try {
+          const storedTheme = window.localStorage.getItem(storageKey);
+          const theme =
+            storedTheme === 'light' ||
+            storedTheme === 'dark' ||
+            storedTheme === 'system'
+              ? storedTheme
+              : 'system';
+          const resolvedTheme =
+            theme === 'system'
+              ? window.matchMedia('(prefers-color-scheme: dark)').matches
+                ? 'dark'
+                : 'light'
+              : theme;
+
+          root.classList.remove('light', 'dark');
+          root.classList.add(resolvedTheme);
+          root.style.colorScheme = resolvedTheme;
+        } catch {
+          root.classList.add('light');
+          root.style.colorScheme = 'light';
+        }
+      })();
+    </script>
     <title>Memo</title>
   </head>
   <body>

@@ -53,7 +53,7 @@ export function TypeSelectionButton<T extends string>({
         <span
           className={`
             inline-flex items-center justify-center w-5 h-5 rounded text-xs font-bold
-            ${isSelected ? 'bg-white/25 text-white' : 'bg-slate-200/80 text-slate-500'}
+            ${isSelected ? 'bg-white/25 text-white' : 'bg-slate-200/80 text-slate-500 dark:bg-slate-700/80 dark:text-slate-400'}
           `}
         >
           {shortcutKey}

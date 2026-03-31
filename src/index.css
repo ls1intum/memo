@@ -54,6 +54,8 @@
 
 :root {
   --radius: 0.625rem;
+  --network-node-fill: #ffffff;
+  --network-text: #1e293b;
 
   --yinmn-blue: oklch(0.38 0.08 245);
   --air-superiority-blue: oklch(0.62 0.05 235);
@@ -79,6 +81,8 @@
 }
 
 .dark {
+  --network-node-fill: oklch(0.26 0.06 245);
+  --network-text: #e2e8f0;
   --background: oklch(0.18 0.05 245);
   --foreground: oklch(1 0 0);
   --card: oklch(0.22 0.06 245);
@@ -100,6 +104,11 @@
 @layer base {
   html {
     scroll-behavior: smooth;
+    color-scheme: light;
+  }
+
+  html.dark {
+    color-scheme: dark;
   }
 
   * {
@@ -115,6 +124,7 @@
 @layer utilities {
   .scrollbar-thin {
     scrollbar-width: thin;
+    scrollbar-color: rgb(203 213 225) transparent;
   }
 
   .scrollbar-thin::-webkit-scrollbar {
@@ -132,5 +142,17 @@
 
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
     background-color: rgb(148 163 184);
+  }
+
+  .dark .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: rgb(71 85 105);
+  }
+
+  .dark .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background-color: rgb(100 116 139);
+  }
+
+  .dark .scrollbar-thin {
+    scrollbar-color: rgb(71 85 105) transparent;
   }
 }

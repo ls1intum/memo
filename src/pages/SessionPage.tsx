@@ -66,33 +66,51 @@ const getRelationshipDescription = (
     case 'ASSUMES':
       return (
         <>
-          <span className="font-medium text-slate-900">{titleA}</span> requires{' '}
-          <span className="font-medium text-slate-900">{titleB}</span> as
-          prerequisite
+          <span className="font-medium text-slate-900 dark:text-slate-100">
+            {titleA}
+          </span>{' '}
+          requires{' '}
+          <span className="font-medium text-slate-900 dark:text-slate-100">
+            {titleB}
+          </span>{' '}
+          as prerequisite
         </>
       );
     case 'EXTENDS':
       return (
         <>
-          <span className="font-medium text-slate-900">{titleA}</span> builds on
-          / is a subset or advanced form of{' '}
-          <span className="font-medium text-slate-900">{titleB}</span>
+          <span className="font-medium text-slate-900 dark:text-slate-100">
+            {titleA}
+          </span>{' '}
+          builds on / is a subset or advanced form of{' '}
+          <span className="font-medium text-slate-900 dark:text-slate-100">
+            {titleB}
+          </span>
         </>
       );
     case 'MATCHES':
       return (
         <>
-          <span className="font-medium text-slate-900">{titleA}</span> is
-          equivalent / strongly overlaps with{' '}
-          <span className="font-medium text-slate-900">{titleB}</span>
+          <span className="font-medium text-slate-900 dark:text-slate-100">
+            {titleA}
+          </span>{' '}
+          is equivalent / strongly overlaps with{' '}
+          <span className="font-medium text-slate-900 dark:text-slate-100">
+            {titleB}
+          </span>
         </>
       );
     case 'UNRELATED':
       return (
         <>
-          <span className="font-medium text-slate-900">{titleA}</span> and{' '}
-          <span className="font-medium text-slate-900">{titleB}</span> have no
-          meaningful relationship
+          <span className="font-medium text-slate-900 dark:text-slate-100">
+            {titleA}
+          </span>{' '}
+          and{' '}
+          <span className="font-medium text-slate-900 dark:text-slate-100">
+            {titleB}
+          </span>{' '}
+          have no meaningful relationship
         </>
       );
     default:
@@ -733,14 +751,14 @@ export function SessionPage() {
   ]);
 
   const renderKeyboardHint = () => (
-    <p className="text-base text-slate-800 leading-relaxed font-bold">
+    <p className="text-base text-slate-800 dark:text-slate-200 leading-relaxed font-bold">
       Select a{' '}
       {mappingMode === 'competency' ? 'relationship type' : 'match quality'}{' '}
       below or press{' '}
       {['1', '2', '3', '4'].map(key => (
         <Kbd
           key={key}
-          className="bg-white text-slate-700 border border-slate-300 text-xs font-semibold px-2 py-1 mr-1"
+          className="mr-1 border border-slate-300 bg-white px-2 py-1 text-xs font-semibold text-slate-700 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300"
         >
           {key}
         </Kbd>
@@ -749,26 +767,26 @@ export function SessionPage() {
   );
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#d7e3ff] via-[#f3f5ff] to-[#e8ecff] text-slate-900">
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#d7e3ff] via-[#f3f5ff] to-[#e8ecff] text-slate-900 dark:from-[#0f1729] dark:via-[#111b30] dark:to-[#0f1729] dark:text-slate-100">
       <div className="absolute inset-0 -z-10 opacity-70">
-        <div className="absolute left-1/2 top-[-6rem] h-[36rem] w-[36rem] -translate-x-1/2 rounded-full bg-white/80 blur-[140px]" />
-        <div className="absolute left-[10%] top-[22%] h-80 w-80 rounded-full bg-[#7fb0ff]/35 blur-[120px]" />
-        <div className="absolute right-[14%] top-[28%] h-[22rem] w-[22rem] rounded-[40%] bg-gradient-to-br from-[#ffdff3]/55 via-[#fff3f8]/35 to-transparent blur-[140px]" />
+        <div className="absolute left-1/2 top-[-6rem] h-[36rem] w-[36rem] -translate-x-1/2 rounded-full bg-white/80 dark:bg-slate-800/30 blur-[140px]" />
+        <div className="absolute left-[10%] top-[22%] h-80 w-80 rounded-full bg-[#7fb0ff]/35 dark:bg-[#7fb0ff]/10 blur-[120px]" />
+        <div className="absolute right-[14%] top-[28%] h-[22rem] w-[22rem] rounded-[40%] bg-gradient-to-br from-[#ffdff3]/55 via-[#fff3f8]/35 to-transparent dark:from-[#ffdff3]/10 dark:via-[#fff3f8]/5 blur-[140px]" />
       </div>
 
       <main className="relative z-10 mx-auto mt-20 flex w-full max-w-6xl flex-col gap-6 px-6 pb-24 lg:mt-24 lg:px-0">
-        <section className="space-y-6 rounded-[24px] border border-white/70 bg-white/85 px-10 py-6 shadow-[0_26px_90px_-55px_rgba(7,30,84,0.5)] backdrop-blur-xl">
-          <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-200/60">
+        <section className="space-y-6 rounded-[24px] border border-white/70 bg-white/85 dark:border-slate-700/50 dark:bg-slate-800/60 dark:shadow-[0_26px_90px_-55px_rgba(0,0,0,0.7)] px-10 py-6 shadow-[0_26px_90px_-55px_rgba(7,30,84,0.5)] backdrop-blur-xl">
+          <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-200/60 dark:border-slate-700/50">
             <div className="flex flex-wrap items-center gap-3">
               <Badge className="bg-gradient-to-r from-[#0a4da2] to-[#7c6cff] text-white border-0 font-semibold text-xs px-4 py-1.5 shadow-md">
                 Mapping Session
               </Badge>
-              <div className="flex items-center gap-2 text-sm font-medium text-slate-700">
+              <div className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300">
                 <span className="flex items-center gap-2">
                   <Check className="h-4 w-4 text-emerald-600" />
                   <span>
                     Completed:{' '}
-                    <span className="font-semibold text-slate-900">
+                    <span className="font-semibold text-slate-900 dark:text-slate-100">
                       {stats.completed}
                     </span>
                   </span>
@@ -776,7 +794,7 @@ export function SessionPage() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <div className="flex h-9 items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 p-1">
+              <div className="flex h-9 items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-800 p-1">
                 <button
                   type="button"
                   onClick={() => {
@@ -788,8 +806,8 @@ export function SessionPage() {
                     h-full px-3 text-xs font-semibold rounded-md transition-all duration-200 flex items-center justify-center
                     ${
                       mappingMode === 'competency'
-                        ? 'bg-white text-slate-900 shadow-sm'
-                        : 'text-slate-500 hover:text-slate-700'
+                        ? 'bg-white text-slate-900 shadow-sm dark:bg-slate-700 dark:text-slate-100'
+                        : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
                     }
                   `}
                 >
@@ -806,8 +824,8 @@ export function SessionPage() {
                     h-full px-3 text-xs font-semibold rounded-md transition-all duration-200 flex items-center justify-center
                     ${
                       mappingMode === 'resource'
-                        ? 'bg-white text-slate-900 shadow-sm'
-                        : 'text-slate-500 hover:text-slate-700'
+                        ? 'bg-white text-slate-900 shadow-sm dark:bg-slate-700 dark:text-slate-100'
+                        : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
                     }
                   `}
                 >
@@ -817,7 +835,7 @@ export function SessionPage() {
               <button
                 type="button"
                 onClick={() => setShowSessionSummary(true)}
-                className="flex h-9 items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-4 text-xs font-semibold text-slate-600 transition-all duration-200 hover:bg-red-50 hover:text-red-600 hover:border-red-200"
+                className="flex h-9 items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-4 text-xs font-semibold text-slate-600 transition-all duration-200 hover:bg-red-50 hover:text-red-600 hover:border-red-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-red-900/30 dark:hover:text-red-400 dark:hover:border-red-800/50"
               >
                 <LogOut className="h-3.5 w-3.5" />
                 End Session
@@ -826,12 +844,12 @@ export function SessionPage() {
           </div>
 
           {error && (
-            <Card className="border border-red-100 bg-red-50/80">
+            <Card className="border border-red-100 bg-red-50/80 dark:border-red-800/50 dark:bg-red-900/30">
               <CardHeader>
-                <CardTitle className="text-red-800">
+                <CardTitle className="text-red-800 dark:text-red-300">
                   Failed to load competencies
                 </CardTitle>
-                <CardDescription className="text-red-700">
+                <CardDescription className="text-red-700 dark:text-red-400">
                   {error}
                 </CardDescription>
               </CardHeader>
@@ -839,10 +857,12 @@ export function SessionPage() {
           )}
 
           {allDone && !error && (
-            <Card className="border border-emerald-200 bg-emerald-50/80">
+            <Card className="border border-emerald-200 bg-emerald-50/80 dark:border-emerald-700/50 dark:bg-emerald-900/30">
               <CardHeader>
-                <CardTitle className="text-emerald-800">🎉 All done!</CardTitle>
-                <CardDescription className="text-emerald-700">
+                <CardTitle className="text-emerald-800 dark:text-emerald-300">
+                  🎉 All done!
+                </CardTitle>
+                <CardDescription className="text-emerald-700 dark:text-emerald-400">
                   You've voted on every available competency pair. Great work!
                   Check back later when more competencies have been added.
                 </CardDescription>
@@ -851,12 +871,12 @@ export function SessionPage() {
           )}
 
           {noCompetencies && !allDone && !error && (
-            <Card className="border border-red-100 bg-red-50/80">
+            <Card className="border border-red-100 bg-red-50/80 dark:border-red-800/50 dark:bg-red-900/30">
               <CardHeader>
-                <CardTitle className="text-red-800">
+                <CardTitle className="text-red-800 dark:text-red-300">
                   No competencies available
                 </CardTitle>
-                <CardDescription className="text-red-700">
+                <CardDescription className="text-red-700 dark:text-red-400">
                   There are currently no competencies in the database. Please
                   run the seed script or create competencies manually before
                   starting a mapping session.
@@ -866,12 +886,12 @@ export function SessionPage() {
           )}
 
           {notEnough && !error && (
-            <Card className="border border-amber-100 bg-amber-50/80">
+            <Card className="border border-amber-100 bg-amber-50/80 dark:border-amber-800/50 dark:bg-amber-900/30">
               <CardHeader>
-                <CardTitle className="text-amber-800">
+                <CardTitle className="text-amber-800 dark:text-amber-300">
                   Not enough competencies
                 </CardTitle>
-                <CardDescription className="text-amber-700">
+                <CardDescription className="text-amber-700 dark:text-amber-400">
                   At least two competencies are required to start a mapping
                   session. Please add more competencies first.
                 </CardDescription>
@@ -884,22 +904,22 @@ export function SessionPage() {
               <div className="flex flex-col items-center justify-center text-center space-y-2 mx-auto w-full">
                 {isLoading || !competencies?.length ? (
                   <div className="flex flex-wrap justify-center items-center gap-2">
-                    <span className="text-[1.35rem] sm:text-[1.7rem] font-bold text-slate-500">
+                    <span className="text-[1.35rem] sm:text-[1.7rem] font-bold text-slate-500 dark:text-slate-400">
                       {mappingMode === 'competency'
                         ? 'How does'
                         : 'How well does'}
                     </span>
-                    <div className="h-7 w-40 rounded-md bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 animate-pulse" />
-                    <span className="text-[1.35rem] sm:text-[1.7rem] font-bold text-slate-500">
+                    <div className="h-7 w-40 rounded-md bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 dark:from-slate-700 dark:via-slate-600 dark:to-slate-700 animate-pulse" />
+                    <span className="text-[1.35rem] sm:text-[1.7rem] font-bold text-slate-500 dark:text-slate-400">
                       {mappingMode === 'competency' ? 'relate to' : 'fit'}
                     </span>
-                    <div className="h-7 w-36 rounded-md bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 animate-pulse" />
-                    <span className="text-[1.35rem] sm:text-[1.7rem] font-bold text-slate-500">
+                    <div className="h-7 w-36 rounded-md bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 dark:from-slate-700 dark:via-slate-600 dark:to-slate-700 animate-pulse" />
+                    <span className="text-[1.35rem] sm:text-[1.7rem] font-bold text-slate-500 dark:text-slate-400">
                       ?
                     </span>
                   </div>
                 ) : mappingMode === 'competency' && competencies.length >= 2 ? (
-                  <h1 className="text-[1.35rem] sm:text-[1.7rem] font-bold text-slate-800 leading-relaxed tracking-tight">
+                  <h1 className="text-[1.35rem] sm:text-[1.7rem] font-bold text-slate-800 dark:text-slate-200 leading-relaxed tracking-tight">
                     How does{' '}
                     <span
                       className="bg-clip-text text-transparent"
@@ -921,7 +941,7 @@ export function SessionPage() {
                     ?
                   </h1>
                 ) : mappingMode === 'resource' && learningResource ? (
-                  <h1 className="text-[1.35rem] sm:text-[1.7rem] font-bold text-slate-800 leading-relaxed tracking-tight">
+                  <h1 className="text-[1.35rem] sm:text-[1.7rem] font-bold text-slate-800 dark:text-slate-200 leading-relaxed tracking-tight">
                     How well does{' '}
                     <span
                       className="bg-clip-text text-transparent"
@@ -959,7 +979,7 @@ export function SessionPage() {
                       description={competencies[0]!.description}
                       themeColors={THEME_COLORS.source}
                       borderColorClass="border-[#0a4da2]/30"
-                      gradientFromClass="from-blue-50/80"
+                      gradientFromClass="from-blue-50/80 dark:from-blue-950/30"
                       isTransitioning={isTransitioning || isCreating}
                     />
                   )}
@@ -973,7 +993,7 @@ export function SessionPage() {
                         }}
                       />
                       <div
-                        className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full shadow-xl ring-3 ring-white"
+                        className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full shadow-xl ring-3 ring-white dark:ring-slate-800"
                         style={{
                           backgroundImage: `linear-gradient(to bottom right, ${THEME_COLORS.source.primary}, ${THEME_COLORS.source.secondary}, ${mappingMode === 'resource' ? THEME_COLORS.resource.primary : THEME_COLORS.destination.primary})`,
                         }}
@@ -1017,7 +1037,7 @@ export function SessionPage() {
                               setIsTransitioning(false);
                             }, 300);
                           }}
-                          className="text-slate-700 border border-slate-300 hover:text-slate-900 hover:bg-slate-100 hover:border-slate-400 focus:outline-none focus:ring-0 focus-visible:ring-0"
+                          className="text-slate-700 border border-slate-300 hover:text-slate-900 hover:bg-slate-100 hover:border-slate-400 dark:text-slate-300 dark:border-slate-600 dark:hover:text-slate-100 dark:hover:bg-slate-700 dark:hover:border-slate-500 focus:outline-none focus:ring-0 focus-visible:ring-0"
                         >
                           <ArrowLeftRight
                             className="h-4 w-4 mr-1.5 transition-transform duration-500 will-change-transform"
@@ -1039,7 +1059,7 @@ export function SessionPage() {
                       description={competencies[1]!.description}
                       themeColors={THEME_COLORS.destination}
                       borderColorClass="border-[#9775fa]/30"
-                      gradientFromClass="from-purple-50/80"
+                      gradientFromClass="from-purple-50/80 dark:from-purple-950/30"
                       isTransitioning={isTransitioning || isCreating}
                     />
                   ) : mappingMode === 'resource' && learningResource ? (
@@ -1049,20 +1069,20 @@ export function SessionPage() {
                       url={learningResource.url}
                       themeColors={THEME_COLORS.resource}
                       borderColorClass="border-pink-400/30"
-                      gradientFromClass="from-pink-50/80"
+                      gradientFromClass="from-pink-50/80 dark:from-pink-950/30"
                       isTransitioning={isTransitioning || isCreating}
                     />
                   ) : null}
                 </div>
               </div>
 
-              <div className="mx-auto rounded-2xl border border-slate-200/80 p-5 shadow-sm space-y-5">
+              <div className="mx-auto rounded-2xl border border-slate-200/80 dark:border-slate-700/50 p-5 shadow-sm space-y-5">
                 {mappingMode === 'competency' &&
                   competencies &&
                   competencies.length >= 2 && (
-                    <div className="rounded-xl bg-gradient-to-r from-blue-50/90 via-purple-50/70 to-blue-50/90 border border-blue-200/50 py-4 px-5 text-center">
+                    <div className="rounded-xl bg-gradient-to-r from-blue-50/90 via-purple-50/70 to-blue-50/90 border border-blue-200/50 dark:from-blue-950/50 dark:via-purple-950/30 dark:to-blue-950/50 dark:border-blue-800/30 py-4 px-5 text-center">
                       {hoveredRelation ? (
-                        <p className="text-base text-slate-800 leading-relaxed font-bold animate-in fade-in duration-200">
+                        <p className="text-base text-slate-800 dark:text-slate-200 leading-relaxed font-bold animate-in fade-in duration-200">
                           <span
                             className={`font-bold ${RELATIONSHIP_TYPE_TEXT_COLORS[hoveredRelation]}`}
                           >
@@ -1080,12 +1100,12 @@ export function SessionPage() {
                           )}
                         </p>
                       ) : relation ? (
-                        <p className="text-base text-slate-800 leading-relaxed font-bold">
-                          <span className="font-bold text-slate-900">
+                        <p className="text-base text-slate-800 dark:text-slate-200 leading-relaxed font-bold">
+                          <span className="font-bold text-slate-900 dark:text-slate-100">
                             {competencies[0]!.title}
                           </span>{' '}
                           <span
-                            className={`font-bold ${RELATIONSHIP_TYPE_TEXT_COLORS[relation] || 'text-slate-600'}`}
+                            className={`font-bold ${RELATIONSHIP_TYPE_TEXT_COLORS[relation] || 'text-slate-600 dark:text-slate-400'}`}
                           >
                             {relation === 'UNRELATED'
                               ? 'is unrelated to'
@@ -1093,7 +1113,7 @@ export function SessionPage() {
                                   rt => rt.value === relation
                                 )?.label.toLowerCase() || ''}
                           </span>{' '}
-                          <span className="font-bold text-slate-900">
+                          <span className="font-bold text-slate-900 dark:text-slate-100">
                             {competencies[1]!.title}
                           </span>
                         </p>
@@ -1106,9 +1126,9 @@ export function SessionPage() {
                 {mappingMode === 'resource' &&
                   competencies?.length &&
                   learningResource && (
-                    <div className="rounded-xl bg-gradient-to-r from-pink-50/90 via-rose-50/70 to-pink-50/90 border border-pink-200/50 py-4 px-5 text-center">
+                    <div className="rounded-xl border border-pink-200/50 bg-gradient-to-r from-pink-50/90 via-rose-50/70 to-pink-50/90 py-4 px-5 text-center dark:border-pink-800/30 dark:from-pink-950/50 dark:via-rose-950/30 dark:to-pink-950/50">
                       {hoveredResourceMatch ? (
-                        <p className="text-base text-slate-800 leading-relaxed font-bold animate-in fade-in duration-200">
+                        <p className="text-base text-slate-800 dark:text-slate-200 leading-relaxed font-bold animate-in fade-in duration-200">
                           <span
                             className={`font-bold ${RESOURCE_MATCH_TYPE_TEXT_COLORS[hoveredResourceMatch]}`}
                           >
@@ -1126,8 +1146,8 @@ export function SessionPage() {
                           }
                         </p>
                       ) : resourceMatchType ? (
-                        <p className="text-base text-slate-800 leading-relaxed font-bold">
-                          <span className="font-bold text-slate-900">
+                        <p className="text-base text-slate-800 dark:text-slate-200 leading-relaxed font-bold">
+                          <span className="font-bold text-slate-900 dark:text-slate-100">
                             {competencies[0]!.title}
                           </span>{' '}
                           <span
@@ -1141,7 +1161,7 @@ export function SessionPage() {
                                   ? 'is a good fit for'
                                   : 'is a perfect match for'}
                           </span>{' '}
-                          <span className="font-bold text-slate-900">
+                          <span className="font-bold text-slate-900 dark:text-slate-100">
                             {learningResource.title}
                           </span>
                         </p>
@@ -1220,21 +1240,23 @@ export function SessionPage() {
                   )}
               </div>
 
-              <div className="mt-8 pt-6 border-t border-slate-200/40 mx-auto max-w-5xl">
+              <div className="mx-auto mt-8 max-w-5xl border-t border-slate-200/40 pt-6 dark:border-slate-700/40">
                 <div className="flex items-center justify-between">
                   <button
                     type="button"
                     onClick={handleUndo}
                     disabled={history.length === 0}
-                    className="flex items-center gap-2 px-3 py-2 text-sm font-bold text-slate-700 border border-slate-300 rounded-lg transition-all duration-200 hover:text-slate-900 hover:bg-slate-100 hover:border-slate-400 disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="flex items-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm font-bold text-slate-700 transition-all duration-200 hover:border-slate-400 hover:bg-slate-100 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-600 dark:text-slate-300 dark:hover:border-slate-500 dark:hover:bg-slate-700 dark:hover:text-slate-100"
                   >
                     <div className="flex items-center gap-1">
                       <span className="mr-1">Undo</span>
-                      <Kbd className="bg-slate-100 text-slate-600 border border-slate-200 text-xs px-1.5 py-0.5">
+                      <Kbd className="border border-slate-200 bg-slate-100 px-1.5 py-0.5 text-xs text-slate-600 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300">
                         ⇧
                       </Kbd>
-                      <span className="text-slate-400 text-xs">+</span>
-                      <Kbd className="bg-slate-100 text-slate-600 border border-slate-200 text-xs px-1.5 py-0.5">
+                      <span className="text-xs text-slate-400 dark:text-slate-500">
+                        +
+                      </span>
+                      <Kbd className="border border-slate-200 bg-slate-100 px-1.5 py-0.5 text-xs text-slate-600 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300">
                         Z
                       </Kbd>
                     </div>
@@ -1245,10 +1267,10 @@ export function SessionPage() {
                       type="button"
                       onClick={() => handleAction('skipped')}
                       disabled={isLoading || isCreating}
-                      className="flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-slate-700 border border-slate-300 rounded-lg transition-all duration-200 hover:text-slate-900 hover:bg-slate-100 hover:border-slate-400 disabled:opacity-40 disabled:cursor-not-allowed"
+                      className="flex items-center gap-2 rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-bold text-slate-700 transition-all duration-200 hover:border-slate-400 hover:bg-slate-100 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-600 dark:text-slate-300 dark:hover:border-slate-500 dark:hover:bg-slate-700 dark:hover:text-slate-100"
                     >
                       Skip
-                      <Kbd className="bg-slate-100 text-slate-600 border border-slate-200 text-xs px-1.5 py-0.5">
+                      <Kbd className="border border-slate-200 bg-slate-100 px-1.5 py-0.5 text-xs text-slate-600 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300">
                         Space
                       </Kbd>
                     </button>
@@ -1269,8 +1291,8 @@ export function SessionPage() {
                         min-w-[180px]
                         ${
                           mappingMode === 'resource'
-                            ? 'bg-gradient-to-r from-pink-600 to-pink-500 shadow-lg shadow-pink-500/20 hover:shadow-xl hover:shadow-pink-500/30'
-                            : 'bg-gradient-to-r from-[#0a4da2] to-[#5538d1] shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/30'
+                            ? 'bg-gradient-to-r from-pink-600 to-pink-500 shadow-lg shadow-pink-500/20 hover:shadow-xl hover:shadow-pink-500/30 dark:shadow-pink-950/40 dark:hover:shadow-pink-950/50'
+                            : 'bg-gradient-to-r from-[#0a4da2] to-[#7c6cff] shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/30'
                         }
                         transition-all duration-200 ease-out
                         hover:scale-[1.02]

@@ -173,20 +173,20 @@ export function OnboardingPage() {
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#d7e3ff] via-[#f3f5ff] to-[#e8ecff] text-slate-900">
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#d7e3ff] via-[#f3f5ff] to-[#e8ecff] text-slate-900 dark:from-[#0f1729] dark:via-[#111b30] dark:to-[#0f1729] dark:text-slate-100">
       <div className="absolute inset-0 -z-10 opacity-70">
-        <div className="absolute left-1/2 top-[-6rem] h-[36rem] w-[36rem] -translate-x-1/2 rounded-full bg-white/80 blur-[140px]" />
-        <div className="absolute left-[10%] top-[22%] h-80 w-80 rounded-full bg-[#7fb0ff]/35 blur-[120px]" />
-        <div className="absolute right-[14%] top-[28%] h-[22rem] w-[22rem] rounded-[40%] bg-gradient-to-br from-[#ffdff3]/55 via-[#fff3f8]/35 to-transparent blur-[140px]" />
+        <div className="absolute left-1/2 top-[-6rem] h-[36rem] w-[36rem] -translate-x-1/2 rounded-full bg-white/80 blur-[140px] dark:bg-slate-800/30" />
+        <div className="absolute left-[10%] top-[22%] h-80 w-80 rounded-full bg-[#7fb0ff]/35 blur-[120px] dark:bg-[#7fb0ff]/10" />
+        <div className="absolute right-[14%] top-[28%] h-[22rem] w-[22rem] rounded-[40%] bg-gradient-to-br from-[#ffdff3]/55 via-[#fff3f8]/35 to-transparent blur-[140px] dark:from-[#ffdff3]/10 dark:via-[#fff3f8]/5" />
       </div>
 
       <main className="relative z-10 mx-auto mt-16 flex w-full max-w-5xl flex-col gap-8 px-6 pb-20 lg:mt-24 lg:px-0">
         <div className="mx-auto w-full max-w-md">
           <div className="flex items-center justify-between mb-2 px-1">
-            <span className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+            <span className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
               Step {step + 1} of {TOTAL_STEPS}
             </span>
-            <span className="text-xs font-medium text-slate-400">
+            <span className="text-xs font-medium text-slate-400 dark:text-slate-500">
               {
                 ['Welcome', 'Our Mission', 'Profile', 'Practice', 'Guidelines'][
                   step
@@ -194,7 +194,7 @@ export function OnboardingPage() {
               }
             </span>
           </div>
-          <div className="h-1.5 w-full rounded-full bg-slate-200/60 overflow-hidden">
+          <div className="h-1.5 w-full rounded-full bg-slate-200/60 dark:bg-slate-700/60 overflow-hidden">
             <motion.div
               className="h-full rounded-full bg-gradient-to-r from-[#0a4da2] to-[#7c6cff]"
               initial={false}
@@ -245,7 +245,7 @@ export function OnboardingPage() {
             variant="outline"
             onClick={goBack}
             disabled={step === 0}
-            className="flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-5 py-5 text-sm font-semibold text-slate-700 shadow-sm transition-all hover:-translate-y-0.5 hover:bg-white hover:border-slate-300 disabled:opacity-0 disabled:pointer-events-none"
+            className="flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-5 py-5 text-sm font-semibold text-slate-700 shadow-sm transition-all hover:-translate-y-0.5 hover:bg-white hover:border-slate-300 disabled:opacity-0 disabled:pointer-events-none dark:border-slate-600 dark:bg-slate-800/80 dark:text-slate-200 dark:hover:bg-slate-700 dark:hover:border-slate-500"
           >
             <ArrowLeft className="h-4 w-4" />
             Back
@@ -256,7 +256,7 @@ export function OnboardingPage() {
               type="button"
               onClick={goNext}
               disabled={!canAdvance}
-              className={`flex items-center gap-2 rounded-full bg-gradient-to-r from-[#0a4da2] to-[#5538d1] px-6 py-5 text-sm font-bold text-white shadow-[0_18px_45px_-26px_rgba(7,30,84,0.75)] transition-all hover:-translate-y-0.5 hover:shadow-[0_22px_55px_-28px_rgba(7,30,84,0.85)] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0`}
+              className={`flex items-center gap-2 rounded-full bg-gradient-to-r from-[#0a4da2] to-[#7c6cff] px-6 py-5 text-sm font-bold text-white shadow-[0_18px_45px_-26px_rgba(7,30,84,0.75)] transition-all hover:-translate-y-0.5 hover:shadow-[0_22px_55px_-28px_rgba(7,30,84,0.85)] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0`}
             >
               {step === 3 && !practiceCompleted
                 ? isPracticeLastRound
@@ -293,7 +293,7 @@ export function OnboardingPage() {
 
 function StepWelcome() {
   return (
-    <section className="space-y-6 rounded-[32px] border border-white/70 bg-white/85 p-10 shadow-[0_26px_90px_-55px_rgba(7,30,84,0.5)] backdrop-blur-xl">
+    <section className="space-y-6 rounded-[32px] border border-white/70 bg-white/85 p-10 shadow-[0_26px_90px_-55px_rgba(7,30,84,0.5)] backdrop-blur-xl dark:border-slate-700/50 dark:bg-slate-800/60 dark:shadow-[0_26px_90px_-55px_rgba(0,0,0,0.7)]">
       <div className="space-y-3 text-center">
         <motion.div
           initial={{ scale: 0.6, opacity: 0 }}
@@ -307,10 +307,10 @@ function StepWelcome() {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15, duration: 0.4 }}
-          className="text-3xl font-bold text-slate-900 sm:text-4xl"
+          className="text-3xl font-bold text-slate-900 sm:text-4xl dark:text-slate-100"
         >
           Welcome to{' '}
-          <span className="bg-gradient-to-r from-[#0a4da2] via-[#5538d1] to-[#9b5dfa] bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-[#0a4da2] via-[#5538d1] to-[#9b5dfa] bg-clip-text text-transparent dark:from-[#6b9fff] dark:via-[#9b7ff5] dark:to-[#c4a5ff]">
             Memo
           </span>
         </motion.h1>
@@ -318,11 +318,14 @@ function StepWelcome() {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.25, duration: 0.4 }}
-          className="mx-auto max-w-xl text-base leading-relaxed text-slate-600"
+          className="mx-auto max-w-xl text-base leading-relaxed text-slate-600 dark:text-slate-400"
         >
-          A <strong className="text-slate-700">competency network</strong> maps
-          how skills relate to each other - which ones are prerequisites, which
-          extend others, and which are equivalent. These networks power
+          A{' '}
+          <strong className="text-slate-700 dark:text-slate-300">
+            competency network
+          </strong>{' '}
+          maps how skills relate to each other - which ones are prerequisites,
+          which extend others, and which are equivalent. These networks power
           personalized learning recommendations.
         </motion.p>
       </div>
@@ -343,21 +346,23 @@ const HOW_IT_WORKS_TILES = [
   {
     icon: Layers,
     color: 'from-[#0a4da2] to-[#4263eb]',
-    iconBg: 'bg-blue-100 text-blue-600',
+    iconBg: 'bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400',
     title: 'See Two Competencies',
     desc: 'We show you a pair of skills from a knowledge domain like "Recursion" and "Divide and Conquer".',
   },
   {
     icon: MousePointerClick,
     color: 'from-[#7c3aed] to-[#9775fa]',
-    iconBg: 'bg-purple-100 text-purple-600',
+    iconBg:
+      'bg-purple-100 text-purple-600 dark:bg-purple-900/40 dark:text-purple-400',
     title: 'Pick a Relationship',
     desc: 'Decide how they relate: prerequisite, extension, equivalent, or unrelated. Use buttons or keyboard shortcuts.',
   },
   {
     icon: CheckCircle2,
     color: 'from-emerald-500 to-emerald-600',
-    iconBg: 'bg-emerald-100 text-emerald-600',
+    iconBg:
+      'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-400',
     title: 'Build the Benchmark',
     desc: 'Your label joins a crowd-sourced dataset for fair, reproducible evaluation of recommender systems.',
   },
@@ -365,19 +370,21 @@ const HOW_IT_WORKS_TILES = [
 
 function StepHowItWorks() {
   return (
-    <section className="space-y-6 rounded-[32px] border border-white/70 bg-white/85 p-10 shadow-[0_26px_90px_-55px_rgba(7,30,84,0.5)] backdrop-blur-xl">
+    <section className="space-y-6 rounded-[32px] border border-white/70 bg-white/85 p-10 shadow-[0_26px_90px_-55px_rgba(7,30,84,0.5)] backdrop-blur-xl dark:border-slate-700/50 dark:bg-slate-800/60 dark:shadow-[0_26px_90px_-55px_rgba(0,0,0,0.7)]">
       <div className="text-center space-y-3">
-        <Badge className="w-fit mx-auto rounded-full border border-[#0a4da2]/30 bg-[#0a4da2]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-[#0a4da2]">
+        <Badge className="w-fit mx-auto rounded-full border border-[#0a4da2]/30 bg-[#0a4da2]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-[#0a4da2] dark:border-[#6b9fff]/30 dark:bg-[#6b9fff]/15 dark:text-[#6b9fff]">
           Our Mission
         </Badge>
-        <h2 className="text-2xl font-bold text-slate-900 sm:text-3xl">
+        <h2 className="text-2xl font-bold text-slate-900 sm:text-3xl dark:text-slate-100">
           Building a Better Benchmark
         </h2>
-        <p className="mx-auto max-w-2xl text-base text-slate-600 leading-relaxed">
+        <p className="mx-auto max-w-2xl text-base text-slate-600 leading-relaxed dark:text-slate-400">
           Memo crowd-sources how competencies relate to each other to create an{' '}
-          <strong className="text-slate-700">open benchmark dataset</strong>.
-          Researchers can use it to fairly evaluate and compare competency-aware
-          learning recommender systems.
+          <strong className="text-slate-700 dark:text-slate-300">
+            open benchmark dataset
+          </strong>
+          . Researchers can use it to fairly evaluate and compare
+          competency-aware learning recommender systems.
         </p>
       </div>
 
@@ -385,7 +392,7 @@ function StepHowItWorks() {
         {HOW_IT_WORKS_TILES.map((tile, i) => (
           <div
             key={tile.title}
-            className="group relative overflow-hidden rounded-2xl border border-slate-200/60 bg-white/80 p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+            className="group relative overflow-hidden rounded-2xl border border-slate-200/60 bg-white/80 p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md dark:border-slate-700/50 dark:bg-slate-800/60 dark:hover:bg-slate-800/80"
           >
             <div className="space-y-4">
               <div className="flex items-center gap-3">
@@ -405,8 +412,10 @@ function StepHowItWorks() {
                   </span>
                 </span>
               </div>
-              <h3 className="text-lg font-bold text-slate-900">{tile.title}</h3>
-              <p className="text-sm text-slate-600 leading-relaxed">
+              <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
+                {tile.title}
+              </h3>
+              <p className="text-sm text-slate-600 leading-relaxed dark:text-slate-400">
                 {tile.desc}
               </p>
             </div>
@@ -414,12 +423,12 @@ function StepHowItWorks() {
         ))}
       </div>
 
-      <p className="mx-auto max-w-xl text-center text-base text-slate-600 leading-relaxed">
+      <p className="mx-auto max-w-xl text-center text-base text-slate-600 leading-relaxed dark:text-slate-400">
         Your contribution is simple. Just map relationships between pairs of
         skills.
       </p>
 
-      <div className="flex flex-wrap items-center justify-center gap-4 text-xs text-slate-500 pt-1">
+      <div className="flex flex-wrap items-center justify-center gap-4 text-xs text-slate-500 dark:text-slate-400 pt-1">
         <span className="flex items-center gap-1.5">
           <Users className="h-3.5 w-3.5" /> Community-Driven
         </span>
@@ -468,15 +477,15 @@ function StepProfile({
   const [searchQuery, setSearchQuery] = useState('');
 
   return (
-    <section className="space-y-6 rounded-[32px] border border-white/70 bg-white/85 p-8 sm:p-10 shadow-[0_26px_90px_-55px_rgba(7,30,84,0.5)] backdrop-blur-xl">
+    <section className="space-y-6 rounded-[32px] border border-white/70 bg-white/85 p-8 sm:p-10 shadow-[0_26px_90px_-55px_rgba(7,30,84,0.5)] backdrop-blur-xl dark:border-slate-700/50 dark:bg-slate-800/60 dark:shadow-[0_26px_90px_-55px_rgba(0,0,0,0.7)]">
       <div className="text-center space-y-3">
-        <Badge className="w-fit mx-auto rounded-full border border-indigo-400/30 bg-indigo-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-indigo-700">
+        <Badge className="w-fit mx-auto rounded-full border border-indigo-400/30 bg-indigo-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-indigo-700 dark:border-indigo-500/30 dark:bg-indigo-900/30 dark:text-indigo-300">
           Your Profile
         </Badge>
-        <h2 className="text-2xl font-bold text-slate-900 sm:text-3xl">
+        <h2 className="text-2xl font-bold text-slate-900 sm:text-3xl dark:text-slate-100">
           Set Everything Up
         </h2>
-        <p className="mx-auto max-w-xl text-base text-slate-600 leading-relaxed">
+        <p className="mx-auto max-w-xl text-base text-slate-600 leading-relaxed dark:text-slate-400">
           Link your university account and share your academic background to
           help us better understand the diverse perspectives shaping our
           dataset.
@@ -485,19 +494,19 @@ function StepProfile({
 
       <div className="mx-auto w-full max-w-4xl mt-8 grid gap-6 md:grid-cols-2">
         {/* Authentication Card */}
-        <div className="flex flex-col rounded-2xl border border-slate-200/60 bg-white p-6 sm:p-7 space-y-4 shadow-sm relative overflow-hidden">
-          <div className="absolute right-0 top-0 rounded-bl-xl bg-amber-50 px-3 py-1 border-b border-l border-amber-200/50">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700">
+        <div className="flex flex-col rounded-2xl border border-slate-200/60 bg-white p-6 sm:p-7 space-y-4 shadow-sm relative overflow-hidden dark:border-slate-700/50 dark:bg-slate-800/80">
+          <div className="absolute right-0 top-0 rounded-bl-xl bg-amber-50 px-3 py-1 border-b border-l border-amber-200/50 dark:bg-amber-900/30 dark:border-amber-700/30">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-300">
               Required
             </span>
           </div>
           <div className="flex items-center justify-between pt-1">
-            <h3 className="font-bold text-slate-900 flex items-center gap-2">
-              <LogIn className="h-4 w-4 text-[#0a4da2]" />
+            <h3 className="font-bold text-slate-900 flex items-center gap-2 dark:text-slate-100">
+              <LogIn className="h-4 w-4 text-[#0a4da2] dark:text-[#6b9fff]" />
               Authentication
             </h3>
           </div>
-          <p className="text-sm text-slate-600 leading-relaxed flex-grow">
+          <p className="text-sm text-slate-600 leading-relaxed flex-grow dark:text-slate-400">
             We use your university account to securely record your contributions
             while keeping your data private.
           </p>
@@ -514,7 +523,7 @@ function StepProfile({
             <button
               type="button"
               onClick={onSignIn}
-              className="flex w-full sm:w-auto self-start mt-2 items-center justify-center gap-2 rounded-xl bg-white border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 hover:border-slate-300 hover:-translate-y-0.5"
+              className="flex w-full sm:w-auto self-start mt-2 items-center justify-center gap-2 rounded-xl bg-white border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 hover:border-slate-300 hover:-translate-y-0.5 dark:bg-slate-700 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-600 dark:hover:border-slate-500"
             >
               <span>Sign in via University Email</span>
             </button>
@@ -522,19 +531,19 @@ function StepProfile({
         </div>
 
         {/* Demographics Card */}
-        <div className="flex flex-col rounded-2xl border border-slate-200/60 bg-white p-6 sm:p-7 space-y-4 shadow-sm relative overflow-hidden">
-          <div className="absolute right-0 top-0 rounded-bl-xl bg-amber-50 px-3 py-1 border-b border-l border-amber-200/50">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700">
+        <div className="flex flex-col rounded-2xl border border-slate-200/60 bg-white p-6 sm:p-7 space-y-4 shadow-sm relative overflow-hidden dark:border-slate-700/50 dark:bg-slate-800/80">
+          <div className="absolute right-0 top-0 rounded-bl-xl bg-amber-50 px-3 py-1 border-b border-l border-amber-200/50 dark:bg-amber-900/30 dark:border-amber-700/30">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-300">
               Required
             </span>
           </div>
           <div className="flex items-center justify-between pt-1">
-            <h3 className="font-bold text-slate-900 flex items-center gap-2">
-              <GraduationCap className="h-4 w-4 text-[#0a4da2]" />
+            <h3 className="font-bold text-slate-900 flex items-center gap-2 dark:text-slate-100">
+              <GraduationCap className="h-4 w-4 text-[#0a4da2] dark:text-[#6b9fff]" />
               Academic Status
             </h3>
           </div>
-          <p className="text-sm text-slate-600 leading-relaxed">
+          <p className="text-sm text-slate-600 leading-relaxed dark:text-slate-400">
             Please select your current academic progress or highest degree so we
             can better understand the demographics of our contributors.
           </p>
@@ -545,10 +554,10 @@ function StepProfile({
                 value={selectedDegree || undefined}
                 onValueChange={onSelectDegree}
               >
-                <SelectTrigger className="w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 h-auto text-sm font-medium text-slate-700 transition shadow-sm focus:border-[#0a4da2] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#0a4da2] data-[placeholder]:text-slate-500">
+                <SelectTrigger className="h-auto w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700 shadow-sm transition focus:border-[#0a4da2] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#0a4da2] data-[placeholder]:text-slate-500 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 dark:data-[placeholder]:text-slate-400 dark:focus:border-[#6b9fff] dark:focus:bg-slate-700 dark:focus:ring-[#6b9fff]">
                   <SelectValue placeholder="Select Your Status..." />
                 </SelectTrigger>
-                <SelectContent className="rounded-xl border border-slate-200 bg-white shadow-xl z-50 overflow-hidden">
+                <SelectContent className="rounded-xl border border-slate-200 bg-white shadow-xl z-50 overflow-hidden dark:border-slate-600 dark:bg-slate-800">
                   {DEGREES.map(degree => (
                     <SelectItem
                       key={degree.id}
@@ -569,10 +578,10 @@ function StepProfile({
                     variant="outline"
                     role="combobox"
                     aria-expanded={domainOpen}
-                    className={`w-full justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 h-auto text-sm transition shadow-sm hover:bg-slate-50 focus:border-[#0a4da2] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#0a4da2] ${
+                    className={`h-auto w-full justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm shadow-sm transition hover:bg-slate-50 focus:border-[#0a4da2] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#0a4da2] dark:border-slate-600 dark:bg-slate-700 dark:hover:bg-slate-700 dark:focus:border-[#6b9fff] dark:focus:bg-slate-700 dark:focus:ring-[#6b9fff] ${
                       !fieldOfStudy
-                        ? 'text-slate-500 font-medium'
-                        : 'text-slate-700 font-medium'
+                        ? 'text-slate-500 dark:text-slate-400 font-medium'
+                        : 'text-slate-700 font-medium dark:text-slate-200'
                     }`}
                   >
                     {fieldOfStudy ||
@@ -581,7 +590,7 @@ function StepProfile({
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent
-                  className="w-[var(--radix-popover-trigger-width)] p-0 rounded-xl bg-white shadow-xl border border-slate-200 z-50 overflow-hidden"
+                  className="w-[var(--radix-popover-trigger-width)] p-0 rounded-xl bg-white shadow-xl border border-slate-200 z-50 overflow-hidden dark:bg-slate-800 dark:border-slate-600"
                   align="start"
                 >
                   <Command>
@@ -596,7 +605,7 @@ function StepProfile({
                         {searchQuery.trim() !== '' ? (
                           <Button
                             variant="ghost"
-                            className="w-full justify-start text-sm h-auto py-2 px-2 text-slate-700 font-normal hover:bg-slate-100"
+                            className="h-auto w-full justify-start px-2 py-2 text-sm font-normal text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700"
                             onClick={() => {
                               onFieldOfStudyChange(searchQuery.trim());
                               setDomainOpen(false);
@@ -607,7 +616,7 @@ function StepProfile({
                             </span>
                           </Button>
                         ) : (
-                          <span className="text-sm text-slate-500 py-2 px-2">
+                          <span className="text-sm text-slate-500 dark:text-slate-400 py-2 px-2">
                             Type your domain...
                           </span>
                         )}
@@ -625,7 +634,7 @@ function StepProfile({
                             className="cursor-pointer font-medium"
                           >
                             <Check
-                              className={`mr-2 h-4 w-4 ${fieldOfStudy === domain ? 'opacity-100 text-[#0a4da2]' : 'opacity-0'}`}
+                              className={`mr-2 h-4 w-4 ${fieldOfStudy === domain ? 'opacity-100 text-[#0a4da2] dark:text-[#6b9fff]' : 'opacity-0'}`}
                             />
                             {domain}
                           </CommandItem>
@@ -656,12 +665,12 @@ const StepPractice = forwardRef<
   ref
 ) {
   return (
-    <section className="space-y-4 rounded-[32px] border border-white/70 bg-white/85 p-8 shadow-[0_26px_90px_-55px_rgba(7,30,84,0.5)] backdrop-blur-xl">
+    <section className="space-y-4 rounded-[32px] border border-white/70 bg-white/85 p-8 shadow-[0_26px_90px_-55px_rgba(7,30,84,0.5)] backdrop-blur-xl dark:border-slate-700/50 dark:bg-slate-800/60 dark:shadow-[0_26px_90px_-55px_rgba(0,0,0,0.7)]">
       <div className="text-center space-y-2">
-        <Badge className="w-fit mx-auto rounded-full border border-amber-400/40 bg-amber-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-amber-700">
+        <Badge className="w-fit mx-auto rounded-full border border-amber-400/40 bg-amber-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-amber-700 dark:border-amber-500/30 dark:bg-amber-900/30 dark:text-amber-300">
           Practice Round
         </Badge>
-        <h2 className="text-2xl font-bold text-slate-900 sm:text-3xl">
+        <h2 className="text-2xl font-bold text-slate-900 sm:text-3xl dark:text-slate-100">
           Try It Yourself
         </h2>
       </div>
@@ -670,13 +679,13 @@ const StepPractice = forwardRef<
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="mx-auto max-w-sm rounded-2xl border border-emerald-200 bg-emerald-50/80 p-6 text-center"
+          className="mx-auto max-w-sm rounded-2xl border border-emerald-200 bg-emerald-50/80 p-6 text-center dark:border-emerald-700/50 dark:bg-emerald-900/30"
         >
-          <CheckCircle2 className="mx-auto h-10 w-10 text-emerald-500 mb-3" />
-          <p className="text-base font-semibold text-emerald-800">
+          <CheckCircle2 className="mx-auto h-10 w-10 text-emerald-500 mb-3 dark:text-emerald-400" />
+          <p className="text-base font-semibold text-emerald-800 dark:text-emerald-300">
             Practice complete!
           </p>
-          <p className="text-sm text-emerald-600 mt-1">
+          <p className="text-sm text-emerald-600 mt-1 dark:text-emerald-400">
             Hit Continue to proceed to the guidelines.
           </p>
         </motion.div>
@@ -723,15 +732,15 @@ function StepConsent({
   onToggle: () => void;
 }) {
   return (
-    <section className="space-y-6 rounded-[32px] border border-white/70 bg-white/85 p-10 shadow-[0_26px_90px_-55px_rgba(7,30,84,0.5)] backdrop-blur-xl">
+    <section className="space-y-6 rounded-[32px] border border-white/70 bg-white/85 p-10 shadow-[0_26px_90px_-55px_rgba(7,30,84,0.5)] backdrop-blur-xl dark:border-slate-700/50 dark:bg-slate-800/60 dark:shadow-[0_26px_90px_-55px_rgba(0,0,0,0.7)]">
       <div className="text-center space-y-3">
-        <Badge className="w-fit mx-auto rounded-full border border-[#0a4da2]/30 bg-[#0a4da2]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-[#0a4da2]">
+        <Badge className="w-fit mx-auto rounded-full border border-[#0a4da2]/30 bg-[#0a4da2]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-[#0a4da2] dark:border-[#6b9fff]/30 dark:bg-[#6b9fff]/15 dark:text-[#6b9fff]">
           Guidelines
         </Badge>
-        <h2 className="text-2xl font-bold text-slate-900 sm:text-3xl">
+        <h2 className="text-2xl font-bold text-slate-900 sm:text-3xl dark:text-slate-100">
           Quality Over Quantity
         </h2>
-        <p className="mx-auto max-w-xl text-base text-slate-600 leading-relaxed">
+        <p className="mx-auto max-w-xl text-base text-slate-600 leading-relaxed dark:text-slate-400">
           Great benchmark data comes from careful, honest mappings.
           <br className="hidden sm:block" />
           Here are a few principles to keep in mind.
@@ -742,28 +751,32 @@ function StepConsent({
         {GUIDELINES.map(g => (
           <div
             key={g.title}
-            className="rounded-xl border border-slate-200/60 bg-slate-50/60 p-5 space-y-2"
+            className="rounded-xl border border-slate-200/60 bg-slate-50/60 p-5 space-y-2 dark:border-slate-700/50 dark:bg-slate-800/40"
           >
             <div className="flex items-center gap-2.5">
               <span className="text-lg">{g.emoji}</span>
-              <h3 className="text-sm font-bold text-slate-900">{g.title}</h3>
+              <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                {g.title}
+              </h3>
             </div>
-            <p className="text-sm text-slate-600 leading-relaxed">{g.desc}</p>
+            <p className="text-sm text-slate-600 leading-relaxed dark:text-slate-400">
+              {g.desc}
+            </p>
           </div>
         ))}
       </div>
 
-      <div className="mx-auto max-w-2xl rounded-2xl border border-[#0a4da2]/20 bg-[#0a4da2]/5 p-6 space-y-4">
+      <div className="mx-auto max-w-2xl rounded-2xl border border-[#0a4da2]/20 bg-[#0a4da2]/5 p-6 space-y-4 dark:border-[#6b9fff]/20 dark:bg-[#6b9fff]/10">
         <label className="flex items-start gap-3 cursor-pointer group">
           <input
             type="checkbox"
             checked={checked}
             onChange={onToggle}
-            className="mt-1 h-5 w-5 rounded border-slate-300 text-[#0a4da2] accent-[#0a4da2] focus:ring-[#0a4da2] transition"
+            className="mt-1 h-5 w-5 rounded border-slate-300 text-[#0a4da2] accent-[#0a4da2] focus:ring-[#0a4da2] transition dark:border-slate-600 dark:accent-[#6b9fff]"
           />
-          <span className="text-sm text-slate-700 leading-relaxed">
+          <span className="text-sm text-slate-700 leading-relaxed dark:text-slate-300">
             I understand that my mappings will be used as{' '}
-            <span className="font-semibold text-slate-900">
+            <span className="font-semibold text-slate-900 dark:text-slate-100">
               ground-truth benchmark data
             </span>{' '}
             to evaluate competency-aware recommender systems. My contributions
