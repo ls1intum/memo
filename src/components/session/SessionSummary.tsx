@@ -14,35 +14,35 @@ interface SessionSummaryProps {
 export function SessionSummary({ stats, onContinue }: SessionSummaryProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 animate-in fade-in duration-300">
-      <div className="relative w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-2xl p-8 animate-in zoom-in-95 duration-300">
+      <div className="relative w-full max-w-md overflow-hidden rounded-3xl bg-white dark:bg-slate-800 shadow-2xl p-8 animate-in zoom-in-95 duration-300">
         <div className="pointer-events-none absolute -right-12 -top-12 h-32 w-32 rounded-full bg-[#7c6cff]/20 blur-[60px]" />
         <div className="pointer-events-none absolute -left-8 -bottom-8 h-24 w-24 rounded-full bg-[#0a4da2]/15 blur-[50px]" />
 
         <div className="relative z-10 space-y-6">
           <div className="text-center space-y-2">
             <div className="text-4xl">🧠</div>
-            <h2 className="text-2xl font-bold text-slate-900">
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
               Session Complete
             </h2>
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-slate-500 dark:text-slate-400">
               Great work! Here's what you accomplished.
             </p>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <div className="rounded-xl bg-emerald-50 border border-emerald-100 p-4 text-center">
-              <p className="text-2xl font-bold text-emerald-700">
+            <div className="rounded-xl bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-100 dark:border-emerald-800/50 p-4 text-center">
+              <p className="text-2xl font-bold text-emerald-700 dark:text-emerald-300">
                 {stats.completed}
               </p>
-              <p className="text-xs font-semibold text-emerald-600 mt-1">
+              <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 mt-1">
                 Mappings
               </p>
             </div>
-            <div className="rounded-xl bg-slate-50 border border-slate-200 p-4 text-center">
-              <p className="text-2xl font-bold text-slate-700">
+            <div className="rounded-xl bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 p-4 text-center">
+              <p className="text-2xl font-bold text-slate-700 dark:text-slate-300">
                 {stats.skipped}
               </p>
-              <p className="text-xs font-semibold text-slate-500 mt-1">
+              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-1">
                 Skipped
               </p>
             </div>
@@ -58,7 +58,7 @@ export function SessionSummary({ stats, onContinue }: SessionSummaryProps) {
             <button
               type="button"
               onClick={onContinue}
-              className="h-12 w-full rounded-full border border-slate-200 bg-white text-base font-semibold text-slate-700 transition hover:-translate-y-0.5 hover:bg-slate-50"
+              className="h-12 w-full rounded-full border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-base font-semibold text-slate-700 dark:text-slate-200 transition hover:-translate-y-0.5 hover:bg-slate-50 dark:hover:bg-slate-600"
             >
               Continue Session
             </button>

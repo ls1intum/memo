@@ -58,11 +58,15 @@ export function Navbar() {
               className="group inline-flex items-center gap-2 rounded-md px-1.5 py-1 text-slate-900 transition hover:text-[#0a4da2] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0a4da2] focus-visible:ring-offset-2 dark:text-white dark:hover:text-[#b3c8ff]"
               aria-label="Memo - Home"
             >
-              <img src="/logoV4.svg" alt="Memo logo" className="h-13 w-13" />
+              <img
+                src="/logoV4.svg"
+                alt="Memo logo"
+                className="h-13 w-13 drop-shadow-sm dark:brightness-0 dark:invert"
+              />
               <span className="font-bold text-lg">Memo</span>
             </Link>
             <span
-              className="rounded-full border border-slate-200/80 bg-white/70 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-600 shadow-sm dark:border-slate-800/80 dark:bg-slate-900/80 dark:text-slate-300"
+              className="rounded-full border border-slate-200 bg-slate-100/90 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-600 shadow-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
               aria-label={`Version ${APP_VERSION}`}
             >
               v{APP_VERSION}
@@ -71,7 +75,7 @@ export function Navbar() {
 
           {/* Center - Sliding nav */}
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-            <div className="pointer-events-auto relative flex w-[16rem] max-w-full items-center justify-between rounded-full border border-slate-200/80 bg-white/70 px-[0px] py-[8px] shadow-inner backdrop-blur dark:border-slate-800/70 dark:bg-slate-900/70">
+            <div className="pointer-events-auto relative flex w-[16rem] max-w-full items-center justify-between rounded-full border border-slate-200 bg-slate-100/90 px-[0px] py-[8px] shadow-inner backdrop-blur dark:border-slate-700 dark:bg-slate-800/90">
               {activeIndex >= 0 && (
                 <div
                   className="absolute inset-y-1 rounded-full bg-linear-to-r from-[#0a4da2] to-[#7c6cff] shadow-md transition-all duration-300 ease-out"
@@ -105,7 +109,7 @@ export function Navbar() {
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
               className={cn(
                 'flex h-9 w-9 items-center justify-center rounded-full border shadow-sm transition hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0a4da2] focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900',
-                'border-slate-200/80 bg-white/70 text-slate-700 hover:bg-white dark:border-slate-800/70 dark:bg-slate-900/80 dark:text-slate-200 dark:hover:bg-slate-800/80'
+                'border-slate-200 bg-slate-100/90 text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700'
               )}
               aria-label={
                 mounted
@@ -158,7 +162,7 @@ export function Navbar() {
                     'group hidden h-9 items-center justify-center gap-2 rounded-full border px-4 shadow-sm transition hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0a4da2] focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900 sm:flex',
                     pathname === '/dashboard'
                       ? 'border-[#0a4da2]/50 bg-linear-to-br from-[#0a4da2]/10 to-[#7c6cff]/10 text-[#0a4da2] ring-1 ring-[#0a4da2]/20 dark:border-[#7c6cff]/50 dark:text-[#b3c8ff] dark:ring-[#7c6cff]/20'
-                      : 'border-slate-200/80 bg-white/70 text-slate-700 hover:bg-white dark:border-slate-800/70 dark:bg-slate-900/80 dark:text-slate-200 dark:hover:bg-slate-800/80'
+                      : 'border-slate-200 bg-slate-100/90 text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700'
                   )}
                   aria-label="Your Dashboard"
                 >
@@ -172,7 +176,7 @@ export function Navbar() {
                       'group hidden h-9 items-center justify-center gap-2 rounded-full border px-4 shadow-sm transition hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0a4da2] focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900 sm:flex',
                       pathname.startsWith('/admin')
                         ? 'border-[#0a4da2]/50 bg-linear-to-br from-[#0a4da2]/10 to-[#7c6cff]/10 text-[#0a4da2] ring-1 ring-[#0a4da2]/20 dark:border-[#7c6cff]/50 dark:text-[#b3c8ff] dark:ring-[#7c6cff]/20'
-                        : 'border-slate-200/80 bg-white/70 text-slate-700 hover:bg-white dark:border-slate-800/70 dark:bg-slate-900/80 dark:text-slate-200 dark:hover:bg-slate-800/80'
+                        : 'border-slate-200 bg-slate-100/90 text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700'
                     )}
                     aria-label="Admin Panel"
                   >
@@ -182,7 +186,7 @@ export function Navbar() {
                 )}
                 <button
                   onClick={logout}
-                  className="hidden rounded-full border border-slate-200/80 bg-white/70 px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0a4da2] focus-visible:ring-offset-2 dark:border-slate-800/70 dark:bg-slate-900/80 dark:text-slate-200 dark:hover:bg-slate-800/80 sm:inline-flex"
+                  className="hidden rounded-full border border-slate-200 bg-slate-100/90 px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0a4da2] focus-visible:ring-offset-2 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 sm:inline-flex"
                   aria-label="Sign out"
                 >
                   Sign out

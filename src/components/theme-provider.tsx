@@ -7,39 +7,102 @@ type ThemeProviderProps = {
   storageKey?: string;
 };
 
+function isTheme(value: string | null): value is Theme {
+  return value === 'light' || value === 'dark' || value === 'system';
+}
+
+function getSystemTheme(): Exclude<Theme, 'system'> {
+  return window.matchMedia('(prefers-color-scheme: dark)').matches
+    ? 'dark'
+    : 'light';
+}
+
+function resolveTheme(theme: Theme): Exclude<Theme, 'system'> {
+  return theme === 'system' ? getSystemTheme() : theme;
+}
+
+function applyTheme(theme: Theme) {
+  const root = window.document.documentElement;
+  const resolvedTheme = resolveTheme(theme);
+
+  root.classList.remove('light', 'dark');
+  root.classList.add(resolvedTheme);
+  root.style.colorScheme = resolvedTheme;
+}
+
+function getStoredTheme(storageKey: string, defaultTheme: Theme): Theme {
+  if (typeof window === 'undefined') {
+    return defaultTheme;
+  }
+
+  try {
+    const storedTheme = window.localStorage.getItem(storageKey);
+    return isTheme(storedTheme) ? storedTheme : defaultTheme;
+  } catch {
+    return defaultTheme;
+  }
+}
+
 export function ThemeProvider({
   children,
   defaultTheme = 'system',
   storageKey = 'vite-ui-theme',
   ...props
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(
-    () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
+  const [theme, setThemeState] = useState<Theme>(() =>
+    getStoredTheme(storageKey, defaultTheme)
   );
 
   useEffect(() => {
-    const root = window.document.documentElement;
+    applyTheme(theme);
 
-    root.classList.remove('light', 'dark');
-
-    if (theme === 'system') {
-      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)')
-        .matches
-        ? 'dark'
-        : 'light';
-
-      root.classList.add(systemTheme);
+    if (theme !== 'system') {
       return;
     }
 
-    root.classList.add(theme);
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = () => applyTheme('system');
+
+    mediaQuery.addEventListener('change', handleChange);
+
+    return () => {
+      mediaQuery.removeEventListener('change', handleChange);
+    };
   }, [theme]);
+
+  useEffect(() => {
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key !== storageKey) {
+        return;
+      }
+
+      if (event.newValue === null) {
+        setThemeState(defaultTheme);
+        return;
+      }
+
+      if (isTheme(event.newValue)) {
+        setThemeState(event.newValue);
+      }
+    };
+
+    window.addEventListener('storage', handleStorage);
+
+    return () => {
+      window.removeEventListener('storage', handleStorage);
+    };
+  }, [defaultTheme, storageKey]);
 
   const value = {
     theme,
-    setTheme: (theme: Theme) => {
-      localStorage.setItem(storageKey, theme);
-      setTheme(theme);
+    setTheme: (nextTheme: Theme) => {
+      try {
+        window.localStorage.setItem(storageKey, nextTheme);
+      } catch {
+        /* localStorage unavailable */
+      }
+
+      setThemeState(nextTheme);
     },
   };
 

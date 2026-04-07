@@ -149,7 +149,7 @@ export function ContributionHeatmap({
                   style={{ width: SQUARE_SIZE }}
                 >
                   {label && (
-                    <span className="absolute bottom-0 left-0 text-[11px] font-medium text-slate-500 whitespace-nowrap">
+                    <span className="absolute bottom-0 left-0 text-[11px] font-medium text-slate-500 dark:text-slate-400 whitespace-nowrap">
                       {label}
                     </span>
                   )}
@@ -174,7 +174,7 @@ export function ContributionHeatmap({
                   key={colIndex}
                   className={`flex flex-col shrink-0 ${
                     isYearChange
-                      ? 'ml-3 mr-1 relative before:absolute before:-left-[10px] before:-top-[24px] before:-bottom-1 before:border-l-[2px] before:border-dashed before:border-slate-300 before:-z-10'
+                      ? 'ml-3 mr-1 relative before:absolute before:-left-[10px] before:-top-[24px] before:-bottom-1 before:border-l-[2px] before:border-dashed before:border-slate-300 dark:before:border-slate-600 before:-z-10'
                       : ''
                   }`}
                   style={{ gap: 4 }}
@@ -182,7 +182,7 @@ export function ContributionHeatmap({
                   {col.map((week, weekIndex) => (
                     <div
                       key={weekIndex}
-                      className={`rounded-[4px] transition-all duration-200 hover:scale-110 hover:ring-2 hover:ring-slate-400 hover:z-10 ${heatmapColor(week.count)}`}
+                      className={`rounded-[4px] transition-all duration-200 hover:scale-110 hover:ring-2 hover:ring-slate-400 dark:hover:ring-slate-500 hover:z-10 ${heatmapColor(week.count)}`}
                       style={{ width: SQUARE_SIZE, height: SQUARE_SIZE }}
                       title={`Week of ${week.date.toLocaleDateString()}: ${week.count} mapping${week.count !== 1 ? 's' : ''}`}
                     />

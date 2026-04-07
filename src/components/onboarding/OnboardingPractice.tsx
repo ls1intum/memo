@@ -199,8 +199,8 @@ export const OnboardingPractice = forwardRef<
                 i < round
                   ? 'bg-emerald-500 text-white'
                   : i === round
-                    ? 'bg-gradient-to-br from-[#0a4da2] to-[#5538d1] text-white ring-2 ring-[#0a4da2]/30 ring-offset-2'
-                    : 'bg-slate-200 text-slate-500'
+                    ? 'bg-gradient-to-br from-[#0a4da2] to-[#7c6cff] text-white ring-2 ring-[#0a4da2]/30 ring-offset-2 dark:ring-offset-slate-800'
+                    : 'bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400'
               }`}
             >
               {i < round ? <Check className="h-3.5 w-3.5" /> : i + 1}
@@ -208,7 +208,9 @@ export const OnboardingPractice = forwardRef<
             {i < TUTORIAL_ROUNDS.length - 1 && (
               <div
                 className={`h-0.5 w-8 rounded-full transition-all duration-300 ${
-                  i < round ? 'bg-emerald-400' : 'bg-slate-200'
+                  i < round
+                    ? 'bg-emerald-400 dark:bg-emerald-500'
+                    : 'bg-slate-200 dark:bg-slate-700'
                 }`}
               />
             )}
@@ -226,7 +228,7 @@ export const OnboardingPractice = forwardRef<
           transition={{ duration: 0.35 }}
         >
           <div className="text-center">
-            <h2 className="text-[1.35rem] sm:text-[1.7rem] font-bold text-slate-800 leading-relaxed tracking-tight">
+            <h2 className="text-[1.35rem] sm:text-[1.7rem] font-bold text-slate-800 dark:text-slate-200 leading-relaxed tracking-tight">
               How does{' '}
               <span
                 className="bg-clip-text text-transparent"
@@ -256,8 +258,8 @@ export const OnboardingPractice = forwardRef<
               title={current.competencies[0].title}
               description={current.competencies[0].description}
               themeColors={THEME_COLORS.source}
-              borderColorClass="border-[#0a4da2]/30"
-              gradientFromClass="from-blue-50/80"
+              borderColorClass="border-[#0a4da2]/30 dark:border-[#6b9fff]/30"
+              gradientFromClass="from-blue-50/80 dark:from-blue-950/30"
               isTransitioning={false}
             />
 
@@ -270,7 +272,7 @@ export const OnboardingPractice = forwardRef<
                   }}
                 />
                 <div
-                  className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full shadow-xl ring-3 ring-white"
+                  className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full shadow-xl ring-3 ring-white dark:ring-slate-800"
                   style={{
                     backgroundImage: `linear-gradient(to bottom right, ${THEME_COLORS.source.primary}, ${THEME_COLORS.source.secondary}, ${THEME_COLORS.destination.primary})`,
                   }}
@@ -294,8 +296,8 @@ export const OnboardingPractice = forwardRef<
               title={current.competencies[1].title}
               description={current.competencies[1].description}
               themeColors={THEME_COLORS.destination}
-              borderColorClass="border-[#9775fa]/30"
-              gradientFromClass="from-purple-50/80"
+              borderColorClass="border-[#9775fa]/30 dark:border-[#b39dff]/30"
+              gradientFromClass="from-purple-50/80 dark:from-purple-950/30"
               isTransitioning={false}
             />
           </div>
@@ -308,30 +310,30 @@ export const OnboardingPractice = forwardRef<
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -8 }}
-          className="rounded-xl bg-gradient-to-r from-blue-50/90 via-purple-50/70 to-blue-50/90 border border-blue-200/50 py-3 px-5 text-center"
+          className="rounded-xl bg-gradient-to-r from-blue-50/90 via-purple-50/70 to-blue-50/90 dark:from-blue-950/50 dark:via-purple-950/30 dark:to-blue-950/50 border border-blue-200/50 dark:border-blue-800/30 py-3 px-5 text-center"
         >
           {wrongAttempt ? (
             <motion.p
               initial={{ x: -6 }}
               animate={{ x: [0, -4, 4, -4, 4, 0] }}
               transition={{ duration: 0.4 }}
-              className="text-base font-bold text-amber-700"
+              className="text-base font-bold text-amber-700 dark:text-amber-400"
             >
               {current.feedbackWrong}
             </motion.p>
           ) : selectedRelation && !wrongAttempt ? (
-            <p className="text-base font-bold text-slate-800">
+            <p className="text-base font-bold text-slate-800 dark:text-slate-200">
               {isCorrect ? current.feedbackCorrect : current.feedbackWrong}
             </p>
           ) : (
-            <p className="text-base font-bold text-slate-800">
+            <p className="text-base font-bold text-slate-800 dark:text-slate-200">
               {current.introText}
             </p>
           )}
         </motion.div>
       </AnimatePresence>
 
-      <div className="mx-auto rounded-2xl border border-slate-200/80 p-5 shadow-sm">
+      <div className="mx-auto rounded-2xl border border-slate-200/80 dark:border-slate-700/50 p-5 shadow-sm">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 w-full">
           {RELATIONSHIP_TYPES.map(({ value, label }, index) => {
             const isSelected = selectedRelation === value;
