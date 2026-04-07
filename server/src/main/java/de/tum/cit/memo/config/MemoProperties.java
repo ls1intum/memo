@@ -15,4 +15,10 @@ public class MemoProperties {
      * Example: mytum.de, in.tum.de, tum.de
      */
     private List<String> allowedEmailDomains = List.of();
+
+    /**
+     * Number of days an account may exist without accepting the consent agreement
+     * before being deleted by the cleanup scheduler.
+     */
+    private long consentTtlDays = 7;
 }

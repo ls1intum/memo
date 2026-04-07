@@ -44,4 +44,9 @@ export const usersApi = {
   delete: async (id: string): Promise<void> => {
     await apiClient.delete(`/api/users/${id}`);
   },
+
+  acceptConsent: async (): Promise<User> => {
+    const response = await apiClient.post<User>('/api/users/me/accept-consent');
+    return response.data;
+  },
 };

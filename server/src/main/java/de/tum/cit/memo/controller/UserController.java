@@ -10,6 +10,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -75,5 +77,12 @@ public class UserController {
     public ResponseEntity<Void> deleteUser(@PathVariable String id) {
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/me/accept-consent")
+    @Operation(summary = "Accept consent agreement for the authenticated user")
+    public ResponseEntity<User> acceptConsent(@AuthenticationPrincipal Jwt jwt) {
+        User user = userService.acceptConsent(jwt.getSubject());
+        return ResponseEntity.ok(user);
     }
 }
