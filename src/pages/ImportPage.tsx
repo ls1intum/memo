@@ -92,38 +92,38 @@ export function ImportPage() {
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-linear-to-br from-[#d7e3ff] via-[#f3f5ff] to-[#e8ecff] text-slate-900">
+    <div className="relative min-h-screen overflow-hidden bg-linear-to-br from-[#d7e3ff] via-[#f3f5ff] to-[#e8ecff] text-slate-900 dark:from-[#0f1729] dark:via-[#111b30] dark:to-[#0f1729] dark:text-slate-100">
       <div className="absolute inset-0 -z-10 opacity-70">
-        <div className="absolute left-1/2 -top-24 h-144 w-xl -translate-x-1/2 rounded-full bg-white/80 blur-[140px]" />
-        <div className="absolute left-[10%] top-[22%] h-80 w-80 rounded-full bg-[#7fb0ff]/35 blur-[120px]" />
-        <div className="absolute right-[14%] top-[28%] h-88 w-88 rounded-[40%] bg-linear-to-br from-[#ffdff3]/55 via-[#fff3f8]/35 to-transparent blur-[140px]" />
+        <div className="absolute left-1/2 -top-24 h-144 w-xl -translate-x-1/2 rounded-full bg-white/80 blur-[140px] dark:bg-slate-800/30" />
+        <div className="absolute left-[10%] top-[22%] h-80 w-80 rounded-full bg-[#7fb0ff]/35 blur-[120px] dark:bg-[#7fb0ff]/10" />
+        <div className="absolute right-[14%] top-[28%] h-88 w-88 rounded-[40%] bg-linear-to-br from-[#ffdff3]/55 via-[#fff3f8]/35 to-transparent blur-[140px] dark:from-[#ffdff3]/10 dark:via-[#fff3f8]/5" />
       </div>
 
       <main className="relative z-10 mx-auto mt-20 w-full max-w-2xl px-6 pb-24 lg:mt-24 lg:px-0">
         <div className="mb-2 flex items-center gap-2 text-sm text-slate-500">
           <Link
             to="/admin"
-            className="flex items-center gap-1 transition hover:text-slate-900"
+            className="flex items-center gap-1 transition hover:text-slate-900 dark:hover:text-slate-100"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
             Admin
           </Link>
           <span>/</span>
-          <span className="font-medium text-slate-700">
+          <span className="font-medium text-slate-700 dark:text-slate-300">
             Import Competencies
           </span>
         </div>
 
         <div className="mb-8 space-y-2">
-          <h1 className="text-3xl font-bold text-slate-900 sm:text-4xl">
+          <h1 className="text-3xl font-bold text-slate-900 sm:text-4xl dark:text-slate-100">
             Import
           </h1>
-          <p className="text-base text-slate-600">
+          <p className="text-base text-slate-600 dark:text-slate-400">
             Bulk-import competencies from a JSON or CSV file.
           </p>
         </div>
 
-        <section className="rounded-3xl border border-white/70 bg-white/85 px-8 py-6 shadow-[0_20px_70px_-30px_rgba(7,30,84,0.35)] backdrop-blur-xl">
+        <section className="rounded-3xl border border-white/70 bg-white/85 px-8 py-6 shadow-[0_20px_70px_-30px_rgba(7,30,84,0.35)] backdrop-blur-xl dark:border-slate-700/50 dark:bg-slate-800/60">
           {status === 'success' && result ? (
             <div className="space-y-4">
               <div className="rounded-xl border border-green-200 bg-green-50 p-5">
@@ -152,21 +152,25 @@ export function ImportPage() {
                   </div>
                 )}
               </div>
-              <Button variant="outline" onClick={reset}>
+              <Button
+                variant="outline"
+                onClick={reset}
+                className="dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-700/50"
+              >
                 Import another file
               </Button>
             </div>
           ) : (
             <>
-              <div className="mb-6 flex gap-2 border-b border-slate-200/60">
+              <div className="mb-6 flex gap-2 border-b border-slate-200/60 dark:border-slate-700/50">
                 {(['file', 'json'] as Mode[]).map(m => (
                   <button
                     key={m}
                     onClick={() => setMode(m)}
                     className={`-mb-px border-b-2 px-4 py-2 text-sm font-semibold transition ${
                       mode === m
-                        ? 'border-[#0a4da2] text-[#0a4da2]'
-                        : 'border-transparent text-slate-500 hover:text-slate-800'
+                        ? 'border-[#0a4da2] text-[#0a4da2] dark:border-[#6b9fff] dark:text-[#6b9fff]'
+                        : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
                     }`}
                   >
                     {m === 'file' ? 'File Upload' : 'Paste JSON'}
@@ -180,7 +184,7 @@ export function ImportPage() {
                     onDrop={handleDrop}
                     onDragOver={e => e.preventDefault()}
                     onClick={() => fileInputRef.current?.click()}
-                    className="flex cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/50 p-10 transition hover:border-[#0a4da2]/50 hover:bg-slate-50"
+                    className="flex cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/50 p-10 transition hover:border-[#0a4da2]/50 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800/30 dark:hover:border-[#7c6cff]/50"
                   >
                     {selectedFile ? (
                       <>
@@ -211,11 +215,11 @@ export function ImportPage() {
                       onChange={handleFileChange}
                     />
                   </div>
-                  <div className="rounded-xl border border-slate-200/60 bg-slate-50/60 p-4">
+                  <div className="rounded-xl border border-slate-200/60 bg-slate-50/60 p-4 dark:border-slate-700/50 dark:bg-slate-800/30">
                     <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-slate-500">
                       CSV format
                     </p>
-                    <pre className="whitespace-pre-wrap font-mono text-xs text-slate-600">
+                    <pre className="whitespace-pre-wrap font-mono text-xs text-slate-600 dark:text-slate-400">
                       {`title,description\n"Understand Big-O notation","Time and space complexity"\n"Apply sorting algorithms",`}
                     </pre>
                   </div>
@@ -227,7 +231,7 @@ export function ImportPage() {
                     onChange={handleJsonChange}
                     placeholder={PLACEHOLDER}
                     rows={12}
-                    className="w-full rounded-xl border border-slate-200/60 bg-slate-50/50 p-4 font-mono text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#0a4da2]/30"
+                    className="w-full rounded-xl border border-slate-200/60 bg-slate-50/50 p-4 font-mono text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#0a4da2]/30 dark:border-slate-700/50 dark:bg-slate-800/50 dark:text-slate-200"
                   />
                   {jsonError && (
                     <p className="text-sm text-red-500">{jsonError}</p>

@@ -205,32 +205,34 @@ export function ModerationPage() {
   );
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-linear-to-br from-[#d7e3ff] via-[#f3f5ff] to-[#e8ecff] text-slate-900">
+    <div className="relative min-h-screen overflow-hidden bg-linear-to-br from-[#d7e3ff] via-[#f3f5ff] to-[#e8ecff] text-slate-900 dark:from-[#0f1729] dark:via-[#111b30] dark:to-[#0f1729] dark:text-slate-100">
       <div className="absolute inset-0 -z-10 opacity-70">
-        <div className="absolute left-1/2 -top-24 h-144 w-xl -translate-x-1/2 rounded-full bg-white/80 blur-[140px]" />
-        <div className="absolute left-[10%] top-[22%] h-80 w-80 rounded-full bg-[#7fb0ff]/35 blur-[120px]" />
-        <div className="absolute right-[14%] top-[28%] h-88 w-88 rounded-[40%] bg-linear-to-br from-[#ffdff3]/55 via-[#fff3f8]/35 to-transparent blur-[140px]" />
+        <div className="absolute left-1/2 -top-24 h-144 w-xl -translate-x-1/2 rounded-full bg-white/80 blur-[140px] dark:bg-slate-800/30" />
+        <div className="absolute left-[10%] top-[22%] h-80 w-80 rounded-full bg-[#7fb0ff]/35 blur-[120px] dark:bg-[#7fb0ff]/10" />
+        <div className="absolute right-[14%] top-[28%] h-88 w-88 rounded-[40%] bg-linear-to-br from-[#ffdff3]/55 via-[#fff3f8]/35 to-transparent blur-[140px] dark:from-[#ffdff3]/10 dark:via-[#fff3f8]/5" />
       </div>
 
       <main className="relative z-10 mx-auto mt-20 w-full max-w-5xl px-6 pb-24 lg:mt-24 lg:px-0">
         <div className="mb-2 flex items-center gap-2 text-sm text-slate-500">
           <Link
             to="/admin"
-            className="flex items-center gap-1 transition hover:text-slate-900"
+            className="flex items-center gap-1 transition hover:text-slate-900 dark:hover:text-slate-100"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
             Admin
           </Link>
           <span>/</span>
-          <span className="font-medium text-slate-700">Content Moderation</span>
+          <span className="font-medium text-slate-700 dark:text-slate-300">
+            Content Moderation
+          </span>
         </div>
 
         <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
           <div className="space-y-1">
-            <h1 className="text-3xl font-bold text-slate-900 sm:text-4xl">
+            <h1 className="text-3xl font-bold text-slate-900 sm:text-4xl dark:text-slate-100">
               Moderation
             </h1>
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-slate-500 dark:text-slate-400">
               Click any title or description to edit it inline.
             </p>
           </div>
@@ -240,13 +242,13 @@ export function ModerationPage() {
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Search…"
-              className="h-10 w-56 rounded-full border border-slate-200/80 bg-white/80 pl-9 pr-4 text-sm text-slate-800 placeholder:text-slate-400 shadow-sm backdrop-blur focus:outline-none focus:ring-2 focus:ring-[#0a4da2]/30"
+              className="h-10 w-56 rounded-full border border-slate-200/80 bg-white/80 pl-9 pr-4 text-sm text-slate-800 placeholder:text-slate-400 shadow-sm backdrop-blur focus:outline-none focus:ring-2 focus:ring-[#0a4da2]/30 dark:border-slate-600/80 dark:bg-slate-800/80 dark:text-slate-200 dark:placeholder:text-slate-500"
             />
           </div>
         </div>
 
-        <section className="rounded-3xl border border-white/70 bg-white/85 px-8 py-6 shadow-[0_20px_70px_-30px_rgba(7,30,84,0.35)] backdrop-blur-xl">
-          <div className="flex gap-2 border-b border-slate-200/60 mb-6">
+        <section className="rounded-3xl border border-white/70 bg-white/85 px-8 py-6 shadow-[0_20px_70px_-30px_rgba(7,30,84,0.35)] backdrop-blur-xl dark:border-slate-700/50 dark:bg-slate-800/60">
+          <div className="flex gap-2 border-b border-slate-200/60 mb-6 dark:border-slate-700/50">
             {(['competencies', 'resources'] as Tab[]).map(t => (
               <button
                 key={t}
@@ -256,8 +258,8 @@ export function ModerationPage() {
                 }}
                 className={`-mb-px border-b-2 px-4 py-2 text-sm font-semibold transition ${
                   tab === t
-                    ? 'border-[#0a4da2] text-[#0a4da2]'
-                    : 'border-transparent text-slate-500 hover:text-slate-800'
+                    ? 'border-[#0a4da2] text-[#0a4da2] dark:border-[#6b9fff] dark:text-[#6b9fff]'
+                    : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
                 }`}
               >
                 {t === 'competencies'
@@ -347,15 +349,22 @@ function CompetencyTable({
   ) => void;
   onDelete: (c: Competency) => void;
 }) {
-  if (isLoading) return <p className="text-sm text-slate-500">Loading…</p>;
+  if (isLoading)
+    return (
+      <p className="text-sm text-slate-500 dark:text-slate-500">Loading…</p>
+    );
   if (data.length === 0)
-    return <p className="text-sm text-slate-400 italic">No results.</p>;
+    return (
+      <p className="text-sm text-slate-400 italic dark:text-slate-500">
+        No results.
+      </p>
+    );
 
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-slate-100">
+          <tr className="border-b border-slate-100 dark:border-slate-700/50 dark:bg-slate-800/40">
             <th className="pb-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-400 w-52">
               Title
             </th>
@@ -371,19 +380,19 @@ function CompetencyTable({
             <th className="pb-3 w-10" />
           </tr>
         </thead>
-        <tbody className="divide-y divide-slate-100">
+        <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50">
           {data.map(c => (
             <tr
               key={c.id}
-              className="group align-top hover:bg-slate-50/60 transition-colors"
+              className="group align-top hover:bg-slate-50/60 transition-colors dark:hover:bg-slate-700/30"
             >
-              <td className="py-3 pr-6 font-medium text-slate-900">
+              <td className="py-3 pr-6 font-medium text-slate-900 dark:text-slate-100">
                 <InlineEdit
                   value={c.title}
                   onSave={val => onUpdate(c, 'title', val)}
                 />
               </td>
-              <td className="py-3 pr-6 text-slate-500">
+              <td className="py-3 pr-6 text-slate-500 dark:text-slate-400">
                 <InlineEdit
                   value={c.description}
                   onSave={val => onUpdate(c, 'description', val)}
@@ -392,11 +401,11 @@ function CompetencyTable({
                 />
               </td>
               <td className="py-3 pr-6 text-center">
-                <span className="inline-flex items-center justify-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-600">
+                <span className="inline-flex items-center justify-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-600 dark:bg-slate-700 dark:text-slate-300">
                   {c.degree}
                 </span>
               </td>
-              <td className="py-3 pr-6 text-xs text-slate-400 hidden lg:table-cell whitespace-nowrap">
+              <td className="py-3 pr-6 text-xs text-slate-400 hidden lg:table-cell whitespace-nowrap dark:text-slate-500">
                 {formatDate(c.createdAt)}
               </td>
               <td className="py-3 text-right">
@@ -428,15 +437,22 @@ function ResourceTable({
   onUpdate: (r: LearningResource, field: 'title' | 'url', val: string) => void;
   onDelete: (r: LearningResource) => void;
 }) {
-  if (isLoading) return <p className="text-sm text-slate-500">Loading…</p>;
+  if (isLoading)
+    return (
+      <p className="text-sm text-slate-500 dark:text-slate-500">Loading…</p>
+    );
   if (data.length === 0)
-    return <p className="text-sm text-slate-400 italic">No results.</p>;
+    return (
+      <p className="text-sm text-slate-400 italic dark:text-slate-500">
+        No results.
+      </p>
+    );
 
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-slate-100">
+          <tr className="border-b border-slate-100 dark:border-slate-700/50 dark:bg-slate-800/40">
             <th className="pb-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-400 w-52">
               Title
             </th>
@@ -449,26 +465,26 @@ function ResourceTable({
             <th className="pb-3 w-10" />
           </tr>
         </thead>
-        <tbody className="divide-y divide-slate-100">
+        <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50">
           {data.map(r => (
             <tr
               key={r.id}
-              className="group align-top hover:bg-slate-50/60 transition-colors"
+              className="group align-top hover:bg-slate-50/60 transition-colors dark:hover:bg-slate-700/30"
             >
-              <td className="py-3 pr-6 font-medium text-slate-900">
+              <td className="py-3 pr-6 font-medium text-slate-900 dark:text-slate-100">
                 <InlineEdit
                   value={r.title}
                   onSave={val => onUpdate(r, 'title', val)}
                 />
               </td>
-              <td className="py-3 pr-6 text-slate-500">
+              <td className="py-3 pr-6 text-slate-500 dark:text-slate-400">
                 <InlineEdit
                   value={r.url}
                   onSave={val => onUpdate(r, 'url', val)}
                   placeholder="No URL"
                 />
               </td>
-              <td className="py-3 pr-6 text-xs text-slate-400 hidden lg:table-cell whitespace-nowrap">
+              <td className="py-3 pr-6 text-xs text-slate-400 hidden lg:table-cell whitespace-nowrap dark:text-slate-500">
                 {formatDate(r.createdAt)}
               </td>
               <td className="py-3 text-right">
