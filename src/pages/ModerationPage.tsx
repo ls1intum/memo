@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Trash2 } from 'lucide-react';
+import { ArrowLeft, Trash2, Search } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import {
@@ -18,8 +18,103 @@ import type { Competency, LearningResource } from '@/lib/api/types';
 
 type Tab = 'competencies' | 'resources';
 
+function formatDate(iso: string) {
+  return new Date(iso).toLocaleDateString('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  });
+}
+
+function InlineEdit({
+  value,
+  onSave,
+  multiline = false,
+  placeholder = '—',
+  className = '',
+}: {
+  value: string | null;
+  onSave: (next: string) => void;
+  multiline?: boolean;
+  placeholder?: string;
+  className?: string;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(value ?? '');
+  const ref = useRef<HTMLInputElement & HTMLTextAreaElement>(null);
+
+  const start = () => {
+    setDraft(value ?? '');
+    setEditing(true);
+    setTimeout(() => ref.current?.focus(), 0);
+  };
+
+  const commit = () => {
+    const trimmed = draft.trim();
+    if (trimmed !== (value ?? '')) onSave(trimmed);
+    setEditing(false);
+  };
+
+  const cancel = () => {
+    setDraft(value ?? '');
+    setEditing(false);
+  };
+
+  const baseInputClass = `w-full bg-transparent text-inherit font-inherit leading-inherit border-0 outline-none resize-none ${className}`;
+
+  if (!editing) {
+    return (
+      <span
+        onClick={start}
+        className={`cursor-text hover:text-[#0a4da2] transition-colors ${className}`}
+        title="Click to edit"
+      >
+        {value || (
+          <span className="text-slate-300 italic text-xs">{placeholder}</span>
+        )}
+      </span>
+    );
+  }
+
+  return multiline ? (
+    <textarea
+      ref={ref as React.RefObject<HTMLTextAreaElement>}
+      value={draft}
+      rows={2}
+      onChange={e => setDraft(e.target.value)}
+      onBlur={commit}
+      onKeyDown={e => {
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          cancel();
+        }
+      }}
+      className={baseInputClass}
+    />
+  ) : (
+    <input
+      ref={ref as React.RefObject<HTMLInputElement>}
+      value={draft}
+      onChange={e => setDraft(e.target.value)}
+      onBlur={commit}
+      onKeyDown={e => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          commit();
+        }
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          cancel();
+        }
+      }}
+      className={baseInputClass}
+    />
+  );
+}
+
 export function ModerationPage() {
   const [tab, setTab] = useState<Tab>('competencies');
+  const [search, setSearch] = useState('');
   const [deleteTarget, setDeleteTarget] = useState<{
     id: string;
     title: string;
@@ -36,6 +131,36 @@ export function ModerationPage() {
   const resourcesQuery = useQuery({
     queryKey: ['learningResources'],
     queryFn: learningResourcesApi.getAll,
+  });
+
+  const updateCompetency = useMutation({
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: { title?: string; description?: string };
+    }) => competenciesApi.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['competencies'] });
+      toast.success('Saved');
+    },
+    onError: () => toast.error('Failed to save'),
+  });
+
+  const updateResource = useMutation({
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: { title?: string; url?: string };
+    }) => learningResourcesApi.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['learningResources'] });
+      toast.success('Saved');
+    },
+    onError: () => toast.error('Failed to save'),
   });
 
   const deleteCompetency = useMutation({
@@ -69,15 +194,25 @@ export function ModerationPage() {
 
   const isDeleting = deleteCompetency.isPending || deleteResource.isPending;
 
+  const q = search.toLowerCase();
+  const filteredCompetencies = (competenciesQuery.data ?? []).filter(
+    c =>
+      c.title.toLowerCase().includes(q) ||
+      (c.description ?? '').toLowerCase().includes(q)
+  );
+  const filteredResources = (resourcesQuery.data ?? []).filter(
+    r => r.title.toLowerCase().includes(q) || r.url.toLowerCase().includes(q)
+  );
+
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#d7e3ff] via-[#f3f5ff] to-[#e8ecff] text-slate-900">
+    <div className="relative min-h-screen overflow-hidden bg-linear-to-br from-[#d7e3ff] via-[#f3f5ff] to-[#e8ecff] text-slate-900">
       <div className="absolute inset-0 -z-10 opacity-70">
-        <div className="absolute left-1/2 top-[-6rem] h-[36rem] w-[36rem] -translate-x-1/2 rounded-full bg-white/80 blur-[140px]" />
+        <div className="absolute left-1/2 -top-24 h-144 w-xl -translate-x-1/2 rounded-full bg-white/80 blur-[140px]" />
         <div className="absolute left-[10%] top-[22%] h-80 w-80 rounded-full bg-[#7fb0ff]/35 blur-[120px]" />
-        <div className="absolute right-[14%] top-[28%] h-[22rem] w-[22rem] rounded-[40%] bg-gradient-to-br from-[#ffdff3]/55 via-[#fff3f8]/35 to-transparent blur-[140px]" />
+        <div className="absolute right-[14%] top-[28%] h-88 w-88 rounded-[40%] bg-linear-to-br from-[#ffdff3]/55 via-[#fff3f8]/35 to-transparent blur-[140px]" />
       </div>
 
-      <main className="relative z-10 mx-auto mt-20 w-full max-w-4xl px-6 pb-24 lg:mt-24 lg:px-0">
+      <main className="relative z-10 mx-auto mt-20 w-full max-w-5xl px-6 pb-24 lg:mt-24 lg:px-0">
         <div className="mb-2 flex items-center gap-2 text-sm text-slate-500">
           <Link
             to="/admin"
@@ -90,37 +225,56 @@ export function ModerationPage() {
           <span className="font-medium text-slate-700">Content Moderation</span>
         </div>
 
-        <div className="mb-8 space-y-2">
-          <h1 className="text-3xl font-bold text-slate-900 sm:text-4xl">
-            Content Moderation
-          </h1>
-          <p className="text-base text-slate-600">
-            Review and delete competencies and learning resources.
-          </p>
+        <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
+          <div className="space-y-1">
+            <h1 className="text-3xl font-bold text-slate-900 sm:text-4xl">
+              Moderation
+            </h1>
+            <p className="text-sm text-slate-500">
+              Click any title or description to edit it inline.
+            </p>
+          </div>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Search…"
+              className="h-10 w-56 rounded-full border border-slate-200/80 bg-white/80 pl-9 pr-4 text-sm text-slate-800 placeholder:text-slate-400 shadow-sm backdrop-blur focus:outline-none focus:ring-2 focus:ring-[#0a4da2]/30"
+            />
+          </div>
         </div>
 
-        <section className="rounded-[24px] border border-white/70 bg-white/85 px-8 py-6 shadow-[0_20px_70px_-30px_rgba(7,30,84,0.35)] backdrop-blur-xl">
+        <section className="rounded-3xl border border-white/70 bg-white/85 px-8 py-6 shadow-[0_20px_70px_-30px_rgba(7,30,84,0.35)] backdrop-blur-xl">
           <div className="flex gap-2 border-b border-slate-200/60 mb-6">
             {(['competencies', 'resources'] as Tab[]).map(t => (
               <button
                 key={t}
-                onClick={() => setTab(t)}
-                className={`px-4 py-2 text-sm font-semibold border-b-2 -mb-px transition ${
+                onClick={() => {
+                  setTab(t);
+                  setSearch('');
+                }}
+                className={`-mb-px border-b-2 px-4 py-2 text-sm font-semibold transition ${
                   tab === t
                     ? 'border-[#0a4da2] text-[#0a4da2]'
                     : 'border-transparent text-slate-500 hover:text-slate-800'
                 }`}
               >
-                {t === 'competencies' ? 'Competencies' : 'Learning Resources'}
+                {t === 'competencies'
+                  ? `Competencies${competenciesQuery.data ? ` (${filteredCompetencies.length})` : ''}`
+                  : `Learning Resources${resourcesQuery.data ? ` (${filteredResources.length})` : ''}`}
               </button>
             ))}
           </div>
 
           {tab === 'competencies' && (
             <CompetencyTable
-              data={competenciesQuery.data ?? []}
+              data={filteredCompetencies}
               isLoading={competenciesQuery.isLoading}
-              onDelete={(c: Competency) =>
+              onUpdate={(c, field, val) =>
+                updateCompetency.mutate({ id: c.id, data: { [field]: val } })
+              }
+              onDelete={c =>
                 setDeleteTarget({
                   id: c.id,
                   title: c.title,
@@ -132,9 +286,12 @@ export function ModerationPage() {
 
           {tab === 'resources' && (
             <ResourceTable
-              data={resourcesQuery.data ?? []}
+              data={filteredResources}
               isLoading={resourcesQuery.isLoading}
-              onDelete={(r: LearningResource) =>
+              onUpdate={(r, field, val) =>
+                updateResource.mutate({ id: r.id, data: { [field]: val } })
+              }
+              onDelete={r =>
                 setDeleteTarget({ id: r.id, title: r.title, type: 'resources' })
               }
             />
@@ -178,51 +335,76 @@ export function ModerationPage() {
 function CompetencyTable({
   data,
   isLoading,
+  onUpdate,
   onDelete,
 }: {
   data: Competency[];
   isLoading: boolean;
+  onUpdate: (
+    c: Competency,
+    field: 'title' | 'description',
+    val: string
+  ) => void;
   onDelete: (c: Competency) => void;
 }) {
-  if (isLoading)
-    return <p className="text-sm text-slate-500">Loading…</p>;
+  if (isLoading) return <p className="text-sm text-slate-500">Loading…</p>;
   if (data.length === 0)
-    return <p className="text-sm text-slate-500">No competencies found.</p>;
+    return <p className="text-sm text-slate-400 italic">No results.</p>;
 
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-200/60">
+    <div className="overflow-x-auto">
       <table className="w-full text-sm">
-        <thead className="bg-slate-50/80">
-          <tr>
-            <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+        <thead>
+          <tr className="border-b border-slate-100">
+            <th className="pb-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-400 w-52">
               Title
             </th>
-            <th className="hidden px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 md:table-cell">
+            <th className="pb-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">
               Description
             </th>
-            <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">
-              Actions
+            <th className="pb-3 text-center text-xs font-semibold uppercase tracking-wider text-slate-400 w-16">
+              Votes
             </th>
+            <th className="pb-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-400 hidden lg:table-cell w-28">
+              Created
+            </th>
+            <th className="pb-3 w-10" />
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-100">
           {data.map(c => (
             <tr
               key={c.id}
-              className="transition hover:bg-slate-50/60"
+              className="group align-top hover:bg-slate-50/60 transition-colors"
             >
-              <td className="px-4 py-3 font-medium text-slate-900">
-                {c.title}
+              <td className="py-3 pr-6 font-medium text-slate-900">
+                <InlineEdit
+                  value={c.title}
+                  onSave={val => onUpdate(c, 'title', val)}
+                />
               </td>
-              <td className="hidden max-w-xs truncate px-4 py-3 text-slate-500 md:table-cell">
-                {c.description ?? '—'}
+              <td className="py-3 pr-6 text-slate-500">
+                <InlineEdit
+                  value={c.description}
+                  onSave={val => onUpdate(c, 'description', val)}
+                  multiline
+                  placeholder="No description"
+                />
               </td>
-              <td className="px-4 py-3 text-right">
+              <td className="py-3 pr-6 text-center">
+                <span className="inline-flex items-center justify-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-600">
+                  {c.degree}
+                </span>
+              </td>
+              <td className="py-3 pr-6 text-xs text-slate-400 hidden lg:table-cell whitespace-nowrap">
+                {formatDate(c.createdAt)}
+              </td>
+              <td className="py-3 text-right">
                 <Button
                   size="sm"
                   variant="ghost"
                   onClick={() => onDelete(c)}
-                  className="text-red-500 hover:bg-red-50 hover:text-red-700"
+                  className="text-red-400 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-50 hover:text-red-600"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -238,58 +420,63 @@ function CompetencyTable({
 function ResourceTable({
   data,
   isLoading,
+  onUpdate,
   onDelete,
 }: {
   data: LearningResource[];
   isLoading: boolean;
+  onUpdate: (r: LearningResource, field: 'title' | 'url', val: string) => void;
   onDelete: (r: LearningResource) => void;
 }) {
-  if (isLoading)
-    return <p className="text-sm text-slate-500">Loading…</p>;
+  if (isLoading) return <p className="text-sm text-slate-500">Loading…</p>;
   if (data.length === 0)
-    return (
-      <p className="text-sm text-slate-500">No learning resources found.</p>
-    );
+    return <p className="text-sm text-slate-400 italic">No results.</p>;
 
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-200/60">
+    <div className="overflow-x-auto">
       <table className="w-full text-sm">
-        <thead className="bg-slate-50/80">
-          <tr>
-            <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+        <thead>
+          <tr className="border-b border-slate-100">
+            <th className="pb-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-400 w-52">
               Title
             </th>
-            <th className="hidden px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 md:table-cell">
+            <th className="pb-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">
               URL
             </th>
-            <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">
-              Actions
+            <th className="pb-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-400 hidden lg:table-cell w-28">
+              Created
             </th>
+            <th className="pb-3 w-10" />
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-100">
           {data.map(r => (
             <tr
               key={r.id}
-              className="transition hover:bg-slate-50/60"
+              className="group align-top hover:bg-slate-50/60 transition-colors"
             >
-              <td className="px-4 py-3 font-medium text-slate-900">{r.title}</td>
-              <td className="hidden max-w-xs truncate px-4 py-3 md:table-cell">
-                <a
-                  href={r.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-[#0a4da2] hover:underline"
-                >
-                  {r.url}
-                </a>
+              <td className="py-3 pr-6 font-medium text-slate-900">
+                <InlineEdit
+                  value={r.title}
+                  onSave={val => onUpdate(r, 'title', val)}
+                />
               </td>
-              <td className="px-4 py-3 text-right">
+              <td className="py-3 pr-6 text-slate-500">
+                <InlineEdit
+                  value={r.url}
+                  onSave={val => onUpdate(r, 'url', val)}
+                  placeholder="No URL"
+                />
+              </td>
+              <td className="py-3 pr-6 text-xs text-slate-400 hidden lg:table-cell whitespace-nowrap">
+                {formatDate(r.createdAt)}
+              </td>
+              <td className="py-3 text-right">
                 <Button
                   size="sm"
                   variant="ghost"
                   onClick={() => onDelete(r)}
-                  className="text-red-500 hover:bg-red-50 hover:text-red-700"
+                  className="text-red-400 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-50 hover:text-red-600"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>

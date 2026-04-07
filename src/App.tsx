@@ -16,6 +16,8 @@ import { AdminRoute } from './components/AdminRoute';
 import { AdminPage } from './pages/AdminPage';
 import { ModerationPage } from './pages/ModerationPage';
 import { ImportPage } from './pages/ImportPage';
+import { RolesPage } from './pages/RolesPage';
+import { ExportPage } from './pages/ExportPage';
 import { AuthProvider } from './contexts/AuthContext';
 
 export function App() {
@@ -53,6 +55,8 @@ export function App() {
                     element={<ModerationPage />}
                   />
                   <Route path="/admin/import" element={<ImportPage />} />
+                  <Route path="/admin/roles" element={<RolesPage />} />
+                  <Route path="/admin/export" element={<ExportPage />} />
                 </Route>
               </Route>
             </Route>

@@ -92,11 +92,11 @@ export function ImportPage() {
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#d7e3ff] via-[#f3f5ff] to-[#e8ecff] text-slate-900">
+    <div className="relative min-h-screen overflow-hidden bg-linear-to-br from-[#d7e3ff] via-[#f3f5ff] to-[#e8ecff] text-slate-900">
       <div className="absolute inset-0 -z-10 opacity-70">
-        <div className="absolute left-1/2 top-[-6rem] h-[36rem] w-[36rem] -translate-x-1/2 rounded-full bg-white/80 blur-[140px]" />
+        <div className="absolute left-1/2 -top-24 h-144 w-xl -translate-x-1/2 rounded-full bg-white/80 blur-[140px]" />
         <div className="absolute left-[10%] top-[22%] h-80 w-80 rounded-full bg-[#7fb0ff]/35 blur-[120px]" />
-        <div className="absolute right-[14%] top-[28%] h-[22rem] w-[22rem] rounded-[40%] bg-gradient-to-br from-[#ffdff3]/55 via-[#fff3f8]/35 to-transparent blur-[140px]" />
+        <div className="absolute right-[14%] top-[28%] h-88 w-88 rounded-[40%] bg-linear-to-br from-[#ffdff3]/55 via-[#fff3f8]/35 to-transparent blur-[140px]" />
       </div>
 
       <main className="relative z-10 mx-auto mt-20 w-full max-w-2xl px-6 pb-24 lg:mt-24 lg:px-0">
@@ -116,14 +116,14 @@ export function ImportPage() {
 
         <div className="mb-8 space-y-2">
           <h1 className="text-3xl font-bold text-slate-900 sm:text-4xl">
-            Import Competencies
+            Import
           </h1>
           <p className="text-base text-slate-600">
             Bulk-import competencies from a JSON or CSV file.
           </p>
         </div>
 
-        <section className="rounded-[24px] border border-white/70 bg-white/85 px-8 py-6 shadow-[0_20px_70px_-30px_rgba(7,30,84,0.35)] backdrop-blur-xl">
+        <section className="rounded-3xl border border-white/70 bg-white/85 px-8 py-6 shadow-[0_20px_70px_-30px_rgba(7,30,84,0.35)] backdrop-blur-xl">
           {status === 'success' && result ? (
             <div className="space-y-4">
               <div className="rounded-xl border border-green-200 bg-green-50 p-5">
@@ -246,7 +246,7 @@ export function ImportPage() {
                 <Button
                   onClick={handleSubmit}
                   disabled={status === 'uploading'}
-                  className="rounded-full bg-gradient-to-r from-[#0a4da2] to-[#7c6cff] px-7 text-white shadow-[0_18px_45px_-26px_rgba(7,30,84,0.75)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_55px_-30px_rgba(7,30,84,0.6)]"
+                  className="rounded-full bg-linear-to-r from-[#0a4da2] to-[#7c6cff] px-7 text-white shadow-[0_18px_45px_-26px_rgba(7,30,84,0.75)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_55px_-30px_rgba(7,30,84,0.6)]"
                 >
                   {status === 'uploading' ? 'Importing…' : 'Import'}
                 </Button>
