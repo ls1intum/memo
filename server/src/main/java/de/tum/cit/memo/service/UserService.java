@@ -78,4 +78,12 @@ public class UserService {
         }
         userRepository.deleteById(id);
     }
+
+    @Transactional
+    public User findOrCreateBySubject(String sub) {
+        return userRepository.findById(sub)
+            .orElseGet(() -> userRepository.save(
+                User.builder().id(sub).role(UserRole.USER).build()
+            ));
+    }
 }

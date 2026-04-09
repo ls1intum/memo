@@ -2,6 +2,7 @@
  * Session API helpers for the session page to use with the Spring Boot API
  */
 
+import { apiClient } from './client';
 import { competenciesApi } from './competencies';
 import { competencyResourceLinksApi } from './competency-resource-links';
 import { learningResourcesApi } from './learning-resources';
@@ -19,15 +20,23 @@ import type { RelationshipType } from '@/components/session/session-constants';
 
 const GUEST_USER_ID = 'guest';
 
-export async function getOrCreateDemoUserAction(): Promise<{
+export async function getCurrentUserAction(): Promise<{
   success: boolean;
-  user?: { id: string; name: string };
+  user?: { id: string; role: string };
   error?: string;
 }> {
-  return {
-    success: true,
-    user: { id: GUEST_USER_ID, name: 'Guest User' },
-  };
+  try {
+    const response = await apiClient.get<{ id: string; role: string }>(
+      '/api/auth/me'
+    );
+    return { success: true, user: response.data };
+  } catch (error) {
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : 'Failed to get current user',
+    };
+  }
 }
 
 export async function getRandomCompetenciesAction(count: number): Promise<{

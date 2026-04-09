@@ -9,7 +9,7 @@ import {
   createCompetencyResourceLinkAction,
   deleteCompetencyResourceLinkAction,
   getRandomLearningResourceAction,
-  getOrCreateDemoUserAction,
+  getCurrentUserAction,
 } from '@/lib/api/session-helpers';
 import { contributorStatsApi } from '@/lib/api/contributor-stats';
 import { getNewlyEarnedMilestones } from '@/lib/milestones';
@@ -216,7 +216,7 @@ export function SessionPage() {
   useEffect(() => {
     async function loadDemoUser() {
       try {
-        const result = await getOrCreateDemoUserAction();
+        const result = await getCurrentUserAction();
         if (result.success && result.user) {
           setUserId(result.user.id);
           // Fetch initial stats for milestone tracking
