@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Shield, SquarePen, Upload, Users, Download } from 'lucide-react';
+import { GitMerge, Shield, SquarePen, Upload, Users, Download } from 'lucide-react';
 
 export function AdminPage() {
   return (
@@ -49,9 +49,25 @@ export function AdminPage() {
               <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-linear-to-br from-[#0a4da2] to-[#7c6cff] shadow-md">
                 <Upload className="h-5 w-5 text-white" />
               </div>
-              <h2 className="text-lg font-bold text-slate-900">Import</h2>
+              <h2 className="text-lg font-bold text-slate-900">Import Competencies</h2>
               <p className="mt-1 text-sm text-slate-500">
                 Bulk-import competencies from a JSON or CSV file.
+              </p>
+            </div>
+          </Link>
+
+          <Link
+            to="/admin/import/relationships"
+            className="group relative overflow-hidden rounded-2xl border border-white/70 bg-white/85 p-6 shadow-[0_16px_50px_-20px_rgba(7,30,84,0.3)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_60px_-24px_rgba(7,30,84,0.4)]"
+          >
+            <div className="pointer-events-none absolute -right-6 -top-6 h-20 w-20 rounded-full bg-indigo-400/20 blur-2xl" />
+            <div className="relative z-10">
+              <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-linear-to-br from-[#0a4da2] to-[#7c6cff] shadow-md">
+                <GitMerge className="h-5 w-5 text-white" />
+              </div>
+              <h2 className="text-lg font-bold text-slate-900">Import Relationships</h2>
+              <p className="mt-1 text-sm text-slate-500">
+                Bulk-import competency relationships from a JSON or CSV file.
               </p>
             </div>
           </Link>

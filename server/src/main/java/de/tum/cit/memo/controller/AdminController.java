@@ -3,6 +3,8 @@ package de.tum.cit.memo.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.tum.cit.memo.dto.CompetencyImportRow;
 import de.tum.cit.memo.dto.ImportResult;
+import de.tum.cit.memo.dto.RelationshipImportRow;
+import de.tum.cit.memo.service.CompetencyRelationshipService;
 import de.tum.cit.memo.service.CompetencyService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -13,7 +15,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -32,6 +36,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class AdminController {
 
     private final CompetencyService competencyService;
+    private final CompetencyRelationshipService competencyRelationshipService;
     private final ObjectMapper objectMapper;
 
     @PostMapping("/competencies/import")
@@ -57,6 +62,71 @@ public class AdminController {
         return ResponseEntity.ok(competencyService.bulkImportCompetencies(rows));
     }
 
+    @PostMapping("/relationships/import")
+    @Operation(summary = "Bulk import competency relationships from JSON array")
+    public ResponseEntity<ImportResult> importRelationshipsJson(
+        @RequestBody List<RelationshipImportRow> rows
+    ) {
+        return ResponseEntity.ok(competencyRelationshipService.bulkImportRelationships(rows));
+    }
+
+    @PostMapping(value = "/relationships/import/file", consumes = "multipart/form-data")
+    @Operation(summary = "Bulk import competency relationships from CSV or JSON file")
+    public ResponseEntity<ImportResult> importRelationshipsFile(
+        @RequestParam("file") MultipartFile file
+    ) throws IOException {
+        String originalFilename = file.getOriginalFilename();
+        List<RelationshipImportRow> rows;
+        if (originalFilename != null && originalFilename.endsWith(".csv")) {
+            rows = parseCsvRelationships(file);
+        } else {
+            rows = objectMapper.readValue(
+                file.getInputStream(),
+                objectMapper.getTypeFactory().constructCollectionType(List.class, RelationshipImportRow.class)
+            );
+        }
+        return ResponseEntity.ok(competencyRelationshipService.bulkImportRelationships(rows));
+    }
+
+    private List<RelationshipImportRow> parseCsvRelationships(MultipartFile file) throws IOException {
+        List<RelationshipImportRow> rows = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8))) {
+            String headerLine = reader.readLine();
+            if (headerLine == null) return rows;
+
+            String[] headers = splitCsvLine(headerLine);
+            Map<String, Integer> columnIndex = new HashMap<>();
+            for (int i = 0; i < headers.length; i++) {
+                columnIndex.put(headers[i].trim().toLowerCase(), i);
+            }
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = splitCsvLine(line);
+                RelationshipImportRow row = new RelationshipImportRow();
+                row.setOriginId(getColumn(parts, columnIndex, "originid"));
+                row.setOriginTitle(getColumn(parts, columnIndex, "origintitle"));
+                row.setDestinationId(getColumn(parts, columnIndex, "destinationid"));
+                row.setDestinationTitle(getColumn(parts, columnIndex, "destinationtitle"));
+                row.setRelationshipType(getColumn(parts, columnIndex, "relationshiptype"));
+                rows.add(row);
+            }
+        }
+        return rows;
+    }
+
+    private String getColumn(String[] parts, Map<String, Integer> columnIndex, String name) {
+        Integer idx = columnIndex.get(name);
+        if (idx == null || idx >= parts.length) return null;
+        String val = parts[idx].trim();
+        if (val.isEmpty()) {
+            return null;
+        } else {
+            return val;
+        }
+    }
+
     private List<CompetencyImportRow> parseCsv(MultipartFile file) throws IOException {
         List<CompetencyImportRow> rows = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(
@@ -68,8 +138,18 @@ public class AdminController {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] parts = splitCsvLine(line);
-                String title = parts.length > 0 ? parts[0].trim() : "";
-                String description = parts.length > 1 ? parts[1].trim() : null;
+                String title;
+                if (parts.length > 0) {
+                    title = parts[0].trim();
+                } else {
+                    title = "";
+                }
+                String description;
+                if (parts.length > 1) {
+                    description = parts[1].trim();
+                } else {
+                    description = null;
+                }
                 rows.add(new CompetencyImportRow(title, description));
             }
         }
