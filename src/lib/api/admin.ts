@@ -28,7 +28,9 @@ export const adminApi = {
     return response.data;
   },
 
-  importRelationshipsJson: async (rows: RelationshipImportRow[]): Promise<ImportResult> => {
+  importRelationshipsJson: async (
+    rows: RelationshipImportRow[]
+  ): Promise<ImportResult> => {
     const response = await apiClient.post<ImportResult>(
       '/api/admin/relationships/import',
       rows

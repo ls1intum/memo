@@ -1,27 +1,103 @@
 [
-  { "originId": "comp_ds_001", "destinationId": "comp_fp_001", "relationshipType": "ASSUMES" },
-  { "originId": "comp_fp_001", "destinationId": "comp_hof_001", "relationshipType": "EXTENDS" },
-  { "originId": "comp_hof_001", "destinationId": "comp_poly_001", "relationshipType": "EXTENDS" },
-  { "originId": "comp_poly_001", "destinationId": "comp_mod_001", "relationshipType": "ASSUMES" },
-  { "originId": "comp_fp_001", "destinationId": "comp_mod_001", "relationshipType": "ASSUMES" },
+  {
+    "originId": "comp_ds_001",
+    "destinationId": "comp_fp_001",
+    "relationshipType": "ASSUMES"
+  },
+  {
+    "originId": "comp_fp_001",
+    "destinationId": "comp_hof_001",
+    "relationshipType": "EXTENDS"
+  },
+  {
+    "originId": "comp_hof_001",
+    "destinationId": "comp_poly_001",
+    "relationshipType": "EXTENDS"
+  },
+  {
+    "originId": "comp_poly_001",
+    "destinationId": "comp_mod_001",
+    "relationshipType": "ASSUMES"
+  },
+  {
+    "originId": "comp_fp_001",
+    "destinationId": "comp_mod_001",
+    "relationshipType": "ASSUMES"
+  },
 
-  { "originTitle": "Data Structures", "destinationId": "comp_alg_001", "relationshipType": "ASSUMES" },
-  { "originId": "comp_alg_001", "destinationTitle": "Complexity Theory", "relationshipType": "EXTENDS" },
-  { "originTitle": "Functional Programming", "destinationTitle": "Type Checking and Inference", "relationshipType": "ASSUMES" },
-  { "originTitle": "Higher-Order Functions", "destinationTitle": "Functional Programming", "relationshipType": "MATCHES" },
-  { "originTitle": "Testing and Verification", "destinationTitle": "Error Handling", "relationshipType": "EXTENDS" },
+  {
+    "originTitle": "Data Structures",
+    "destinationId": "comp_alg_001",
+    "relationshipType": "ASSUMES"
+  },
+  {
+    "originId": "comp_alg_001",
+    "destinationTitle": "Complexity Theory",
+    "relationshipType": "EXTENDS"
+  },
+  {
+    "originTitle": "Functional Programming",
+    "destinationTitle": "Type Checking and Inference",
+    "relationshipType": "ASSUMES"
+  },
+  {
+    "originTitle": "Higher-Order Functions",
+    "destinationTitle": "Functional Programming",
+    "relationshipType": "MATCHES"
+  },
+  {
+    "originTitle": "Testing and Verification",
+    "destinationTitle": "Error Handling",
+    "relationshipType": "EXTENDS"
+  },
 
-  { "originId": "comp_alg_001", "destinationTitle": "Parsing and Grammars", "relationshipType": "ASSUMES" },
-  { "originTitle": "Evaluation Strategies", "destinationId": "comp_fp_001", "relationshipType": "EXTENDS" },
-  { "originId": "comp_os_001", "destinationTitle": "Concurrency and Parallelism", "relationshipType": "ASSUMES" },
+  {
+    "originId": "comp_alg_001",
+    "destinationTitle": "Parsing and Grammars",
+    "relationshipType": "ASSUMES"
+  },
+  {
+    "originTitle": "Evaluation Strategies",
+    "destinationId": "comp_fp_001",
+    "relationshipType": "EXTENDS"
+  },
+  {
+    "originId": "comp_os_001",
+    "destinationTitle": "Concurrency and Parallelism",
+    "relationshipType": "ASSUMES"
+  },
 
-  { "originId": "comp_db_001", "destinationId": "comp_sec_001", "relationshipType": "ASSUMES" },
-  { "originId": "comp_net_001", "destinationId": "comp_sec_001", "relationshipType": "ASSUMES" },
-  { "originId": "comp_alg_001", "destinationId": "comp_test_001", "relationshipType": "EXTENDS" },
-  { "originId": "comp_fp_001", "destinationId": "comp_err_001", "relationshipType": "ASSUMES" },
+  {
+    "originId": "comp_db_001",
+    "destinationId": "comp_sec_001",
+    "relationshipType": "ASSUMES"
+  },
+  {
+    "originId": "comp_net_001",
+    "destinationId": "comp_sec_001",
+    "relationshipType": "ASSUMES"
+  },
+  {
+    "originId": "comp_alg_001",
+    "destinationId": "comp_test_001",
+    "relationshipType": "EXTENDS"
+  },
+  {
+    "originId": "comp_fp_001",
+    "destinationId": "comp_err_001",
+    "relationshipType": "ASSUMES"
+  },
 
-  { "originTitle": "Version Control with Git", "destinationTitle": "Software Security", "relationshipType": "UNRELATED" },
-  { "originTitle": "Object-Oriented Design", "destinationTitle": "Module System and Abstraction", "relationshipType": "MATCHES" },
+  {
+    "originTitle": "Version Control with Git",
+    "destinationTitle": "Software Security",
+    "relationshipType": "UNRELATED"
+  },
+  {
+    "originTitle": "Object-Oriented Design",
+    "destinationTitle": "Module System and Abstraction",
+    "relationshipType": "MATCHES"
+  },
 
   { "originId": "comp_ds_001", "destinationId": "comp_alg_001" }
 ]

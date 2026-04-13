@@ -56,7 +56,10 @@ export function App() {
                     element={<ModerationPage />}
                   />
                   <Route path="/admin/import" element={<ImportPage />} />
-                  <Route path="/admin/import/relationships" element={<RelationshipImportPage />} />
+                  <Route
+                    path="/admin/import/relationships"
+                    element={<RelationshipImportPage />}
+                  />
                   <Route path="/admin/roles" element={<RolesPage />} />
                   <Route path="/admin/export" element={<ExportPage />} />
                 </Route>

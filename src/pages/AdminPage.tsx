@@ -1,5 +1,12 @@
 import { Link } from 'react-router-dom';
-import { GitMerge, Shield, SquarePen, Upload, Users, Download } from 'lucide-react';
+import {
+  GitMerge,
+  Shield,
+  SquarePen,
+  Upload,
+  Users,
+  Download,
+} from 'lucide-react';
 
 export function AdminPage() {
   return (
@@ -49,7 +56,9 @@ export function AdminPage() {
               <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-linear-to-br from-[#0a4da2] to-[#7c6cff] shadow-md">
                 <Upload className="h-5 w-5 text-white" />
               </div>
-              <h2 className="text-lg font-bold text-slate-900">Import Competencies</h2>
+              <h2 className="text-lg font-bold text-slate-900">
+                Import Competencies
+              </h2>
               <p className="mt-1 text-sm text-slate-500">
                 Bulk-import competencies from a JSON or CSV file.
               </p>
@@ -65,7 +74,9 @@ export function AdminPage() {
               <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-linear-to-br from-[#0a4da2] to-[#7c6cff] shadow-md">
                 <GitMerge className="h-5 w-5 text-white" />
               </div>
-              <h2 className="text-lg font-bold text-slate-900">Import Relationships</h2>
+              <h2 className="text-lg font-bold text-slate-900">
+                Import Relationships
+              </h2>
               <p className="mt-1 text-sm text-slate-500">
                 Bulk-import competency relationships from a JSON or CSV file.
               </p>

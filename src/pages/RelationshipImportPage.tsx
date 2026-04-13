@@ -109,7 +109,9 @@ export function RelationshipImportPage() {
             Admin
           </Link>
           <span>/</span>
-          <span className="font-medium text-slate-700">Import Relationships</span>
+          <span className="font-medium text-slate-700">
+            Import Relationships
+          </span>
         </div>
 
         <div className="mb-8 space-y-2">
@@ -228,9 +230,10 @@ export function RelationshipImportPage() {
                     className="w-full rounded-xl border border-slate-200/60 bg-slate-50/50 p-4 font-mono text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#0a4da2]/30"
                   />
                   <p className="text-xs text-slate-400">
-                    JSON fields: <code>originId</code>, <code>originTitle</code>,{' '}
-                    <code>destinationId</code>, <code>destinationTitle</code>,{' '}
-                    <code>relationshipType</code> (ASSUMES / EXTENDS / MATCHES / UNRELATED)
+                    JSON fields: <code>originId</code>, <code>originTitle</code>
+                    , <code>destinationId</code>, <code>destinationTitle</code>,{' '}
+                    <code>relationshipType</code> (ASSUMES / EXTENDS / MATCHES /
+                    UNRELATED)
                   </p>
                   {jsonError && (
                     <p className="text-sm text-red-500">{jsonError}</p>
