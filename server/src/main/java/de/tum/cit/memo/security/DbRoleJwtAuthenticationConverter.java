@@ -4,6 +4,7 @@ import de.tum.cit.memo.entity.User;
 import de.tum.cit.memo.enums.UserRole;
 import de.tum.cit.memo.repository.UserRepository;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.converter.Converter;
@@ -26,8 +27,19 @@ public class DbRoleJwtAuthenticationConverter implements Converter<Jwt, Abstract
         String subject = Objects.requireNonNullElse(jwt.getSubject(), "");
         UserRole role = userRepository.findById(subject)
             .map(User::getRole)
-            .orElse(UserRole.USER);
+            .orElseGet(() -> extractRoleFromJwt(jwt));
         return new JwtAuthenticationToken(jwt,
             List.of(new SimpleGrantedAuthority("ROLE_" + role.name())));
+    }
+
+    private UserRole extractRoleFromJwt(Jwt jwt) {
+        Map<String, Object> realmAccess = jwt.getClaim("realm_access");
+        if (realmAccess != null) {
+            Object roles = realmAccess.get("roles");
+            if (roles instanceof List<?> roleList && roleList.contains("ADMIN")) {
+                return UserRole.ADMIN;
+            }
+        }
+        return UserRole.USER;
     }
 }
