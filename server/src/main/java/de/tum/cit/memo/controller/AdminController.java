@@ -8,12 +8,13 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVRecord;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -59,40 +60,30 @@ public class AdminController {
 
     private List<CompetencyImportRow> parseCsv(MultipartFile file) throws IOException {
         List<CompetencyImportRow> rows = new ArrayList<>();
-        try (BufferedReader reader = new BufferedReader(
-            new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8))) {
-            String header = reader.readLine();
-            if (header == null) {
-                return rows;
+        CSVFormat format = CSVFormat.DEFAULT.builder()
+            .setHeader()
+            .setSkipHeaderRecord(true)
+            .setTrim(true)
+            .build();
+        try (var reader = new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8);
+             var parser = format.parse(reader)) {
+            for (CSVRecord record : parser) {
+            String title;
+            if (record.size() > 0) {
+                title = record.get(0);
+            } else {
+                title = "";
             }
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] parts = splitCsvLine(line);
-                String title = parts.length > 0 ? parts[0].trim() : "";
-                String description = parts.length > 1 ? parts[1].trim() : null;
+            String description;
+            if (record.size() > 1) {
+                description = record.get(1);
+            } else {
+                description = null;
+            }
                 rows.add(new CompetencyImportRow(title, description));
             }
         }
         return rows;
-    }
-
-    private String[] splitCsvLine(String line) {
-        List<String> fields = new ArrayList<>();
-        StringBuilder current = new StringBuilder();
-        boolean inQuotes = false;
-        for (int i = 0; i < line.length(); i++) {
-            char c = line.charAt(i);
-            if (c == '"') {
-                inQuotes = !inQuotes;
-            } else if (c == ',' && !inQuotes) {
-                fields.add(current.toString());
-                current = new StringBuilder();
-            } else {
-                current.append(c);
-            }
-        }
-        fields.add(current.toString());
-        return fields.toArray(new String[0]);
     }
 
     private List<CompetencyImportRow> parseJson(MultipartFile file) throws IOException {
