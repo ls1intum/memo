@@ -9,16 +9,14 @@ import de.tum.cit.memo.service.CompetencyService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVRecord;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -42,7 +40,7 @@ public class AdminController {
     @PostMapping("/competencies/import")
     @Operation(summary = "Bulk import competencies from JSON array")
     public ResponseEntity<ImportResult> importJson(
-        @Valid @RequestBody List<CompetencyImportRow> rows
+        @RequestBody List<CompetencyImportRow> rows
     ) {
         return ResponseEntity.ok(competencyService.bulkImportCompetencies(rows));
     }
@@ -90,36 +88,32 @@ public class AdminController {
 
     private List<RelationshipImportRow> parseCsvRelationships(MultipartFile file) throws IOException {
         List<RelationshipImportRow> rows = new ArrayList<>();
-        try (BufferedReader reader = new BufferedReader(
-                new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8))) {
-            String headerLine = reader.readLine();
-            if (headerLine == null) return rows;
-
-            String[] headers = splitCsvLine(headerLine);
-            Map<String, Integer> columnIndex = new HashMap<>();
-            for (int i = 0; i < headers.length; i++) {
-                columnIndex.put(headers[i].trim().toLowerCase(), i);
-            }
-
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] parts = splitCsvLine(line);
+        CSVFormat format = CSVFormat.DEFAULT.builder()
+            .setHeader()
+            .setSkipHeaderRecord(true)
+            .setTrim(true)
+            .setIgnoreHeaderCase(true)
+            .build();
+        try (var reader = new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8);
+             var parser = format.parse(reader)) {
+            for (CSVRecord record : parser) {
                 RelationshipImportRow row = new RelationshipImportRow();
-                row.setOriginId(getColumn(parts, columnIndex, "originid"));
-                row.setOriginTitle(getColumn(parts, columnIndex, "origintitle"));
-                row.setDestinationId(getColumn(parts, columnIndex, "destinationid"));
-                row.setDestinationTitle(getColumn(parts, columnIndex, "destinationtitle"));
-                row.setRelationshipType(getColumn(parts, columnIndex, "relationshiptype"));
+                row.setOriginId(getMappedValue(record, "originId"));
+                row.setOriginTitle(getMappedValue(record, "originTitle"));
+                row.setDestinationId(getMappedValue(record, "destinationId"));
+                row.setDestinationTitle(getMappedValue(record, "destinationTitle"));
+                row.setRelationshipType(getMappedValue(record, "relationshipType"));
                 rows.add(row);
             }
         }
         return rows;
     }
 
-    private String getColumn(String[] parts, Map<String, Integer> columnIndex, String name) {
-        Integer idx = columnIndex.get(name);
-        if (idx == null || idx >= parts.length) return null;
-        String val = parts[idx].trim();
+    private String getMappedValue(CSVRecord record, String header) {
+        if (!record.isMapped(header)) {
+            return null;
+        }
+        String val = record.get(header);
         if (val.isEmpty()) {
             return null;
         } else {
@@ -129,24 +123,23 @@ public class AdminController {
 
     private List<CompetencyImportRow> parseCsv(MultipartFile file) throws IOException {
         List<CompetencyImportRow> rows = new ArrayList<>();
-        try (BufferedReader reader = new BufferedReader(
-            new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8))) {
-            String header = reader.readLine();
-            if (header == null) {
-                return rows;
-            }
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] parts = splitCsvLine(line);
+        CSVFormat format = CSVFormat.DEFAULT.builder()
+            .setHeader()
+            .setSkipHeaderRecord(true)
+            .setTrim(true)
+            .build();
+        try (var reader = new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8);
+             var parser = format.parse(reader)) {
+            for (CSVRecord record : parser) {
                 String title;
-                if (parts.length > 0) {
-                    title = parts[0].trim();
+                if (record.size() > 0) {
+                    title = record.get(0);
                 } else {
                     title = "";
                 }
                 String description;
-                if (parts.length > 1) {
-                    description = parts[1].trim();
+                if (record.size() > 1) {
+                    description = record.get(1);
                 } else {
                     description = null;
                 }
@@ -154,25 +147,6 @@ public class AdminController {
             }
         }
         return rows;
-    }
-
-    private String[] splitCsvLine(String line) {
-        List<String> fields = new ArrayList<>();
-        StringBuilder current = new StringBuilder();
-        boolean inQuotes = false;
-        for (int i = 0; i < line.length(); i++) {
-            char c = line.charAt(i);
-            if (c == '"') {
-                inQuotes = !inQuotes;
-            } else if (c == ',' && !inQuotes) {
-                fields.add(current.toString());
-                current = new StringBuilder();
-            } else {
-                current.append(c);
-            }
-        }
-        fields.add(current.toString());
-        return fields.toArray(new String[0]);
     }
 
     private List<CompetencyImportRow> parseJson(MultipartFile file) throws IOException {
