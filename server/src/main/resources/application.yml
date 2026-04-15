@@ -26,10 +26,15 @@ spring:
         jdbc:
           time_zone: UTC
 
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
+
   flyway:
     enabled: true
     baseline-on-migrate: true
-    validate-on-migrate: false
+    validate-on-migrate: true
     locations: classpath:db/migration
 
 server:
@@ -125,8 +130,6 @@ memo:
     # --- Universität Erlangen-Nürnberg ---
     - fau.de
     - fau.eu
-    # --- Dev / demo (remove in production) ---
-    - memo.local
 
 logging:
   level:
