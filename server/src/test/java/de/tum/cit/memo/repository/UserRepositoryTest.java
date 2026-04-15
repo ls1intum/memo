@@ -73,9 +73,18 @@ class UserRepositoryTest extends AbstractRepositoryTest {
             userRepository.saveAndFlush(user1);
 
             User user2 = createUser("User Two", "same@example.com", UserRole.USER);
+            userRepository.save(user2);
 
-            assertThatThrownBy(() -> userRepository.saveAndFlush(user2))
-                .isInstanceOf(DataIntegrityViolationException.class);
+            // The email constraint is DEFERRABLE INITIALLY DEFERRED (V9 migration), so it is only
+            // checked at commit time. Force an immediate check before the transaction rolls back.
+            // The native query bypasses Spring's exception translator, so Hibernate's
+            // ConstraintViolationException is thrown directly rather than the Spring wrapper.
+            assertThatThrownBy(() ->
+                entityManager.createNativeQuery("SET CONSTRAINTS users_email_key IMMEDIATE").executeUpdate()
+            ).isInstanceOfAny(
+                DataIntegrityViolationException.class,
+                org.hibernate.exception.ConstraintViolationException.class
+            );
         }
 
         @Test
