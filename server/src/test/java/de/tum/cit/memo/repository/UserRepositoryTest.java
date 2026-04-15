@@ -68,6 +68,9 @@ class UserRepositoryTest extends AbstractRepositoryTest {
 
         @Test
         @DisplayName("should enforce unique email constraint")
+        // The email constraint is DEFERRABLE INITIALLY DEFERRED (V9 migration). Setting it to
+        // IMMEDIATE via @Sql before the test body ensures the constraint fires at flush time.
+        @Sql(statements = "SET CONSTRAINTS users_email_key IMMEDIATE")
         void shouldEnforceUniqueEmail() {
             User user1 = createUser("User One", "same@example.com", UserRole.USER);
             userRepository.saveAndFlush(user1);
