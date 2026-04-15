@@ -6,8 +6,10 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
@@ -16,6 +18,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@SpringBootTest(properties = "memo.allowed-email-domains=example.test")
 @AutoConfigureMockMvc
 @SuppressWarnings("null")
 class SecurityConfigIntegrationTest extends AbstractIntegrationTest {
@@ -65,9 +68,18 @@ class SecurityConfigIntegrationTest extends AbstractIntegrationTest {
 
         @Test
         @DisplayName("should return 200 for a protected endpoint with a valid token")
+        @Sql(
+            statements = {
+                "DELETE FROM competency_relationships_votes",
+                "DELETE FROM competency_resource_links",
+                "DELETE FROM competency_relationships",
+                "DELETE FROM users"
+            },
+            executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
+        )
         void shouldReturn200ForProtectedEndpointWithValidToken() throws Exception {
             mockMvc.perform(get("/api/auth/me")
-                    .with(jwt().jwt(j -> j.subject("kcid-security-001").claim("email", "test@tum.de"))))
+                    .with(jwt().jwt(j -> j.subject("kcid-security-001").claim("email", "test@example.test"))))
                 .andExpect(status().isOk());
         }
     }

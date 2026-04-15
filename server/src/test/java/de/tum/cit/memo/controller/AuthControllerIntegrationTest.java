@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.jdbc.Sql;
@@ -18,6 +19,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@SpringBootTest(properties = "memo.allowed-email-domains=example.test")
 @AutoConfigureMockMvc
 @SuppressWarnings("null")
 @Sql(
@@ -62,7 +64,7 @@ class AuthControllerIntegrationTest extends AbstractIntegrationTest {
             String sub = "kcid-first-login-001";
 
             mockMvc.perform(get("/api/auth/me")
-                    .with(jwt().jwt(j -> j.subject(sub).claim("email", "alice@tum.de"))))
+                    .with(jwt().jwt(j -> j.subject(sub).claim("email", "alice@example.test"))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(sub))
                 .andExpect(jsonPath("$.role").value("USER"));
@@ -74,7 +76,7 @@ class AuthControllerIntegrationTest extends AbstractIntegrationTest {
             String sub = "kcid-first-login-002";
 
             mockMvc.perform(get("/api/auth/me")
-                    .with(jwt().jwt(j -> j.subject(sub).claim("email", "bob@tum.de"))))
+                    .with(jwt().jwt(j -> j.subject(sub).claim("email", "bob@example.test"))))
                 .andExpect(status().isOk());
 
             assertThat(userRepository.findById(sub)).isPresent();
@@ -84,7 +86,7 @@ class AuthControllerIntegrationTest extends AbstractIntegrationTest {
         @DisplayName("should assign USER role by default on first login")
         void shouldAssignUserRoleByDefault() throws Exception {
             mockMvc.perform(get("/api/auth/me")
-                    .with(jwt().jwt(j -> j.subject("kcid-first-login-003").claim("email", "carol@tum.de"))))
+                    .with(jwt().jwt(j -> j.subject("kcid-first-login-003").claim("email", "carol@example.test"))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.role").value("USER"));
         }
@@ -100,11 +102,11 @@ class AuthControllerIntegrationTest extends AbstractIntegrationTest {
             String sub = "kcid-returning-user-001";
 
             mockMvc.perform(get("/api/auth/me")
-                    .with(jwt().jwt(j -> j.subject(sub).claim("email", "dave@tum.de"))))
+                    .with(jwt().jwt(j -> j.subject(sub).claim("email", "dave@example.test"))))
                 .andExpect(status().isOk());
 
             mockMvc.perform(get("/api/auth/me")
-                    .with(jwt().jwt(j -> j.subject(sub).claim("email", "dave@tum.de"))))
+                    .with(jwt().jwt(j -> j.subject(sub).claim("email", "dave@example.test"))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(sub))
                 .andExpect(jsonPath("$.role").value("USER"));
@@ -138,7 +140,7 @@ class AuthControllerIntegrationTest extends AbstractIntegrationTest {
         @DisplayName("should return 200 for an email on a permitted university domain")
         void shouldReturn200ForAllowedDomain() throws Exception {
             mockMvc.perform(get("/api/auth/me")
-                    .with(jwt().jwt(j -> j.subject("kcid-allowed-001").claim("email", "student@tum.de"))))
+                    .with(jwt().jwt(j -> j.subject("kcid-allowed-001").claim("email", "student@example.test"))))
                 .andExpect(status().isOk());
         }
 
@@ -146,7 +148,7 @@ class AuthControllerIntegrationTest extends AbstractIntegrationTest {
         @DisplayName("should match allowed domain case-insensitively")
         void shouldMatchDomainCaseInsensitively() throws Exception {
             mockMvc.perform(get("/api/auth/me")
-                    .with(jwt().jwt(j -> j.subject("kcid-allowed-002").claim("email", "student@TUM.DE"))))
+                    .with(jwt().jwt(j -> j.subject("kcid-allowed-002").claim("email", "student@EXAMPLE.TEST"))))
                 .andExpect(status().isOk());
         }
 
