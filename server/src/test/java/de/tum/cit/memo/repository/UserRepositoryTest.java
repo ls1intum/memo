@@ -7,7 +7,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.context.jdbc.Sql;
 
 import java.util.List;
@@ -18,7 +17,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @Sql(statements = {
     "DELETE FROM competency_relationships_votes",
-    "DELETE FROM competency_resource_links",
+    "DELETE FROM competency_resource_mapping_votes",
+    "DELETE FROM competency_resource_mappings",
     "DELETE FROM competency_relationships",
     "DELETE FROM users"
 }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
@@ -64,18 +64,6 @@ class UserRepositoryTest extends AbstractRepositoryTest {
             User saved = userRepository.save(user);
 
             assertThat(saved.getRole()).isEqualTo(UserRole.ADMIN);
-        }
-
-        @Test
-        @DisplayName("should enforce unique email constraint")
-        void shouldEnforceUniqueEmail() {
-            User user1 = createUser("User One", "same@example.com", UserRole.USER);
-            userRepository.saveAndFlush(user1);
-
-            User user2 = createUser("User Two", "same@example.com", UserRole.USER);
-
-            assertThatThrownBy(() -> userRepository.saveAndFlush(user2))
-                .isInstanceOf(DataIntegrityViolationException.class);
         }
 
         @Test

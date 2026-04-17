@@ -110,11 +110,10 @@ export type ResourceMatchTypeOption = {
 };
 
 export const RESOURCE_MATCH_TYPES: ResourceMatchTypeOption[] = [
-  { value: 'UNRELATED', label: 'Unrelated', description: 'no edge / no link' },
   {
-    value: 'WEAK',
-    label: 'Weak',
-    description: 'small connection / minor overlap',
+    value: 'PERFECT_MATCH',
+    label: 'Perfect Match',
+    description: 'directly aligned / ideal relationship',
   },
   {
     value: 'GOOD_FIT',
@@ -122,10 +121,11 @@ export const RESOURCE_MATCH_TYPES: ResourceMatchTypeOption[] = [
     description: 'generally relevant, needs tailored exercise',
   },
   {
-    value: 'PERFECT_MATCH',
-    label: 'Perfect Match',
-    description: 'directly aligned / ideal relationship',
+    value: 'WEAK',
+    label: 'Weak',
+    description: 'small connection / minor overlap',
   },
+  { value: 'UNRELATED', label: 'Unrelated', description: 'no edge / no link' },
 ];
 
 export const RESOURCE_SELECTED_COLORS: Record<ResourceMatchType, string> = {

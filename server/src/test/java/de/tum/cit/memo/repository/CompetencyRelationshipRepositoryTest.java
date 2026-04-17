@@ -24,7 +24,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @Sql(statements = {
     "DELETE FROM competency_relationships_votes",
-    "DELETE FROM competency_resource_links",
+    "DELETE FROM competency_resource_mapping_votes",
+    "DELETE FROM competency_resource_mappings",
     "DELETE FROM competency_relationships",
     "DELETE FROM competencies",
     "DELETE FROM users"

@@ -27,4 +27,15 @@ public interface CompetencyRepository extends JpaRepository<Competency, String> 
     @org.springframework.data.jpa.repository.Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query(value = "UPDATE competencies SET degree = GREATEST(degree - 1, 0) WHERE id IN :ids", nativeQuery = true)
     void decrementDegree(@Param("ids") List<String> ids);
+
+    @Query("SELECT c.id FROM Competency c ORDER BY c.resourceLinkDegree ASC")
+    List<String> findIdsByResourceLinkDegreeAsc(org.springframework.data.domain.Pageable pageable);
+
+    @org.springframework.data.jpa.repository.Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query("UPDATE Competency c SET c.resourceLinkDegree = c.resourceLinkDegree + 1 WHERE c.id IN :ids")
+    void incrementResourceLinkDegree(@Param("ids") List<String> ids);
+
+    @org.springframework.data.jpa.repository.Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query(value = "UPDATE competencies SET resource_link_degree = GREATEST(resource_link_degree - 1, 0) WHERE id IN :ids", nativeQuery = true)
+    void decrementResourceLinkDegree(@Param("ids") List<String> ids);
 }

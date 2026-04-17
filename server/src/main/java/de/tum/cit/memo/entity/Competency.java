@@ -38,4 +38,7 @@ public class Competency {
 
     @Column(nullable = false)
     private int degree;
+
+    @Column(name = "resource_link_degree", nullable = false)
+    private int resourceLinkDegree;
 }

@@ -87,10 +87,10 @@ export function MappingCard(props: MappingCardProps) {
               href={url}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-sm text-pink-600 hover:text-pink-700 dark:text-pink-400 dark:hover:text-pink-300 hover:underline transition-colors"
+              className="inline-flex items-start gap-2 text-sm text-pink-600 hover:text-pink-700 dark:text-pink-400 dark:hover:text-pink-300 hover:underline transition-colors min-w-0"
             >
-              <ExternalLink className="h-4 w-4" />
-              {url}
+              <ExternalLink className="h-4 w-4 shrink-0 mt-0.5" />
+              <span className="break-all">{url}</span>
             </a>
           </div>
         </CardHeader>
