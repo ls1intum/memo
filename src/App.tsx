@@ -12,6 +12,12 @@ import { ImprintPage } from './pages/ImprintPage';
 import { PrivacyPage } from './pages/PrivacyPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { AdminRoute } from './components/AdminRoute';
+import { AdminPage } from './pages/AdminPage';
+import { ModerationPage } from './pages/ModerationPage';
+import { ImportPage } from './pages/ImportPage';
+import { RolesPage } from './pages/RolesPage';
+import { ExportPage } from './pages/ExportPage';
 import { AuthProvider } from './contexts/AuthContext';
 
 export function App() {
@@ -42,6 +48,16 @@ export function App() {
               <Route element={<ProtectedRoute />}>
                 <Route path="/dashboard" element={<DashboardPage />} />
                 <Route path="/session" element={<SessionPage />} />
+                <Route element={<AdminRoute />}>
+                  <Route path="/admin" element={<AdminPage />} />
+                  <Route
+                    path="/admin/moderation"
+                    element={<ModerationPage />}
+                  />
+                  <Route path="/admin/import" element={<ImportPage />} />
+                  <Route path="/admin/roles" element={<RolesPage />} />
+                  <Route path="/admin/export" element={<ExportPage />} />
+                </Route>
               </Route>
             </Route>
           </Routes>
