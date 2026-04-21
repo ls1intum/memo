@@ -72,6 +72,9 @@ dependencies {
     // API Documentation
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.4'
 
+    // CSV parsing
+    implementation 'org.apache.commons:commons-csv:1.11.0'
+
     // Utilities
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'

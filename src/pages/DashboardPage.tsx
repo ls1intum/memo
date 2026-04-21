@@ -104,14 +104,17 @@ function StatCard({
 }
 
 export function DashboardPage() {
-  const { userId } = useAuth();
+  const { userId, isLoading: isAuthLoading } = useAuth();
   const navigate = useNavigate();
   const [stats, setStats] = useState<ContributorStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!userId) return;
+    if (!userId) {
+      if (!isAuthLoading) setLoading(false);
+      return;
+    }
     async function loadStats() {
       try {
         setLoading(true);
@@ -128,7 +131,7 @@ export function DashboardPage() {
       }
     }
     void loadStats();
-  }, [userId]);
+  }, [userId, isAuthLoading]);
 
   const earnedSet = useMemo(
     () => new Set(stats?.earnedBadges ?? []),
