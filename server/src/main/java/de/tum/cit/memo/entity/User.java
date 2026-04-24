@@ -41,4 +41,11 @@ public class User {
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
+
+    @Column(nullable = false)
+    @Builder.Default
+    private boolean consentAccepted = false;
+
+    @Column(nullable = true)
+    private Instant consentAcceptedAt;
 }

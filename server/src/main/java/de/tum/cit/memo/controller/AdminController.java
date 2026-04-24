@@ -9,6 +9,7 @@ import de.tum.cit.memo.service.CompetencyService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
@@ -40,7 +41,7 @@ public class AdminController {
     @PostMapping("/competencies/import")
     @Operation(summary = "Bulk import competencies from JSON array")
     public ResponseEntity<ImportResult> importJson(
-        @RequestBody List<CompetencyImportRow> rows
+        @Valid @RequestBody List<CompetencyImportRow> rows
     ) {
         return ResponseEntity.ok(competencyService.bulkImportCompetencies(rows));
     }

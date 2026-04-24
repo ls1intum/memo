@@ -12,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -85,5 +87,19 @@ public class UserService {
             .orElseGet(() -> userRepository.save(
                 User.builder().id(sub).role(UserRole.USER).build()
             ));
+    }
+
+    @Transactional
+    public User acceptConsent(String id) {
+        User user = getUserById(id);
+        user.setConsentAccepted(true);
+        user.setConsentAcceptedAt(Instant.now());
+        return userRepository.save(user);
+    }
+
+    @Transactional
+    public int deleteUsersWithExpiredConsentTtl(long ttlDays) {
+        Instant threshold = Instant.now().minus(Duration.ofDays(ttlDays));
+        return userRepository.deleteExpiredUnconsented(threshold);
     }
 }
