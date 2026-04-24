@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState, useRef, forwardRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
+import { toast } from 'sonner';
 import { CompetencyNetworkViz } from '@/components/competency-network/CompetencyNetworkViz';
 import {
   ArrowLeft,
@@ -44,6 +45,7 @@ import {
   OnboardingPracticeRef,
 } from '@/components/onboarding/OnboardingPractice';
 import { useAuth } from '@/contexts/useAuth';
+import { usersApi } from '@/lib/api/users';
 
 const TOTAL_STEPS = 5;
 const ONBOARDED_KEY = 'memo-onboarded';
@@ -226,6 +228,10 @@ export function OnboardingPage() {
                 setDirection(1);
                 setStep(s => s + 1);
               }}
+              onSkip={() => {
+                setDirection(1);
+                setStep(s => s + 1);
+              }}
               onCorrectStateChange={setCurrentPracticeCorrect}
               onLastRoundChange={setIsPracticeLastRound}
               completed={practiceCompleted}
@@ -269,15 +275,28 @@ export function OnboardingPage() {
             <Button
               className="flex items-center gap-2 rounded-full bg-gradient-to-r from-emerald-500 to-emerald-600 px-7 py-2.5 text-sm font-bold text-white shadow-lg shadow-emerald-500/20 transition-all hover:-translate-y-0.5 hover:shadow-xl disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0"
               disabled={!canAdvance}
-              onClick={() => {
+              onClick={async () => {
+                try {
+                  await usersApi.acceptConsent();
+                } catch (e) {
+                  // eslint-disable-next-line no-console
+                  console.error('Failed to record consent', e);
+                  toast.error(
+                    'Could not record your consent. Please try again.',
+                    { duration: 10000 }
+                  );
+                  return;
+                }
+
                 try {
                   localStorage.setItem(ONBOARDED_KEY, '1');
                   sessionStorage.removeItem(SESSION_DEGREE_KEY);
                   sessionStorage.removeItem(SESSION_FIELD_KEY);
                 } catch (e) {
                   // eslint-disable-next-line no-console
-                  console.warn('localStorage unavailable', e);
+                  console.warn('Storage unavailable', e);
                 }
+
                 void navigate('/session');
               }}
             >
@@ -656,17 +675,27 @@ const StepPractice = forwardRef<
   OnboardingPracticeRef,
   {
     onComplete: () => void;
+    onSkip: () => void;
     onCorrectStateChange: (isCorrect: boolean) => void;
     onLastRoundChange: (isLastRound: boolean) => void;
     completed: boolean;
   }
 >(function StepPractice(
-  { onComplete, onCorrectStateChange, onLastRoundChange, completed },
+  { onComplete, onSkip, onCorrectStateChange, onLastRoundChange, completed },
   ref
 ) {
   return (
-    <section className="space-y-4 rounded-[32px] border border-white/70 bg-white/85 p-8 shadow-[0_26px_90px_-55px_rgba(7,30,84,0.5)] backdrop-blur-xl dark:border-slate-700/50 dark:bg-slate-800/60 dark:shadow-[0_26px_90px_-55px_rgba(0,0,0,0.7)]">
-      <div className="text-center space-y-2">
+    <section className="relative space-y-4 rounded-[32px] border border-white/70 bg-white/85 p-8 shadow-[0_26px_90px_-55px_rgba(7,30,84,0.5)] backdrop-blur-xl dark:border-slate-700/50 dark:bg-slate-800/60 dark:shadow-[0_26px_90px_-55px_rgba(0,0,0,0.7)]">
+      {!completed && (
+        <Button
+          type="button"
+          onClick={onSkip}
+          className="absolute right-8 top-8 z-10 flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-5 py-2 text-sm font-semibold text-slate-700 shadow-sm transition-all hover:-translate-y-0.5 hover:bg-white hover:border-slate-300 dark:border-slate-600 dark:bg-slate-800/80 dark:text-slate-200 dark:hover:bg-slate-700 dark:hover:border-slate-500"
+        >
+          Skip
+        </Button>
+      )}
+      <div className="text-center space-y-2 mb-4">
         <Badge className="w-fit mx-auto rounded-full border border-amber-400/40 bg-amber-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-amber-700 dark:border-amber-500/30 dark:bg-amber-900/30 dark:text-amber-300">
           Practice Round
         </Badge>

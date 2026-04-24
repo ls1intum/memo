@@ -140,20 +140,21 @@ export const OnboardingPractice = forwardRef<
   function handleSelect(value: RelationshipType | null) {
     if (!value || isCorrect) return;
 
-    // Strict mode: only allow the correct answer
-    if (current.guidanceLevel === 'strict' && value !== current.correctAnswer) {
+    const isWrong = value !== current.correctAnswer;
+
+    // Strict mode: silently ignore wrong answers
+    if (isWrong && current.guidanceLevel === 'strict') {
       return;
     }
 
-    // Soft mode: wrong answer, show feedback, let them try again
-    if (current.guidanceLevel === 'soft' && value !== current.correctAnswer) {
+    // Soft and free modes: show feedback briefly, then let the user try again
+    if (isWrong) {
       setWrongAttempt(true);
       setSelectedRelation(value);
-      // Reset after a moment to let them try again
       setTimeout(() => {
         setSelectedRelation(null);
         setWrongAttempt(false);
-      }, 1500);
+      }, 3000);
       return;
     }
 
@@ -191,31 +192,33 @@ export const OnboardingPractice = forwardRef<
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center justify-center gap-3">
-        {TUTORIAL_ROUNDS.map((_, i) => (
-          <div key={i} className="flex items-center gap-2">
-            <div
-              className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold transition-all duration-300 ${
-                i < round
-                  ? 'bg-emerald-500 text-white'
-                  : i === round
-                    ? 'bg-gradient-to-br from-[#0a4da2] to-[#7c6cff] text-white ring-2 ring-[#0a4da2]/30 ring-offset-2 dark:ring-offset-slate-800'
-                    : 'bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400'
-              }`}
-            >
-              {i < round ? <Check className="h-3.5 w-3.5" /> : i + 1}
-            </div>
-            {i < TUTORIAL_ROUNDS.length - 1 && (
+      <div className="flex justify-center w-full">
+        <div className="flex items-center justify-center gap-3">
+          {TUTORIAL_ROUNDS.map((_, i) => (
+            <div key={i} className="flex items-center gap-3">
               <div
-                className={`h-0.5 w-8 rounded-full transition-all duration-300 ${
+                className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold transition-all duration-300 ${
                   i < round
-                    ? 'bg-emerald-400 dark:bg-emerald-500'
-                    : 'bg-slate-200 dark:bg-slate-700'
+                    ? 'bg-emerald-500 text-white shadow-sm shadow-emerald-500/30'
+                    : i === round
+                      ? 'bg-gradient-to-br from-[#0a4da2] to-[#7c6cff] text-white shadow-md shadow-[#7c6cff]/40'
+                      : 'bg-slate-100 dark:bg-slate-700 text-slate-400 dark:text-slate-500 border border-slate-200 dark:border-slate-600'
                 }`}
-              />
-            )}
-          </div>
-        ))}
+              >
+                {i < round ? <Check className="h-4 w-4" /> : i + 1}
+              </div>
+              {i < TUTORIAL_ROUNDS.length - 1 && (
+                <div
+                  className={`h-[2px] w-10 rounded-full transition-all duration-300 ${
+                    i < round
+                      ? 'bg-emerald-400 dark:bg-emerald-500'
+                      : 'bg-slate-200 dark:bg-slate-700'
+                  }`}
+                />
+              )}
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* ── Question ── */}
@@ -322,7 +325,9 @@ export const OnboardingPractice = forwardRef<
               {current.feedbackWrong}
             </motion.p>
           ) : selectedRelation && !wrongAttempt ? (
-            <p className="text-base font-bold text-slate-800 dark:text-slate-200">
+            <p
+              className={`text-base font-bold ${isCorrect ? 'text-slate-800 dark:text-slate-200' : 'text-amber-700 dark:text-amber-400'}`}
+            >
               {isCorrect ? current.feedbackCorrect : current.feedbackWrong}
             </p>
           ) : (
