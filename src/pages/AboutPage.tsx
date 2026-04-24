@@ -20,7 +20,7 @@ export function AboutPage() {
 
       <main className="relative z-10 mx-auto flex w-full max-w-6xl flex-col gap-16 px-6 pb-20 pt-[8rem] lg:px-0">
         {/* Hero Section */}
-        <section className="space-y-12 text-center animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <section className="space-y-12 text-center">
           <div className="space-y-8">
             <h1 className="text-balance text-[3.2rem] font-semibold leading-[1.04] tracking-tight text-slate-900 dark:text-slate-100 sm:text-[3.9rem] lg:text-[4.9rem]">
               Building the foundation for{' '}
