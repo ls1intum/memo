@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.jdbc.Sql;
@@ -19,8 +21,13 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
- * End-to-end tests for admin interfaces, exercising the full HTTP → Security → Controller →
- * Service → Repository → Database stack.
+ * End-to-end tests for admin interfaces, exercising the full HTTP → Security →
+ * DbRoleJwtAuthenticationConverter → Controller → Service → Repository → Database stack.
+ *
+ * <p>An admin user with id {@code e2e-admin} is pre-seeded before each test so that
+ * {@code jwt().jwt(j -> j.subject("e2e-admin"))} resolves to {@code ROLE_ADMIN} through
+ * the real {@link de.tum.cit.memo.security.DbRoleJwtAuthenticationConverter}.
+ * Plain {@code jwt()} (unknown subject) resolves to {@code ROLE_USER}.
  */
 @AutoConfigureMockMvc
 @SuppressWarnings("null")
@@ -44,7 +51,7 @@ class AdminInterfaceE2ETest extends AbstractIntegrationTest {
     private MockMvc mockMvc;
 
     // -------------------------------------------------------------------------
-    // User management
+    // User management (ADMIN-only)
     // -------------------------------------------------------------------------
 
     @Nested
@@ -55,7 +62,7 @@ class AdminInterfaceE2ETest extends AbstractIntegrationTest {
         @DisplayName("should create a user and return 201 with the user body")
         void shouldCreateUser() throws Exception {
             mockMvc.perform(post("/api/users")
-                    .with(jwt())
+                    .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN")))
                     .contentType(MediaType.APPLICATION_JSON)
                     .content("""
                         {"name": "Alice", "email": "alice@example.com"}
@@ -72,7 +79,7 @@ class AdminInterfaceE2ETest extends AbstractIntegrationTest {
         @DisplayName("should retrieve a created user by id")
         void shouldRetrieveUserById() throws Exception {
             String body = mockMvc.perform(post("/api/users")
-                    .with(jwt())
+                    .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN")))
                     .contentType(MediaType.APPLICATION_JSON)
                     .content("""
                         {"name": "Bob", "email": "bob@example.com"}
@@ -82,7 +89,8 @@ class AdminInterfaceE2ETest extends AbstractIntegrationTest {
 
             String id = extractJsonField(body, "id");
 
-            mockMvc.perform(get("/api/users/{id}", id).with(jwt()))
+            mockMvc.perform(get("/api/users/{id}", id)
+                    .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(id))
                 .andExpect(jsonPath("$.name").value("Bob"));
@@ -92,7 +100,7 @@ class AdminInterfaceE2ETest extends AbstractIntegrationTest {
         @DisplayName("should list all users including newly created ones")
         void shouldListAllUsers() throws Exception {
             mockMvc.perform(post("/api/users")
-                    .with(jwt())
+                    .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN")))
                     .contentType(MediaType.APPLICATION_JSON)
                     .content("""
                         {"name": "User One", "email": "user1@example.com"}
@@ -100,23 +108,24 @@ class AdminInterfaceE2ETest extends AbstractIntegrationTest {
                 .andExpect(status().isCreated());
 
             mockMvc.perform(post("/api/users")
-                    .with(jwt())
+                    .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN")))
                     .contentType(MediaType.APPLICATION_JSON)
                     .content("""
                         {"name": "User Two", "email": "user2@example.com"}
                         """))
                 .andExpect(status().isCreated());
 
-            mockMvc.perform(get("/api/users").with(jwt()))
+            mockMvc.perform(get("/api/users")
+                    .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)));
         }
 
         @Test
-        @DisplayName("should update a user's name and role")
+        @DisplayName("should update a user's name and promote to ADMIN role")
         void shouldUpdateUser() throws Exception {
             String body = mockMvc.perform(post("/api/users")
-                    .with(jwt())
+                    .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN")))
                     .contentType(MediaType.APPLICATION_JSON)
                     .content("""
                         {"name": "Carol", "email": "carol@example.com"}
@@ -127,7 +136,7 @@ class AdminInterfaceE2ETest extends AbstractIntegrationTest {
             String id = extractJsonField(body, "id");
 
             mockMvc.perform(put("/api/users/{id}", id)
-                    .with(jwt())
+                    .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN")))
                     .contentType(MediaType.APPLICATION_JSON)
                     .content("""
                         {"name": "Carol Admin", "role": "ADMIN"}
@@ -141,7 +150,7 @@ class AdminInterfaceE2ETest extends AbstractIntegrationTest {
         @DisplayName("should delete a user and return 404 on subsequent lookup")
         void shouldDeleteUser() throws Exception {
             String body = mockMvc.perform(post("/api/users")
-                    .with(jwt())
+                    .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN")))
                     .contentType(MediaType.APPLICATION_JSON)
                     .content("""
                         {"name": "Dave", "email": "dave@example.com"}
@@ -151,10 +160,12 @@ class AdminInterfaceE2ETest extends AbstractIntegrationTest {
 
             String id = extractJsonField(body, "id");
 
-            mockMvc.perform(delete("/api/users/{id}", id).with(jwt()))
+            mockMvc.perform(delete("/api/users/{id}", id)
+                    .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
                 .andExpect(status().isNoContent());
 
-            mockMvc.perform(get("/api/users/{id}", id).with(jwt()))
+            mockMvc.perform(get("/api/users/{id}", id)
+                    .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
                 .andExpect(status().isNotFound());
         }
 
@@ -162,7 +173,7 @@ class AdminInterfaceE2ETest extends AbstractIntegrationTest {
         @DisplayName("should reject duplicate email with 409 Conflict")
         void shouldRejectDuplicateEmail() throws Exception {
             mockMvc.perform(post("/api/users")
-                    .with(jwt())
+                    .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN")))
                     .contentType(MediaType.APPLICATION_JSON)
                     .content("""
                         {"name": "Eve", "email": "duplicate@example.com"}
@@ -170,7 +181,7 @@ class AdminInterfaceE2ETest extends AbstractIntegrationTest {
                 .andExpect(status().isCreated());
 
             mockMvc.perform(post("/api/users")
-                    .with(jwt())
+                    .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN")))
                     .contentType(MediaType.APPLICATION_JSON)
                     .content("""
                         {"name": "Eve Clone", "email": "duplicate@example.com"}
@@ -182,7 +193,7 @@ class AdminInterfaceE2ETest extends AbstractIntegrationTest {
         @DisplayName("should reject user creation with missing name with 400")
         void shouldRejectUserWithMissingName() throws Exception {
             mockMvc.perform(post("/api/users")
-                    .with(jwt())
+                    .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN")))
                     .contentType(MediaType.APPLICATION_JSON)
                     .content("""
                         {"email": "noname@example.com"}
@@ -195,7 +206,7 @@ class AdminInterfaceE2ETest extends AbstractIntegrationTest {
         @DisplayName("should reject user creation with invalid email with 400")
         void shouldRejectUserWithInvalidEmail() throws Exception {
             mockMvc.perform(post("/api/users")
-                    .with(jwt())
+                    .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN")))
                     .contentType(MediaType.APPLICATION_JSON)
                     .content("""
                         {"name": "Bad Email", "email": "not-an-email"}
@@ -207,7 +218,8 @@ class AdminInterfaceE2ETest extends AbstractIntegrationTest {
         @Test
         @DisplayName("should return 404 when getting a non-existent user")
         void shouldReturn404ForMissingUser() throws Exception {
-            mockMvc.perform(get("/api/users/non-existent-id").with(jwt()))
+            mockMvc.perform(get("/api/users/non-existent-id")
+                    .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
                 .andExpect(status().isNotFound());
         }
     }
@@ -317,7 +329,8 @@ class AdminInterfaceE2ETest extends AbstractIntegrationTest {
 
             String id = extractJsonField(result.getResponse().getContentAsString(), "id");
 
-            mockMvc.perform(delete("/api/competencies/{id}", id).with(jwt()))
+            mockMvc.perform(delete("/api/competencies/{id}", id)
+                    .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
                 .andExpect(status().isNoContent());
 
             mockMvc.perform(get("/api/competencies/{id}", id).with(jwt()))
@@ -443,7 +456,8 @@ class AdminInterfaceE2ETest extends AbstractIntegrationTest {
 
             String id = extractJsonField(result.getResponse().getContentAsString(), "id");
 
-            mockMvc.perform(delete("/api/learning-resources/{id}", id).with(jwt()))
+            mockMvc.perform(delete("/api/learning-resources/{id}", id)
+                    .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
                 .andExpect(status().isNoContent());
 
             mockMvc.perform(get("/api/learning-resources/{id}", id).with(jwt()))
@@ -478,13 +492,139 @@ class AdminInterfaceE2ETest extends AbstractIntegrationTest {
     }
 
     // -------------------------------------------------------------------------
+    // Admin-only import endpoints
+    // -------------------------------------------------------------------------
+
+    @Nested
+    @DisplayName("bulk competency import")
+    class BulkCompetencyImport {
+
+        @Test
+        @DisplayName("should import competencies from a JSON body and return import summary")
+        void shouldImportFromJsonBody() throws Exception {
+            mockMvc.perform(post("/api/admin/competencies/import")
+                    .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN")))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("""
+                        [
+                          {"title": "Machine Learning", "description": "ML fundamentals"},
+                          {"title": "Deep Learning", "description": "Neural networks"}
+                        ]
+                        """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.imported").value(2))
+                .andExpect(jsonPath("$.skipped").value(0))
+                .andExpect(jsonPath("$.errors", empty()));
+        }
+
+        @Test
+        @DisplayName("should skip rows with duplicate titles and report in summary")
+        void shouldSkipDuplicateTitles() throws Exception {
+            mockMvc.perform(post("/api/admin/competencies/import")
+                    .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN")))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("""
+                        [{"title": "Probability Theory"}]
+                        """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.imported").value(1));
+
+            mockMvc.perform(post("/api/admin/competencies/import")
+                    .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN")))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("""
+                        [
+                          {"title": "Probability Theory"},
+                          {"title": "Graph Theory"}
+                        ]
+                        """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.imported").value(1))
+                .andExpect(jsonPath("$.skipped").value(1));
+        }
+
+        @Test
+        @DisplayName("should capture blank-title rows as errors when importing from a CSV file")
+        void shouldCaptureRowsWithBlankTitleFromCsv() throws Exception {
+            // @Valid on the JSON body endpoint rejects blank titles before the service sees them.
+            // File uploads bypass bean validation, so blank titles from CSV reach the service
+            // and are captured in the ImportResult errors list rather than throwing.
+            String csv = "title,description\nValid Competency,good\n  ,blank title here\n";
+            MockMultipartFile file = new MockMultipartFile(
+                "file", "competencies.csv", "text/csv", csv.getBytes()
+            );
+
+            mockMvc.perform(multipart("/api/admin/competencies/import/file")
+                    .file(file)
+                    .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.imported").value(1))
+                .andExpect(jsonPath("$.errors", hasSize(1)));
+        }
+
+        @Test
+        @DisplayName("should import competencies from an uploaded CSV file")
+        void shouldImportFromCsvFile() throws Exception {
+            String csv = "title,description\nOperating Systems,Processes and memory\nNetworking,TCP/IP stack\n";
+            MockMultipartFile file = new MockMultipartFile(
+                "file", "competencies.csv", "text/csv", csv.getBytes()
+            );
+
+            mockMvc.perform(multipart("/api/admin/competencies/import/file")
+                    .file(file)
+                    .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.imported").value(2))
+                .andExpect(jsonPath("$.skipped").value(0));
+        }
+
+        @Test
+        @DisplayName("should import competencies from an uploaded JSON file")
+        void shouldImportFromJsonFile() throws Exception {
+            String json = """
+                [{"title": "Compiler Design"}, {"title": "Formal Languages"}]
+                """;
+            MockMultipartFile file = new MockMultipartFile(
+                "file", "competencies.json", "application/json", json.getBytes()
+            );
+
+            mockMvc.perform(multipart("/api/admin/competencies/import/file")
+                    .file(file)
+                    .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.imported").value(2));
+        }
+
+        @Test
+        @DisplayName("should return 403 for USER role on POST /api/admin/competencies/import")
+        void shouldRejectUserRoleOnImport() throws Exception {
+            mockMvc.perform(post("/api/admin/competencies/import")
+                    .with(jwt())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("""
+                        [{"title": "Forbidden"}]
+                        """))
+                .andExpect(status().isForbidden());
+        }
+
+        @Test
+        @DisplayName("should return 403 for USER role on POST /api/admin/competencies/import/file")
+        void shouldRejectUserRoleOnFileImport() throws Exception {
+            MockMultipartFile file = new MockMultipartFile(
+                "file", "competencies.csv", "text/csv", "title\nForbidden\n".getBytes()
+            );
+
+            mockMvc.perform(multipart("/api/admin/competencies/import/file")
+                    .file(file)
+                    .with(jwt()))
+                .andExpect(status().isForbidden());
+        }
+    }
+
+    // -------------------------------------------------------------------------
     // Helper
     // -------------------------------------------------------------------------
 
-    /**
-     * Extracts a top-level string field from a minimal JSON response without pulling in
-     * an extra JSON library.
-     */
     private static String extractJsonField(String json, String field) {
         String key = "\"" + field + "\"";
         int keyIndex = json.indexOf(key);

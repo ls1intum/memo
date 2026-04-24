@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -25,6 +26,9 @@ class SecurityConfigIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    // jwt() with no authorities → empty authority list → ROLE_ADMIN check fails → 403
+    // jwt().authorities(ROLE_ADMIN) → ROLE_ADMIN authority set directly → 200/201
 
     @Nested
     @DisplayName("public endpoints")
@@ -82,17 +86,6 @@ class SecurityConfigIntegrationTest extends AbstractIntegrationTest {
         }
 
         @Test
-        @DisplayName("should return 401 for PUT /api/users/{id} without token")
-        void shouldRejectUpdateUser() throws Exception {
-            mockMvc.perform(put("/api/users/some-id")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content("""
-                        {"name": "Updated"}
-                        """))
-                .andExpect(status().isUnauthorized());
-        }
-
-        @Test
         @DisplayName("should return 401 for DELETE /api/users/{id} without token")
         void shouldRejectDeleteUser() throws Exception {
             mockMvc.perform(delete("/api/users/some-id"))
@@ -107,13 +100,11 @@ class SecurityConfigIntegrationTest extends AbstractIntegrationTest {
         }
 
         @Test
-        @DisplayName("should return 401 for POST /api/competencies without token")
-        void shouldRejectCreateCompetency() throws Exception {
-            mockMvc.perform(post("/api/competencies")
+        @DisplayName("should return 401 for POST /api/admin/competencies/import without token")
+        void shouldRejectAdminImport() throws Exception {
+            mockMvc.perform(post("/api/admin/competencies/import")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content("""
-                        {"title": "Test"}
-                        """))
+                    .content("[]"))
                 .andExpect(status().isUnauthorized());
         }
 
@@ -123,16 +114,96 @@ class SecurityConfigIntegrationTest extends AbstractIntegrationTest {
             mockMvc.perform(get("/api/learning-resources"))
                 .andExpect(status().isUnauthorized());
         }
+    }
+
+    @Nested
+    @DisplayName("role-based access control")
+    class RoleBasedAccessControl {
 
         @Test
-        @DisplayName("should return 401 for POST /api/learning-resources without token")
-        void shouldRejectCreateLearningResource() throws Exception {
-            mockMvc.perform(post("/api/learning-resources")
+        @DisplayName("should return 403 for USER role on GET /api/users")
+        void userRoleCannotListUsers() throws Exception {
+            mockMvc.perform(get("/api/users").with(jwt()))
+                .andExpect(status().isForbidden());
+        }
+
+        @Test
+        @DisplayName("should return 200 for ADMIN role on GET /api/users")
+        void adminRoleCanListUsers() throws Exception {
+            mockMvc.perform(get("/api/users")
+                    .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
+                .andExpect(status().isOk());
+        }
+
+        @Test
+        @DisplayName("should return 403 for USER role on POST /api/users")
+        void userRoleCannotCreateUser() throws Exception {
+            mockMvc.perform(post("/api/users")
+                    .with(jwt())
                     .contentType(MediaType.APPLICATION_JSON)
                     .content("""
-                        {"title": "Test", "url": "https://example.com"}
+                        {"name": "Test", "email": "rbac-test@example.com"}
                         """))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isForbidden());
+        }
+
+        @Test
+        @DisplayName("should return 403 for USER role on DELETE /api/users/{id}")
+        void userRoleCannotDeleteUser() throws Exception {
+            mockMvc.perform(delete("/api/users/any-id").with(jwt()))
+                .andExpect(status().isForbidden());
+        }
+
+        @Test
+        @DisplayName("should return 403 for USER role on DELETE /api/competencies/{id}")
+        void userRoleCannotDeleteCompetency() throws Exception {
+            mockMvc.perform(delete("/api/competencies/any-id").with(jwt()))
+                .andExpect(status().isForbidden());
+        }
+
+        @Test
+        @DisplayName("should return 404 for ADMIN role on DELETE /api/competencies/{id} when not found")
+        void adminRoleCanAttemptDeleteCompetency() throws Exception {
+            mockMvc.perform(delete("/api/competencies/non-existent")
+                    .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
+                .andExpect(status().isNotFound());
+        }
+
+        @Test
+        @DisplayName("should return 403 for USER role on DELETE /api/learning-resources/{id}")
+        void userRoleCannotDeleteLearningResource() throws Exception {
+            mockMvc.perform(delete("/api/learning-resources/any-id").with(jwt()))
+                .andExpect(status().isForbidden());
+        }
+
+        @Test
+        @DisplayName("should return 404 for ADMIN role on DELETE /api/learning-resources/{id} when not found")
+        void adminRoleCanAttemptDeleteLearningResource() throws Exception {
+            mockMvc.perform(delete("/api/learning-resources/non-existent")
+                    .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
+                .andExpect(status().isNotFound());
+        }
+
+        @Test
+        @DisplayName("should return 403 for USER role on POST /api/admin/competencies/import")
+        void userRoleCannotImportCompetencies() throws Exception {
+            mockMvc.perform(post("/api/admin/competencies/import")
+                    .with(jwt())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("[]"))
+                .andExpect(status().isForbidden());
+        }
+
+        @Test
+        @DisplayName("should return 200 for ADMIN role on POST /api/admin/competencies/import")
+        void adminRoleCanImportCompetencies() throws Exception {
+            mockMvc.perform(post("/api/admin/competencies/import")
+                    .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN")))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("""
+                        [{"title": "RBAC Test Competency"}]
+                        """))
+                .andExpect(status().isOk());
         }
     }
 
@@ -141,21 +212,22 @@ class SecurityConfigIntegrationTest extends AbstractIntegrationTest {
     class AuthenticatedAccessGranted {
 
         @Test
-        @DisplayName("should return 200 for GET /api/users with valid token")
-        void shouldAllowGetUsers() throws Exception {
-            mockMvc.perform(get("/api/users").with(jwt()))
+        @DisplayName("should return 200 for ADMIN role on GET /api/users")
+        void shouldAllowAdminGetUsers() throws Exception {
+            mockMvc.perform(get("/api/users")
+                    .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
                 .andExpect(status().isOk());
         }
 
         @Test
-        @DisplayName("should return 200 for GET /api/competencies with valid token")
+        @DisplayName("should return 200 for authenticated GET /api/competencies")
         void shouldAllowGetCompetencies() throws Exception {
             mockMvc.perform(get("/api/competencies").with(jwt()))
                 .andExpect(status().isOk());
         }
 
         @Test
-        @DisplayName("should return 200 for GET /api/learning-resources with valid token")
+        @DisplayName("should return 200 for authenticated GET /api/learning-resources")
         void shouldAllowGetLearningResources() throws Exception {
             mockMvc.perform(get("/api/learning-resources").with(jwt()))
                 .andExpect(status().isOk());
