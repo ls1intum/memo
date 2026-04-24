@@ -30,7 +30,7 @@ export interface LearningResource {
 
 export interface CompetencyRelationship {
   id: string;
-  relationshipType: 'ASSUMES' | 'EXTENDS' | 'MATCHES';
+  relationshipType: 'ASSUMES' | 'EXTENDS' | 'MATCHES' | 'UNRELATED';
   originId: string;
   destinationId: string;
   userId: string;
@@ -79,8 +79,16 @@ export interface UpdateLearningResourceRequest {
   url?: string;
 }
 
+export interface RelationshipImportRow {
+  originId?: string;
+  originTitle?: string;
+  destinationId?: string;
+  destinationTitle?: string;
+  relationshipType?: 'ASSUMES' | 'EXTENDS' | 'MATCHES' | 'UNRELATED';
+}
+
 export interface CreateCompetencyRelationshipRequest {
-  relationshipType: 'ASSUMES' | 'EXTENDS' | 'MATCHES';
+  relationshipType: 'ASSUMES' | 'EXTENDS' | 'MATCHES' | 'UNRELATED';
   originId: string;
   destinationId: string;
   userId: string;

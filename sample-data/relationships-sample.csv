@@ -1,0 +1,21 @@
+originId,originTitle,destinationId,destinationTitle,relationshipType
+comp_ds_001,,comp_fp_001,,ASSUMES
+comp_fp_001,,comp_hof_001,,EXTENDS
+comp_hof_001,,comp_poly_001,,EXTENDS
+comp_poly_001,,comp_mod_001,,ASSUMES
+comp_fp_001,,comp_mod_001,,ASSUMES
+,Data Structures,comp_alg_001,,ASSUMES
+comp_alg_001,,,Complexity Theory,EXTENDS
+,Complexity Theory,comp_alg_001,,UNRELATED
+,Functional Programming,,Type Checking and Inference,ASSUMES
+,Higher-Order Functions,,Functional Programming,MATCHES
+comp_alg_001,,,Parsing and Grammars,ASSUMES
+,Evaluation Strategies,comp_fp_001,,EXTENDS
+comp_fp_001,,comp_err_001,,ASSUMES
+comp_alg_001,,comp_test_001,,EXTENDS
+comp_db_001,,comp_sec_001,,ASSUMES
+comp_os_001,,comp_conc_001,,ASSUMES
+comp_net_001,,comp_sec_001,,ASSUMES
+,Version Control with Git,,Software Security,UNRELATED
+,Testing and Verification,,Error Handling,EXTENDS
+,Object-Oriented Design,,Module System and Abstraction,MATCHES
