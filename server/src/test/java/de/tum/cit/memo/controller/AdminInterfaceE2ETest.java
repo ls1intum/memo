@@ -22,12 +22,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * End-to-end tests for admin interfaces, exercising the full HTTP → Security →
- * DbRoleJwtAuthenticationConverter → Controller → Service → Repository → Database stack.
+ * Controller → Service → Repository → Database stack.
  *
- * <p>An admin user with id {@code e2e-admin} is pre-seeded before each test so that
- * {@code jwt().jwt(j -> j.subject("e2e-admin"))} resolves to {@code ROLE_ADMIN} through
- * the real {@link de.tum.cit.memo.security.DbRoleJwtAuthenticationConverter}.
- * Plain {@code jwt()} (unknown subject) resolves to {@code ROLE_USER}.
+ * <p>These tests do not exercise subject-based role resolution via
+ * {@link de.tum.cit.memo.security.DbRoleJwtAuthenticationConverter}. Instead, the
+ * required role is supplied directly on the mocked JWT — for example
+ * {@code jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))}. The converter
+ * itself is covered by {@code DbRoleJwtAuthenticationConverterTest}, and the full
+ * end-to-end Keycloak → converter → controller path is exercised by the frontend
+ * integration suite under {@code src/lib/api/__tests__/}.
  */
 @AutoConfigureMockMvc
 @SuppressWarnings("null")
