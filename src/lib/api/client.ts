@@ -25,7 +25,8 @@ apiClient.interceptors.response.use(
   response => response,
   error => {
     if (error.code === 'ECONNABORTED') {
-      error.message = 'Request timed out. Please check if the server is running.';
+      error.message =
+        'Request timed out. Please check if the server is running.';
     } else if (error.code === 'ERR_NETWORK') {
       error.message =
         'Unable to connect to the server. Please ensure the backend is running.';

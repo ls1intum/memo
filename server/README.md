@@ -42,12 +42,15 @@ This starts:
 - **Keycloak Admin**: http://localhost:8081 (admin/admin)
 - **API Docs**: http://localhost:8080/api-docs
 
-### 3. Default Users
+### 3. Seeded Test Users
 
-The Keycloak realm comes with pre-configured users:
+The Keycloak realm import includes two pre-verified users used by the integration test suite. They
+also work for local development.
 
-- **Demo User**: demo@memo.local / demo (USER role)
-- **Admin User**: admin@memo.local / admin (ADMIN role)
+- **User**: e2e-user@memo.local / e2e-user (USER role)
+- **Admin**: e2e-admin@memo.local / e2e-admin (ADMIN role)
+
+Additional users can be created via the registration flow on the frontend.
 
 ## Development
 
@@ -91,9 +94,15 @@ docker-compose up postgres keycloak-postgres keycloak -d
 
 ## API Endpoints
 
-All endpoints require JWT authentication (except Swagger UI and health checks).
+All endpoints require JWT authentication (except Swagger UI and health checks). Endpoints under
+`/api/users/**` require ADMIN, except `POST /api/users/me/accept-consent` and
+`GET /api/users/{userId}/stats` which are open to any authenticated user.
 
-### Users
+### Auth
+
+- `GET /api/auth/me` - Get or create the user record for the current JWT subject
+
+### Users (ADMIN)
 
 - `POST /api/users` - Create user
 - `GET /api/users/{id}` - Get user by ID
@@ -101,6 +110,8 @@ All endpoints require JWT authentication (except Swagger UI and health checks).
 - `GET /api/users` - Get all users
 - `PUT /api/users/{id}` - Update user
 - `DELETE /api/users/{id}` - Delete user
+- `POST /api/users/me/accept-consent` - Accept consent for the current user (any authenticated)
+- `GET /api/users/{userId}/stats` - Contributor statistics (any authenticated)
 
 ### Competencies
 
@@ -109,7 +120,7 @@ All endpoints require JWT authentication (except Swagger UI and health checks).
 - `GET /api/competencies` - Get all competencies
 - `GET /api/competencies/random?count=2` - Get random competencies
 - `PUT /api/competencies/{id}` - Update competency
-- `DELETE /api/competencies/{id}` - Delete competency
+- `DELETE /api/competencies/{id}` - Delete competency (ADMIN)
 
 ### Learning Resources
 
@@ -118,14 +129,15 @@ All endpoints require JWT authentication (except Swagger UI and health checks).
 - `GET /api/learning-resources/by-url?url=` - Get resource by URL
 - `GET /api/learning-resources` - Get all resources
 - `PUT /api/learning-resources/{id}` - Update resource
-- `DELETE /api/learning-resources/{id}` - Delete resource
+- `DELETE /api/learning-resources/{id}` - Delete resource (ADMIN)
 
 ### Competency Relationships
 
-- `POST /api/competency-relationships` - Create relationship
 - `GET /api/competency-relationships/{id}` - Get relationship by ID
 - `GET /api/competency-relationships` - Get all relationships
 - `DELETE /api/competency-relationships/{id}` - Delete relationship
+
+Relationships are created indirectly via the scheduling/voting endpoints below.
 
 ### Competency Resource Links
 
@@ -133,6 +145,19 @@ All endpoints require JWT authentication (except Swagger UI and health checks).
 - `GET /api/competency-resource-links/{id}` - Get link by ID
 - `GET /api/competency-resource-links` - Get all links
 - `DELETE /api/competency-resource-links/{id}` - Delete link
+
+### Scheduling / Voting
+
+- `GET /api/scheduling/next-relationship` - Get the next competency pair to map (X-User-Id header).
+  Returns 204 if no tasks remain.
+- `POST /api/scheduling/vote` - Submit a vote on a relationship (MATCHES, UNRELATED, ASSUMES,
+  EXTENDS). Accepts either `relationshipId` or `originId`+`destinationId`.
+- `DELETE /api/scheduling/vote/{relationshipId}` - Undo a vote.
+
+### Admin Imports (ADMIN)
+
+- `POST /api/admin/competencies/import` - Bulk import competencies from a JSON array body
+- `POST /api/admin/competencies/import/file` - Bulk import from a CSV or JSON file upload
 
 ## Authentication
 
@@ -144,8 +169,8 @@ The API uses OAuth2/JWT via Keycloak. To authenticate:
 curl -X POST http://localhost:8081/realms/memo/protocol/openid-connect/token \
   -H "Content-Type: application/x-www-form-urlencoded" \
   -d "client_id=memo-client" \
-  -d "username=demo@memo.local" \
-  -d "password=demo" \
+  -d "username=e2e-user@memo.local" \
+  -d "password=e2e-user" \
   -d "grant_type=password"
 ```
 
@@ -154,6 +179,10 @@ curl -X POST http://localhost:8081/realms/memo/protocol/openid-connect/token \
 ```bash
 curl -H "Authorization: Bearer YOUR_TOKEN" http://localhost:8080/api/competencies
 ```
+
+The first authenticated call to `GET /api/auth/me` provisions a `users` row for the JWT subject with
+USER role. The role is then resolved from the database on every request, so promotions to ADMIN
+happen by updating `users.role` directly (see Flyway migrations).
 
 ## Database
 

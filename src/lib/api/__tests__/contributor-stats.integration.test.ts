@@ -1,11 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { contributorStatsApi } from '@/lib/api/contributor-stats';
-import {
-  getUserToken,
-  getUserId,
-  authAs,
-  clearAuth,
-} from '@/test/fixtures';
+import { getUserToken, getUserId, authAs, clearAuth } from '@/test/fixtures';
 
 describe('Contributor Stats API', () => {
   beforeAll(async () => {

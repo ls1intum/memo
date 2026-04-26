@@ -2,12 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { competenciesApi } from '@/lib/api/competencies';
 import { learningResourcesApi } from '@/lib/api/learning-resources';
 import { competencyResourceLinksApi } from '@/lib/api/competency-resource-links';
-import {
-  getUserToken,
-  getUserId,
-  authAs,
-  clearAuth,
-} from '@/test/fixtures';
+import { getUserToken, getUserId, authAs, clearAuth } from '@/test/fixtures';
 import {
   deleteCompetenciesByTitlePrefix,
   deleteLearningResourcesByTitlePrefix,
@@ -74,8 +69,6 @@ describe('Competency Resource Links API', () => {
       matchType: 'WEAK',
     });
     await competencyResourceLinksApi.delete(link.id);
-    await expect(
-      competencyResourceLinksApi.getById(link.id)
-    ).rejects.toThrow();
+    await expect(competencyResourceLinksApi.getById(link.id)).rejects.toThrow();
   });
 });

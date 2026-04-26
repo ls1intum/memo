@@ -39,20 +39,22 @@ competency-based learning.
    ```
 
 4. **Access the application**
-   - **Frontend**: http://localhost:5173
+   - **Frontend**: http://localhost:3000
    - **Backend API**: http://localhost:8080
    - **Swagger UI**: http://localhost:8080/swagger-ui.html
    - **Keycloak Admin**: http://localhost:8081 (admin/admin)
 
 5. **Login**
-   - Use `demo@memo.local` / `demo` or `admin@memo.local` / `admin`
+   - Register a new account from the frontend, or
+   - Use the seeded integration-test users `e2e-user@memo.local` / `e2e-user` (USER role) or
+     `e2e-admin@memo.local` / `e2e-admin` (ADMIN role)
 
 ## 🏗 Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────┐
 │                  Vite + React Frontend                  │
-│                      (Port 5173)                        │
+│                      (Port 3000)                        │
 │  ┌─────────────┐  ┌──────────────┐  ┌───────────────┐   │
 │  │   React     │  │ React Query  │  │   Keycloak    │   │
 │  │ Components  │  │ + Axios API  │  │     Auth      │   │
@@ -122,15 +124,16 @@ memo/
 ### Frontend Commands
 
 ```bash
-npm run dev          # Start development server (Vite)
-npm run build        # Build for production
-npm run preview      # Preview production build
-npm run lint         # Run ESLint
-npm run lint:fix     # Fix ESLint issues
-npm run format       # Format code with Prettier
-npm run type-check   # TypeScript type checking
-npm run quality      # Run all checks
-npm run quality:fix  # Fix all auto-fixable issues
+npm run dev               # Start development server (Vite)
+npm run build             # Build for production
+npm run preview           # Preview production build
+npm run lint              # Run ESLint
+npm run lint:fix          # Fix ESLint issues
+npm run format            # Format code with Prettier
+npm run type-check        # TypeScript type checking
+npm run quality           # Run all checks
+npm run quality:fix       # Fix all auto-fixable issues
+npm run test:integration  # FE↔BE integration tests against the running docker stack
 ```
 
 ### Backend Commands
@@ -150,12 +153,17 @@ cd server
 
 The application uses Keycloak for OAuth2/JWT authentication.
 
-### Default Users
+### Seeded Test Users
 
-| Email              | Password | Role  |
-| ------------------ | -------- | ----- |
-| `demo@memo.local`  | `demo`   | USER  |
-| `admin@memo.local` | `admin`  | ADMIN |
+The Keycloak realm import includes two pre-verified users used by the integration test suite. They
+also work for local development.
+
+| Email                  | Password    | Role  |
+| ---------------------- | ----------- | ----- |
+| `e2e-user@memo.local`  | `e2e-user`  | USER  |
+| `e2e-admin@memo.local` | `e2e-admin` | ADMIN |
+
+Additional users can be created via the registration flow on the frontend.
 
 ### Keycloak Admin Console
 
@@ -178,7 +186,7 @@ The application uses Keycloak for OAuth2/JWT authentication.
 
 - **Framework**: Spring Boot 3.4.1
 - **Language**: Java 17
-- **Database**: PostgreSQL 16
+- **Database**: PostgreSQL 18.1
 - **ORM**: JPA/Hibernate
 - **Migrations**: Flyway
 - **Security**: Spring Security + OAuth2
@@ -200,14 +208,17 @@ Full API documentation with interactive testing:
 
 ### Main Endpoints
 
+- `GET /api/auth/me` - Get or create the current user record
 - `GET /api/competencies` - List all competencies
 - `GET /api/competencies/random?count=2` - Get random competencies
 - `POST /api/competencies` - Create competency
-- `POST /api/competency-relationships` - Create relationship
-- `GET /api/users` - List users
+- `GET /api/scheduling/next-relationship` - Get the next pair to map
+- `POST /api/scheduling/vote` - Submit a relationship vote (creates relationships indirectly)
 - `GET /api/learning-resources` - List resources
+- `POST /api/admin/competencies/import` - Bulk import (ADMIN)
 
-All endpoints require JWT authentication via Bearer token.
+All endpoints require JWT authentication via Bearer token. See [server/README.md](server/README.md)
+for the full endpoint list and role requirements.
 
 ## 🤝 Contributing
 
@@ -224,9 +235,25 @@ All endpoints require JWT authentication via Bearer token.
 
 - [ ] Frontend: `npm run quality` passes
 - [ ] Backend: `cd server && ./server-manage.sh test` passes
+- [ ] Integration suite: `npm run test:integration` passes (with the docker stack up)
 - [ ] Code is properly formatted
 - [ ] No console.log statements in production code
 - [ ] API changes documented in Swagger
+
+## ✅ Integration Tests
+
+A frontend-side integration suite under [src/lib/api/**tests**/](src/lib/api/__tests__/) exercises
+the real frontend API client (`src/lib/api/*`) against the running backend, covering every REST
+module. It boots no browser — the harness uses Vitest, hits Keycloak via the password grant for real
+JWTs, and uses Postgres directly to bootstrap the seeded admin role.
+
+```bash
+cd server && ./server-manage.sh up   # if not already running
+npm run test:integration
+```
+
+The harness is idempotent: it creates the seeded users via the Keycloak admin API if the realm
+import did not include them, and provisions matching backend user records on first login.
 
 ## 🆘 Troubleshooting
 

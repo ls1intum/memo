@@ -31,10 +31,9 @@ export async function deleteCompetenciesByTitlePrefix(
   prefix: string
 ): Promise<void> {
   await withClient(async client => {
-    await client.query(
-      `DELETE FROM competencies WHERE title LIKE $1 || '%'`,
-      [prefix]
-    );
+    await client.query(`DELETE FROM competencies WHERE title LIKE $1 || '%'`, [
+      prefix,
+    ]);
   });
 }
 

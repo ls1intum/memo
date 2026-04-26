@@ -1,12 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { competenciesApi } from '@/lib/api/competencies';
 import { schedulingApi } from '@/lib/api/scheduling';
-import {
-  getUserToken,
-  getUserId,
-  authAs,
-  clearAuth,
-} from '@/test/fixtures';
+import { getUserToken, getUserId, authAs, clearAuth } from '@/test/fixtures';
 import { deleteCompetenciesByTitlePrefix } from '@/test/db-helpers';
 
 const PREFIX = `[e2e-sched-${Date.now()}]`;

@@ -2,12 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { competenciesApi } from '@/lib/api/competencies';
 import { competencyRelationshipsApi } from '@/lib/api/competency-relationships';
 import { schedulingApi } from '@/lib/api/scheduling';
-import {
-  getUserToken,
-  getUserId,
-  authAs,
-  clearAuth,
-} from '@/test/fixtures';
+import { getUserToken, getUserId, authAs, clearAuth } from '@/test/fixtures';
 import { deleteCompetenciesByTitlePrefix } from '@/test/db-helpers';
 
 const PREFIX = `[e2e-rel-${Date.now()}]`;
