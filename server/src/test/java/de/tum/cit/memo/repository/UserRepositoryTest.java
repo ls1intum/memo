@@ -68,22 +68,17 @@ class UserRepositoryTest extends AbstractRepositoryTest {
         @Test
         @DisplayName("should enforce unique email constraint")
         // The email constraint is DEFERRABLE INITIALLY DEFERRED (V9 migration). Setting it to
-        // IMMEDIATE via @Sql before the test body ensures the constraint fires at flush time.
+        // IMMEDIATE via @Sql before the test body ensures the constraint fires on the conflicting
+        // saveAndFlush rather than at commit time, so the assertion can observe the throw.
         @Sql(statements = "SET CONSTRAINTS users_email_key IMMEDIATE")
         void shouldEnforceUniqueEmail() {
             User user1 = createUser("User One", "same@example.com", UserRole.USER);
             userRepository.saveAndFlush(user1);
 
             User user2 = createUser("User Two", "same@example.com", UserRole.USER);
-            userRepository.saveAndFlush(user2);
 
-            // The email constraint is DEFERRABLE INITIALLY DEFERRED (V9 migration), so it is only
-            // checked at commit time. Force an immediate check before the transaction rolls back.
-            // The native query bypasses Spring's exception translator, so Hibernate's
-            // ConstraintViolationException is thrown directly instead of the Spring wrapper.
-            assertThatThrownBy(() ->
-                entityManager.createNativeQuery("SET CONSTRAINTS users_email_key IMMEDIATE").executeUpdate()
-            ).isInstanceOf(org.hibernate.exception.ConstraintViolationException.class);
+            assertThatThrownBy(() -> userRepository.saveAndFlush(user2))
+                .isInstanceOf(org.springframework.dao.DataIntegrityViolationException.class);
         }
 
         @Test

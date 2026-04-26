@@ -51,7 +51,7 @@ class DbRoleJwtAuthenticationConverterTest {
             AbstractAuthenticationToken token = converter.convert(jwtWithSubject("admin-id"));
 
             assertThat(token.getAuthorities())
-                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+                .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
         }
 
         @Test
@@ -63,8 +63,8 @@ class DbRoleJwtAuthenticationConverterTest {
             AbstractAuthenticationToken token = converter.convert(jwtWithSubject("user-id"));
 
             assertThat(token.getAuthorities())
-                .anyMatch(a -> a.getAuthority().equals("ROLE_USER"))
-                .noneMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+                .anyMatch(a -> "ROLE_USER".equals(a.getAuthority()))
+                .noneMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
         }
 
         @Test
@@ -75,8 +75,8 @@ class DbRoleJwtAuthenticationConverterTest {
             AbstractAuthenticationToken token = converter.convert(jwtWithSubject("unknown"));
 
             assertThat(token.getAuthorities())
-                .anyMatch(a -> a.getAuthority().equals("ROLE_USER"))
-                .noneMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+                .anyMatch(a -> "ROLE_USER".equals(a.getAuthority()))
+                .noneMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
         }
 
         @Test

@@ -1,5 +1,6 @@
 package de.tum.cit.memo.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.tum.cit.memo.enums.ResourceMatchType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -59,16 +60,19 @@ public class CompetencyResourceLink {
     @Column(name = "match_type", nullable = false, length = 20)
     private ResourceMatchType matchType;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "competency_id", insertable = false, updatable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Competency competency;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "resource_id", insertable = false, updatable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private LearningResource resource;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", insertable = false, updatable = false)
     private User user;
