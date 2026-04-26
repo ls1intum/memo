@@ -92,3 +92,17 @@ export interface CreateCompetencyResourceLinkRequest {
   userId: string;
   matchType: 'UNRELATED' | 'WEAK' | 'GOOD_FIT' | 'PERFECT_MATCH';
 }
+
+export type ExportFormat = 'json' | 'csv';
+
+export type ExportDataset =
+  | 'competencies'
+  | 'relationships'
+  | 'resources'
+  | 'links'
+  | 'votes';
+
+export interface ExportParams {
+  format: ExportFormat;
+  include: ExportDataset[];
+}

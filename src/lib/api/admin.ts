@@ -1,5 +1,5 @@
 import { apiClient } from './client';
-import type { ImportResult } from './types';
+import type { ImportResult, ExportParams } from './types';
 
 export interface CompetencyImportRow {
   title: string;
@@ -26,5 +26,24 @@ export const adminApi = {
       { headers: { 'Content-Type': 'multipart/form-data' } }
     );
     return response.data;
+  },
+
+  exportData: async (params: ExportParams): Promise<void> => {
+    const response = await apiClient.get('/api/admin/export', {
+      params: {
+        format: params.format,
+        include: params.include.join(','),
+      },
+      responseType: 'blob',
+      timeout: 30000,
+    });
+    const url = URL.createObjectURL(new Blob([response.data]));
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `memo-export-${Date.now()}.${params.format}`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   },
 };
