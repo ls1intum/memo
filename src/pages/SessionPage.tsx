@@ -277,7 +277,7 @@ export function SessionPage() {
   );
 
   useEffect(() => {
-    async function loadDemoUser() {
+    async function loadCurrentUser() {
       try {
         const result = await getCurrentUserAction();
         if (result.success && result.user) {
@@ -306,7 +306,7 @@ export function SessionPage() {
       }
     }
 
-    void loadDemoUser();
+    void loadCurrentUser();
   }, []);
 
   const loadMappingPair = useCallback(

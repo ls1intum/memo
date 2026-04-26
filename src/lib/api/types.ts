@@ -11,7 +11,14 @@ export interface Competency {
   id: string;
   title: string;
   description: string | null;
+  degree: number;
   createdAt: string;
+}
+
+export interface ImportResult {
+  imported: number;
+  skipped: number;
+  errors: string[];
 }
 
 export interface LearningResource {

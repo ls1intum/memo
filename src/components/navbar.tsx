@@ -2,7 +2,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { useTheme } from './use-theme';
 import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
-import { CircleUser } from 'lucide-react';
+import { CircleUser, Shield } from 'lucide-react';
 import { useAuth } from '../contexts/useAuth';
 
 const navItems = [
@@ -16,7 +16,7 @@ export function Navbar() {
   const location = useLocation();
   const pathname = location.pathname;
   const { theme, setTheme } = useTheme();
-  const { isAuthenticated, login, logout } = useAuth();
+  const { isAuthenticated, login, logout, role } = useAuth();
   const [mounted, setMounted] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const activeIndex = navItems.findIndex(item => item.href === pathname);
@@ -169,6 +169,21 @@ export function Navbar() {
                   <CircleUser className="h-4 w-4" />
                   <span className="text-sm font-semibold">Dashboard</span>
                 </Link>
+                {role === 'ADMIN' && (
+                  <Link
+                    to="/admin"
+                    className={cn(
+                      'group hidden h-9 items-center justify-center gap-2 rounded-full border px-4 shadow-sm transition hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0a4da2] focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900 sm:flex',
+                      pathname.startsWith('/admin')
+                        ? 'border-[#0a4da2]/50 bg-linear-to-br from-[#0a4da2]/10 to-[#7c6cff]/10 text-[#0a4da2] ring-1 ring-[#0a4da2]/20 dark:border-[#7c6cff]/50 dark:text-[#b3c8ff] dark:ring-[#7c6cff]/20'
+                        : 'border-slate-200/80 bg-white/70 text-slate-700 hover:bg-white dark:border-slate-800/70 dark:bg-slate-900/80 dark:text-slate-200 dark:hover:bg-slate-800/80'
+                    )}
+                    aria-label="Admin Panel"
+                  >
+                    <Shield className="h-4 w-4" />
+                    <span className="text-sm font-semibold">Admin</span>
+                  </Link>
+                )}
                 <button
                   onClick={logout}
                   className="hidden rounded-full border border-slate-200/80 bg-white/70 px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0a4da2] focus-visible:ring-offset-2 dark:border-slate-800/70 dark:bg-slate-900/80 dark:text-slate-200 dark:hover:bg-slate-800/80 sm:inline-flex"
