@@ -11,6 +11,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 
 @Entity
@@ -38,4 +39,15 @@ public class Competency {
 
     @Column(nullable = false)
     private int degree;
+
+    @Builder.Default
+    @Column(name = "confidence_score", nullable = false, precision = 5, scale = 2)
+    private BigDecimal confidenceScore = BigDecimal.ZERO;
+
+    @Builder.Default
+    @Column(name = "confidence_tier", nullable = false, length = 10)
+    private String confidenceTier = "LOW";
+
+    @Column(name = "confidence_computed_at")
+    private Instant confidenceComputedAt;
 }

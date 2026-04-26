@@ -4,6 +4,8 @@ import { Link } from 'react-router-dom';
 import { ArrowLeft, Trash2, Search } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { ConfidenceBadge } from '@/components/ConfidenceBadge';
+import { ConfidenceBreakdownTooltip } from '@/components/ConfidenceBreakdownTooltip';
 import {
   Dialog,
   DialogContent,
@@ -371,6 +373,9 @@ function CompetencyTable({
             <th className="pb-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">
               Description
             </th>
+            <th className="pb-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-400 w-36">
+              Confidence
+            </th>
             <th className="pb-3 text-center text-xs font-semibold uppercase tracking-wider text-slate-400 w-16">
               Votes
             </th>
@@ -399,6 +404,25 @@ function CompetencyTable({
                   multiline
                   placeholder="No description"
                 />
+              </td>
+              <td className="py-3 pr-6">
+                {c.confidenceTier && c.confidenceScore !== undefined ? (
+                  <ConfidenceBreakdownTooltip
+                    voteSignal={0}
+                    consensusSignal={0}
+                    resourceSignal={0}
+                    metadataSignal={0}
+                  >
+                    <ConfidenceBadge
+                      score={c.confidenceScore}
+                      tier={c.confidenceTier}
+                    />
+                  </ConfidenceBreakdownTooltip>
+                ) : (
+                  <span className="text-xs text-slate-300 dark:text-slate-600">
+                    —
+                  </span>
+                )}
               </td>
               <td className="py-3 pr-6 text-center">
                 <span className="inline-flex items-center justify-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-600 dark:bg-slate-700 dark:text-slate-300">

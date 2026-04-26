@@ -1,3 +1,19 @@
+// Confidence types
+export type ConfidenceTier = 'HIGH' | 'MEDIUM' | 'LOW';
+
+export interface ConfidenceRating {
+  competencyId: string;
+  competencyTitle: string;
+  confidenceScore: number;
+  confidenceTier: ConfidenceTier;
+  totalVotes: number;
+  voteSignal: number;
+  consensusSignal: number;
+  resourceSignal: number;
+  metadataSignal: number;
+  computedAt: string | null;
+}
+
 // API Response Types
 export interface User {
   id: string;
@@ -13,6 +29,8 @@ export interface Competency {
   description: string | null;
   degree: number;
   createdAt: string;
+  confidenceScore?: number;
+  confidenceTier?: ConfidenceTier;
 }
 
 export interface ImportResult {

@@ -52,4 +52,16 @@ public interface CompetencyRelationshipRepository extends JpaRepository<Competen
   List<CompetencyRelationship> findUnvotedByUserAndNotSkipped(@Param("userId") String userId,
       @Param("skippedIds") List<String> skippedIds,
       org.springframework.data.domain.Pageable pageable);
+
+  /** Total votes across all relationships involving this competency. */
+  @Query(value = "SELECT COALESCE(SUM(total_votes), 0) FROM competency_relationships WHERE origin_id = :id OR destination_id = :id", nativeQuery = true)
+  long sumTotalVotesByCompetencyId(@Param("id") String competencyId);
+
+  /** Dominant vote fractions for relationships with at least 1 vote. */
+  @Query(value = """
+      SELECT GREATEST(vote_assumes, vote_extends, vote_matches, vote_unrelated) * 1.0 / total_votes
+      FROM competency_relationships
+      WHERE (origin_id = :id OR destination_id = :id) AND total_votes > 0
+      """, nativeQuery = true)
+  List<Double> findDominantVoteFractionsByCompetencyId(@Param("id") String competencyId);
 }
