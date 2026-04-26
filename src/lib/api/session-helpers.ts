@@ -4,21 +4,21 @@
 
 import { apiClient } from './client';
 import { competenciesApi } from './competencies';
-import { competencyResourceLinksApi } from './competency-resource-links';
-import { learningResourcesApi } from './learning-resources';
+import { resourceSchedulingApi } from './resource-scheduling';
 import { schedulingApi } from './scheduling';
 import type {
   RelationshipTask,
   VoteResponse as SchedulingVoteResponse,
 } from './scheduling';
 import type {
-  Competency,
-  LearningResource,
-  CompetencyResourceLink,
-} from './types';
-import type { RelationshipType } from '@/components/session/session-constants';
-
-const GUEST_USER_ID = 'guest';
+  ResourceTask,
+  ResourceVoteResponse as ResourceSchedulingVoteResponse,
+} from './resource-scheduling';
+import type { Competency } from './types';
+import type {
+  RelationshipType,
+  ResourceMatchType,
+} from '@/components/session/session-constants';
 
 export async function getCurrentUserAction(): Promise<{
   success: boolean;
@@ -120,28 +120,6 @@ export async function submitCompetencyVoteAction(
   }
 }
 
-export async function getRandomLearningResourceAction(): Promise<{
-  success: boolean;
-  resource?: LearningResource;
-  error?: string;
-}> {
-  try {
-    const resources = await learningResourcesApi.getRandom(1);
-    if (resources.length > 0) {
-      return { success: true, resource: resources[0] };
-    }
-    return { success: false, error: 'No learning resources available' };
-  } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : 'Failed to fetch learning resource',
-    };
-  }
-}
-
 export async function unvoteAction(
   userId: string,
   relationshipId: string
@@ -157,53 +135,76 @@ export async function unvoteAction(
   }
 }
 
-export async function createCompetencyResourceLinkAction(
-  formData: FormData
+/**
+ * Get the next competency↔resource task from the resource scheduling pipeline.
+ * Returns allDone: true when there are no more pairs to vote on.
+ */
+export async function getNextResourceTaskAction(
+  userId: string,
+  skippedIds?: string[]
 ): Promise<{
   success: boolean;
-  link?: CompetencyResourceLink;
+  task?: ResourceTask;
+  allDone?: boolean;
   error?: string;
 }> {
   try {
-    const competencyId = formData.get('competencyId') as string;
-    const resourceId = formData.get('resourceId') as string;
-    const matchType = formData.get('matchType') as string;
-
-    const link = await competencyResourceLinksApi.create({
-      competencyId,
-      resourceId,
-      userId: GUEST_USER_ID,
-      matchType: matchType as
-        | 'UNRELATED'
-        | 'WEAK'
-        | 'GOOD_FIT'
-        | 'PERFECT_MATCH',
-    });
-    return { success: true, link };
+    const task = await resourceSchedulingApi.getNextTask(userId, skippedIds);
+    if (task === null) {
+      return { success: true, allDone: true };
+    }
+    return { success: true, task };
   } catch (error) {
     return {
       success: false,
       error:
         error instanceof Error
           ? error.message
-          : 'Failed to create resource link',
+          : 'Failed to fetch next resource task',
     };
   }
 }
 
-export async function deleteCompetencyResourceLinkAction(
-  id: string
+/**
+ * Submit a match-quality vote on a competency↔resource mapping.
+ * Pass opts.mappingId for existing mappings, or opts.competencyId+opts.resourceId for new pairs.
+ */
+export async function submitResourceVoteAction(
+  userId: string,
+  matchType: ResourceMatchType,
+  opts: { mappingId?: string; competencyId?: string; resourceId?: string }
+): Promise<{
+  success: boolean;
+  voteResponse?: ResourceSchedulingVoteResponse;
+  error?: string;
+}> {
+  try {
+    const voteResponse = await resourceSchedulingApi.submitVote(
+      userId,
+      matchType,
+      opts
+    );
+    return { success: true, voteResponse };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to submit vote',
+    };
+  }
+}
+
+export async function unvoteResourceAction(
+  userId: string,
+  mappingId: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    await competencyResourceLinksApi.delete(id);
+    await resourceSchedulingApi.unvote(userId, mappingId);
     return { success: true };
   } catch (error) {
     return {
       success: false,
       error:
-        error instanceof Error
-          ? error.message
-          : 'Failed to delete resource link',
+        error instanceof Error ? error.message : 'Failed to undo resource vote',
     };
   }
 }

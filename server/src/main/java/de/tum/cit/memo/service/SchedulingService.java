@@ -15,6 +15,7 @@ import de.tum.cit.memo.repository.CompetencyRelationshipVoteRepository;
 import de.tum.cit.memo.repository.CompetencyRepository;
 import de.tum.cit.memo.repository.UserRepository;
 import de.tum.cit.memo.util.IdGenerator;
+import de.tum.cit.memo.util.SchedulingConstants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -26,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
@@ -43,13 +45,6 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public class SchedulingService {
 
-    private static final double COVERAGE_WEIGHT = 0.7;
-    private static final int LOW_DEGREE_POOL_SIZE = 20;
-    private static final int CONSENSUS_CANDIDATE_LIMIT = 20;
-    private static final int CONSENSUS_MIN_VOTES = 5;
-    private static final int CONSENSUS_MAX_VOTES = 20;
-    private static final double CONSENSUS_MIN_ENTROPY = 0.5;
-
     private final CompetencyRelationshipRepository relationshipRepository;
     private final CompetencyRelationshipVoteRepository voteRepository;
     private final CompetencyRepository competencyRepository;
@@ -60,14 +55,9 @@ public class SchedulingService {
     @Transactional
     public Optional<RelationshipTaskResponse> getNextTask(String userId, List<String> skippedIds) {
         assertUserExists(userId);
-        List<String> skipList;
-        if (skippedIds != null) {
-            skipList = skippedIds;
-        } else {
-            skipList = List.of();
-        }
+        List<String> skipList = Objects.requireNonNullElse(skippedIds, List.of());
 
-        if (random.nextDouble() < COVERAGE_WEIGHT) {
+        if (random.nextDouble() < SchedulingConstants.COVERAGE_WEIGHT) {
             log.debug("Coverage pipeline for user {}", userId);
             return coveragePipeline(userId, skipList);
         }
@@ -199,8 +189,9 @@ public class SchedulingService {
     private RelationshipTaskResponse consensusPipeline(String userId, List<String> skippedIds) {
         List<CompetencyRelationship> candidates = relationshipRepository
                 .findHighEntropyRelationshipsExcludingUser(
-                        userId, CONSENSUS_MIN_VOTES, CONSENSUS_MAX_VOTES, CONSENSUS_MIN_ENTROPY,
-                        skippedIds, PageRequest.of(0, CONSENSUS_CANDIDATE_LIMIT));
+                        userId, SchedulingConstants.CONSENSUS_MIN_VOTES, SchedulingConstants.CONSENSUS_MAX_VOTES,
+                        SchedulingConstants.CONSENSUS_MIN_ENTROPY,
+                        skippedIds, PageRequest.of(0, SchedulingConstants.CONSENSUS_CANDIDATE_LIMIT));
 
         if (candidates.isEmpty()) {
             return null;
@@ -210,9 +201,10 @@ public class SchedulingService {
     }
 
     private List<String> getLowDegreeCompetencyIds() {
-        List<String> ids = competencyRepository.findIdsByDegreeAsc(PageRequest.of(0, LOW_DEGREE_POOL_SIZE));
+        List<String> ids = competencyRepository.findIdsByDegreeAsc(
+                PageRequest.of(0, SchedulingConstants.LOW_DEGREE_POOL_SIZE));
         if (ids.isEmpty()) {
-            return competencyRepository.findRandomCompetencyIds(LOW_DEGREE_POOL_SIZE);
+            return competencyRepository.findRandomCompetencyIds(SchedulingConstants.LOW_DEGREE_POOL_SIZE);
         }
         return ids;
     }
@@ -236,7 +228,16 @@ public class SchedulingService {
     private CompetencyRelationship findOrCreateRelationship(String originId, String destinationId) {
         return relationshipRepository
                 .findByOriginIdAndDestinationId(originId, destinationId)
-                .orElseGet(() -> createRelationship(originId, destinationId));
+                .orElseGet(() -> {
+                    try {
+                        return createRelationship(originId, destinationId);
+                    } catch (DataIntegrityViolationException ex) {
+                        log.debug("Relationship already created by concurrent request ({} → {})", originId, destinationId);
+                        return relationshipRepository
+                                .findByOriginIdAndDestinationId(originId, destinationId)
+                                .orElseThrow();
+                    }
+                });
     }
 
     private CompetencyRelationship pickWeightedByEntropy(List<CompetencyRelationship> candidates) {

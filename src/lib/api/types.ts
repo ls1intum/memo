@@ -37,13 +37,18 @@ export interface CompetencyRelationship {
   createdAt: string;
 }
 
-export interface CompetencyResourceLink {
+export interface CompetencyResourceMapping {
   id: string;
   competencyId: string;
   resourceId: string;
-  userId: string;
-  matchType: 'UNRELATED' | 'WEAK' | 'GOOD_FIT' | 'PERFECT_MATCH';
+  voteUnrelated: number;
+  voteWeak: number;
+  voteGoodFit: number;
+  votePerfectMatch: number;
+  entropy: number;
+  totalVotes: number;
   createdAt: string;
+  updatedAt: string;
 }
 
 // Request Types
@@ -84,11 +89,4 @@ export interface CreateCompetencyRelationshipRequest {
   originId: string;
   destinationId: string;
   userId: string;
-}
-
-export interface CreateCompetencyResourceLinkRequest {
-  competencyId: string;
-  resourceId: string;
-  userId: string;
-  matchType: 'UNRELATED' | 'WEAK' | 'GOOD_FIT' | 'PERFECT_MATCH';
 }

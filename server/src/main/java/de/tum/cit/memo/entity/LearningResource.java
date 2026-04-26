@@ -36,4 +36,7 @@ public class LearningResource {
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
+
+    @Column(name = "resource_link_degree", nullable = false)
+    private int resourceLinkDegree;
 }

@@ -2,13 +2,12 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { toast } from 'sonner';
 
 import {
-  getRandomCompetenciesAction,
   getNextRelationshipTaskAction,
   submitCompetencyVoteAction,
   unvoteAction,
-  createCompetencyResourceLinkAction,
-  deleteCompetencyResourceLinkAction,
-  getRandomLearningResourceAction,
+  getNextResourceTaskAction,
+  submitResourceVoteAction,
+  unvoteResourceAction,
   getCurrentUserAction,
 } from '@/lib/api/session-helpers';
 import { contributorStatsApi } from '@/lib/api/contributor-stats';
@@ -118,6 +117,66 @@ const getRelationshipDescription = (
   }
 };
 
+const getResourceMatchDescription = (
+  type: ResourceMatchType,
+  competencyTitle: string,
+  resourceTitle: string
+) => {
+  switch (type) {
+    case 'UNRELATED':
+      return (
+        <>
+          <span className="font-medium text-slate-900 dark:text-slate-100">
+            {resourceTitle}
+          </span>{' '}
+          has no meaningful connection to{' '}
+          <span className="font-medium text-slate-900 dark:text-slate-100">
+            {competencyTitle}
+          </span>
+        </>
+      );
+    case 'WEAK':
+      return (
+        <>
+          <span className="font-medium text-slate-900 dark:text-slate-100">
+            {resourceTitle}
+          </span>{' '}
+          has a minor overlap with{' '}
+          <span className="font-medium text-slate-900 dark:text-slate-100">
+            {competencyTitle}
+          </span>
+        </>
+      );
+    case 'GOOD_FIT':
+      return (
+        <>
+          <span className="font-medium text-slate-900 dark:text-slate-100">
+            {resourceTitle}
+          </span>{' '}
+          is generally relevant to{' '}
+          <span className="font-medium text-slate-900 dark:text-slate-100">
+            {competencyTitle}
+          </span>
+          , but may need tailoring
+        </>
+      );
+    case 'PERFECT_MATCH':
+      return (
+        <>
+          <span className="font-medium text-slate-900 dark:text-slate-100">
+            {resourceTitle}
+          </span>{' '}
+          is directly aligned with{' '}
+          <span className="font-medium text-slate-900 dark:text-slate-100">
+            {competencyTitle}
+          </span>
+        </>
+      );
+    default:
+      return '';
+  }
+};
+
 export function SessionPage() {
   const [relation, setRelation] = useState<RelationshipType | null>(null);
   const [resourceMatchType, setResourceMatchType] =
@@ -142,6 +201,9 @@ export function SessionPage() {
   const [learningResource, setLearningResource] =
     useState<LearningResource | null>(null);
   const [mappingMode, setMappingMode] = useState<MappingMode>('competency');
+  // Ref always reflects the current mode so loadMappingPair doesn't need it as a dep.
+  const mappingModeRef = useRef<MappingMode>('competency');
+  mappingModeRef.current = mappingMode;
   const [error, setError] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
@@ -152,6 +214,7 @@ export function SessionPage() {
   const [currentRelationshipId, setCurrentRelationshipId] = useState<
     string | null
   >(null);
+  const [currentMappingId, setCurrentMappingId] = useState<string | null>(null);
   const [showSessionSummary, setShowSessionSummary] = useState(false);
   const [initialTotalVotes, setInitialTotalVotes] = useState<number | null>(
     null
@@ -261,7 +324,10 @@ export function SessionPage() {
       setResourceMatchType(null);
       setIsSwapped(false);
 
-      if (mappingMode === 'competency') {
+      const activeMode: MappingMode =
+        Math.random() < 0.5 ? 'competency' : 'resource';
+
+      if (activeMode === 'competency') {
         if (!userId) {
           setIsTransitioning(false);
           return;
@@ -327,48 +393,89 @@ export function SessionPage() {
         ] as Competency[]);
         setLearningResource(null);
       } else {
-        const [compResult, resourceResult] = await Promise.all([
-          getRandomCompetenciesAction(1),
-          getRandomLearningResourceAction(),
-        ]);
+        if (!userId) {
+          setIsTransitioning(false);
+          return;
+        }
 
-        if (!compResult.success || !compResult.competencies?.length) {
+        const skippedResourceIds = historyRef.current
+          .filter(h => h.type === 'skipped' && h.mode === 'resource')
+          .map(h => {
+            if (h.resourceLinkId) return h.resourceLinkId;
+            const cId = h.competencies?.[0]?.id;
+            const rId = h.learningResource?.id;
+            return cId && rId ? `${cId}:${rId}` : null;
+          })
+          .filter((id): id is string => id !== null);
+
+        if (currentSkipId && !skippedResourceIds.includes(currentSkipId)) {
+          skippedResourceIds.push(currentSkipId);
+        }
+
+        const result = await getNextResourceTaskAction(
+          userId,
+          skippedResourceIds
+        );
+
+        if (!result.success) {
           setError(
-            compResult.error ??
-              'Failed to fetch competency for resource mapping.'
+            result.error ??
+              'An unexpected error occurred while fetching the next resource task.'
           );
           if (isInitialLoad) setCompetencies([]);
           setIsTransitioning(false);
           return;
         }
 
-        if (!resourceResult.success || !resourceResult.resource) {
-          setError(
-            resourceResult.error ??
-              'Failed to fetch learning resource. Make sure resources are seeded.'
-          );
-          setCompetencies(compResult.competencies);
-          setLearningResource(null);
+        if (result.allDone) {
+          setAllDone(true);
+          setCompetencies([]);
+          setCurrentMappingId(null);
           setIsTransitioning(false);
           return;
         }
 
-        setCompetencies(compResult.competencies);
-        setLearningResource(resourceResult.resource);
+        if (!result.task) {
+          if (isInitialLoad) setCompetencies([]);
+          setIsTransitioning(false);
+          return;
+        }
+
+        setAllDone(false);
+        setCurrentMappingId(result.task.mappingId);
+        setCompetencies([
+          {
+            id: result.task.competency.id,
+            title: result.task.competency.title,
+            description: result.task.competency.description,
+          },
+        ] as import('@/lib/api/types').Competency[]);
+        setLearningResource({
+          id: result.task.resource.id,
+          title: result.task.resource.title,
+          url: result.task.resource.url,
+          createdAt: '',
+        });
       }
 
+      // Batch mode update with content so the UI never shows a blank intermediate state.
+      if (activeMode !== mappingModeRef.current) {
+        setMappingMode(activeMode);
+      }
       setIsTransitioning(false);
     },
-    [mappingMode, userId]
+    [userId]
   );
 
-  const prevModeRef = useRef<MappingMode | null>(null);
-
+  // Trigger exactly one initial load once userId is available.
+  // loadMappingPair is stable (userId is its only dep) so this effect fires once.
+  const initialLoadDoneRef = useRef(false);
   useEffect(() => {
-    const isInitialLoad = prevModeRef.current === null;
-    prevModeRef.current = mappingMode;
-    void loadMappingPair(isInitialLoad);
-  }, [mappingMode, loadMappingPair]);
+    if (userId && !initialLoadDoneRef.current) {
+      initialLoadDoneRef.current = true;
+      void loadMappingPair(true);
+    }
+  }, [userId, loadMappingPair]);
 
   const handleContinueSession = useCallback(() => {
     setShowSessionSummary(false);
@@ -458,7 +565,7 @@ export function SessionPage() {
             !resourceMatchType ||
             !userId
           ) {
-            setError('Missing required data to create resource link');
+            setError('Missing required data to submit resource vote');
             return;
           }
 
@@ -466,14 +573,18 @@ export function SessionPage() {
           setError(null);
 
           try {
-            const formData = new FormData();
-            formData.set('competencyId', competencies[0]!.id);
-            formData.set('resourceId', learningResource.id);
-            formData.set('userId', userId);
-            formData.set('matchType', resourceMatchType);
+            const voteOpts = {
+              mappingId: currentMappingId ?? undefined,
+              competencyId: competencies[0]!.id,
+              resourceId: learningResource.id,
+            };
 
             const startTime = Date.now();
-            const result = await createCompetencyResourceLinkAction(formData);
+            const result = await submitResourceVoteAction(
+              userId,
+              resourceMatchType,
+              voteOpts
+            );
 
             const elapsed = Date.now() - startTime;
             if (elapsed < 300) {
@@ -481,7 +592,7 @@ export function SessionPage() {
             }
 
             if (!result.success) {
-              setError(result.error ?? 'Failed to create resource link');
+              setError(result.error ?? 'Failed to submit resource vote');
               setIsCreating(false);
               return;
             }
@@ -497,7 +608,10 @@ export function SessionPage() {
               {
                 type: 'completed',
                 mode: 'resource',
-                resourceLinkId: result.link?.id,
+                resourceLinkId:
+                  result.voteResponse?.mappingId ??
+                  currentMappingId ??
+                  undefined,
                 competencies: competencies ? [...competencies] : undefined,
                 learningResource: learningResource ?? undefined,
               },
@@ -522,7 +636,12 @@ export function SessionPage() {
           mappingMode === 'competency' && competencies?.length === 2
             ? (currentRelationshipId ??
               `${competencies[0]!.id}:${competencies[1]!.id}`)
-            : undefined;
+            : mappingMode === 'resource' &&
+                competencies?.length === 1 &&
+                learningResource
+              ? (currentMappingId ??
+                `${competencies[0]!.id}:${learningResource.id}`)
+              : undefined;
 
         setStats(prev => ({ ...prev, skipped: prev.skipped + 1 }));
         setHistory(prev => [
@@ -558,6 +677,7 @@ export function SessionPage() {
       mappingMode,
       loadMappingPair,
       currentRelationshipId,
+      currentMappingId,
       isSwapped,
       checkMilestones,
     ]
@@ -627,25 +747,23 @@ export function SessionPage() {
   }, [relationshipToDelete, userId]);
 
   useEffect(() => {
-    if (resourceLinkToDelete) {
-      deleteCompetencyResourceLinkAction(resourceLinkToDelete)
+    if (resourceLinkToDelete && userId) {
+      unvoteResourceAction(userId, resourceLinkToDelete)
         .then(result => {
           if (!result.success) {
-            setError(result.error ?? 'Failed to delete resource link');
+            setError(result.error ?? 'Failed to undo resource vote');
           }
         })
         .catch(err => {
           setError(
-            err instanceof Error
-              ? err.message
-              : 'Failed to delete resource link'
+            err instanceof Error ? err.message : 'Failed to undo resource vote'
           );
         })
         .finally(() => {
           setResourceLinkToDelete(null);
         });
     }
-  }, [resourceLinkToDelete]);
+  }, [resourceLinkToDelete, userId]);
 
   const isLoading = competencies === null && !error;
   const noCompetencies = competencies !== null && competencies.length === 0;
@@ -751,7 +869,7 @@ export function SessionPage() {
   ]);
 
   const renderKeyboardHint = () => (
-    <p className="text-base text-slate-800 dark:text-slate-200 leading-relaxed font-bold">
+    <p className="text-base text-slate-800 dark:text-slate-200 leading-relaxed font-bold text-balance">
       Select a{' '}
       {mappingMode === 'competency' ? 'relationship type' : 'match quality'}{' '}
       below or press{' '}
@@ -794,44 +912,6 @@ export function SessionPage() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <div className="flex h-9 items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-800 p-1">
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (mappingMode !== 'competency') {
-                      setMappingMode('competency');
-                    }
-                  }}
-                  className={`
-                    h-full px-3 text-xs font-semibold rounded-md transition-all duration-200 flex items-center justify-center
-                    ${
-                      mappingMode === 'competency'
-                        ? 'bg-white text-slate-900 shadow-sm dark:bg-slate-700 dark:text-slate-100'
-                        : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
-                    }
-                  `}
-                >
-                  Competencies
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (mappingMode !== 'resource') {
-                      setMappingMode('resource');
-                    }
-                  }}
-                  className={`
-                    h-full px-3 text-xs font-semibold rounded-md transition-all duration-200 flex items-center justify-center
-                    ${
-                      mappingMode === 'resource'
-                        ? 'bg-white text-slate-900 shadow-sm dark:bg-slate-700 dark:text-slate-100'
-                        : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
-                    }
-                  `}
-                >
-                  Resources
-                </button>
-              </div>
               <button
                 type="button"
                 onClick={() => setShowSessionSummary(true)}
@@ -901,7 +981,7 @@ export function SessionPage() {
 
           {!error && !allDone && !noCompetencies && !notEnough && (
             <>
-              <div className="flex flex-col items-center justify-center text-center space-y-2 mx-auto w-full">
+              <div className="flex h-[5.5rem] flex-col items-center justify-center overflow-hidden text-center space-y-2 mx-auto w-full">
                 {isLoading || !competencies?.length ? (
                   <div className="flex flex-wrap justify-center items-center gap-2">
                     <span className="text-[1.35rem] sm:text-[1.7rem] font-bold text-slate-500 dark:text-slate-400">
@@ -919,7 +999,7 @@ export function SessionPage() {
                     </span>
                   </div>
                 ) : mappingMode === 'competency' && competencies.length >= 2 ? (
-                  <h1 className="text-[1.35rem] sm:text-[1.7rem] font-bold text-slate-800 dark:text-slate-200 leading-relaxed tracking-tight">
+                  <h1 className="text-[1.35rem] sm:text-[1.7rem] font-bold text-slate-800 dark:text-slate-200 leading-relaxed tracking-tight text-balance">
                     How does{' '}
                     <span
                       className="bg-clip-text text-transparent"
@@ -941,7 +1021,7 @@ export function SessionPage() {
                     ?
                   </h1>
                 ) : mappingMode === 'resource' && learningResource ? (
-                  <h1 className="text-[1.35rem] sm:text-[1.7rem] font-bold text-slate-800 dark:text-slate-200 leading-relaxed tracking-tight">
+                  <h1 className="text-[1.35rem] sm:text-[1.7rem] font-bold text-slate-800 dark:text-slate-200 leading-relaxed tracking-tight text-balance">
                     How well does{' '}
                     <span
                       className="bg-clip-text text-transparent"
@@ -1080,9 +1160,9 @@ export function SessionPage() {
                 {mappingMode === 'competency' &&
                   competencies &&
                   competencies.length >= 2 && (
-                    <div className="rounded-xl bg-gradient-to-r from-blue-50/90 via-purple-50/70 to-blue-50/90 border border-blue-200/50 dark:from-blue-950/50 dark:via-purple-950/30 dark:to-blue-950/50 dark:border-blue-800/30 py-4 px-5 text-center">
+                    <div className="rounded-xl bg-gradient-to-r from-blue-50/90 via-purple-50/70 to-blue-50/90 border border-blue-200/50 dark:from-blue-950/50 dark:via-purple-950/30 dark:to-blue-950/50 dark:border-blue-800/30 h-[4.5rem] px-5 flex items-center justify-center overflow-hidden text-center">
                       {hoveredRelation ? (
-                        <p className="text-base text-slate-800 dark:text-slate-200 leading-relaxed font-bold animate-in fade-in duration-200">
+                        <p className="text-base text-slate-800 dark:text-slate-200 leading-relaxed font-bold animate-in fade-in duration-200 text-balance">
                           <span
                             className={`font-bold ${RELATIONSHIP_TYPE_TEXT_COLORS[hoveredRelation]}`}
                           >
@@ -1100,7 +1180,7 @@ export function SessionPage() {
                           )}
                         </p>
                       ) : relation ? (
-                        <p className="text-base text-slate-800 dark:text-slate-200 leading-relaxed font-bold">
+                        <p className="text-base text-slate-800 dark:text-slate-200 leading-relaxed font-bold text-balance">
                           <span className="font-bold text-slate-900 dark:text-slate-100">
                             {competencies[0]!.title}
                           </span>{' '}
@@ -1126,9 +1206,9 @@ export function SessionPage() {
                 {mappingMode === 'resource' &&
                   competencies?.length &&
                   learningResource && (
-                    <div className="rounded-xl border border-pink-200/50 bg-gradient-to-r from-pink-50/90 via-rose-50/70 to-pink-50/90 py-4 px-5 text-center dark:border-pink-800/30 dark:from-pink-950/50 dark:via-rose-950/30 dark:to-pink-950/50">
+                    <div className="rounded-xl bg-gradient-to-r from-blue-50/90 via-pink-50/70 to-blue-50/90 border border-blue-200/50 dark:from-blue-950/50 dark:via-pink-950/30 dark:to-blue-950/50 dark:border-blue-800/30 h-[4.5rem] px-5 flex items-center justify-center overflow-hidden text-center">
                       {hoveredResourceMatch ? (
-                        <p className="text-base text-slate-800 dark:text-slate-200 leading-relaxed font-bold animate-in fade-in duration-200">
+                        <p className="text-base text-slate-800 dark:text-slate-200 leading-relaxed font-bold animate-in fade-in duration-200 text-balance">
                           <span
                             className={`font-bold ${RESOURCE_MATCH_TYPE_TEXT_COLORS[hoveredResourceMatch]}`}
                           >
@@ -1139,14 +1219,14 @@ export function SessionPage() {
                             }
                             :
                           </span>{' '}
-                          {
-                            RESOURCE_MATCH_TYPES.find(
-                              rt => rt.value === hoveredResourceMatch
-                            )?.description
-                          }
+                          {getResourceMatchDescription(
+                            hoveredResourceMatch,
+                            competencies[0]!.title,
+                            learningResource!.title
+                          )}
                         </p>
                       ) : resourceMatchType ? (
-                        <p className="text-base text-slate-800 dark:text-slate-200 leading-relaxed font-bold">
+                        <p className="text-base text-slate-800 dark:text-slate-200 leading-relaxed font-bold text-balance">
                           <span className="font-bold text-slate-900 dark:text-slate-100">
                             {competencies[0]!.title}
                           </span>{' '}
