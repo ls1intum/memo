@@ -54,6 +54,40 @@
       }
     ]
   },
+  "users": [
+    {
+      "username": "e2e-user",
+      "email": "e2e-user@memo.local",
+      "firstName": "E2E",
+      "lastName": "User",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "e2e-user",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["USER"]
+    },
+    {
+      "username": "e2e-admin",
+      "email": "e2e-admin@memo.local",
+      "firstName": "E2E",
+      "lastName": "Admin",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "e2e-admin",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["ADMIN", "USER"]
+    }
+  ],
   "identityProviders": [],
   "identityProviderMappers": [],
   "verifyEmail": true,

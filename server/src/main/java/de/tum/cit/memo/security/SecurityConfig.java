@@ -28,6 +28,8 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/api-docs/**").permitAll()
                 .requestMatchers("/actuator/health").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/users/me/accept-consent").authenticated()
+                .requestMatchers(HttpMethod.GET, "/api/users/*/stats").authenticated()
                 .requestMatchers("/api/users/**").hasRole("ADMIN")
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/api/competencies/**").hasRole("ADMIN")
