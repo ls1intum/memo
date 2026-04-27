@@ -126,7 +126,7 @@ export function ConfidencePage() {
                       Title
                     </th>
                     <th className="pb-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-400 w-44">
-                      Confidence
+                      Confidence (%)
                     </th>
                     <th className="pb-3 text-center text-xs font-semibold uppercase tracking-wider text-slate-400 w-16">
                       Votes
