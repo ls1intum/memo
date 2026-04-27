@@ -1,0 +1,12 @@
+title,description
+Linear Algebra,Understand vectors and matrices and their applications in computer science.
+Probability and Statistics,Apply probability theory and statistical inference to model uncertainty.
+Graph Theory,"Represent and analyse graphs, implement BFS and DFS, and solve shortest-path problems."
+Lambda Calculus,"Understand alpha-equivalence, beta-reduction, and Church encodings."
+Logic and Proof Techniques,"Construct formal proofs using propositional logic, induction, and proof by contradiction."
+Compiler Design,"Implement lexers, parsers, and code generators; understand IR and optimisation."
+Memory Management,"Manage heap and stack allocation, understand garbage collection and ownership."
+Design Patterns,Apply creational and structural design patterns to build maintainable software.
+API Design,"Design RESTful and GraphQL APIs with versioning, pagination, and error handling."
+Distributed Systems,"Reason about CAP theorem, implement consensus protocols and distributed stores."
+Data Structures,

@@ -1,0 +1,43 @@
+[
+  {
+    "title": "Linear Algebra",
+    "description": "Understand vectors, matrices, transformations, eigenvalues, and their applications in computer science."
+  },
+  {
+    "title": "Probability and Statistics",
+    "description": "Apply probability theory, distributions, and statistical inference to model uncertainty in computational systems."
+  },
+  {
+    "title": "Graph Theory",
+    "description": "Represent and analyse graphs, implement traversal algorithms (BFS, DFS), and solve shortest-path and spanning-tree problems."
+  },
+  {
+    "title": "Lambda Calculus",
+    "description": "Understand the foundations of functional computation, alpha-equivalence, beta-reduction, and Church encodings."
+  },
+  {
+    "title": "Logic and Proof Techniques",
+    "description": "Construct formal proofs using propositional and predicate logic, induction, and proof by contradiction."
+  },
+  {
+    "title": "Compiler Design",
+    "description": "Implement lexers, parsers, semantic analysers, and code generators; understand intermediate representations and optimisation passes."
+  },
+  {
+    "title": "Memory Management",
+    "description": "Manage heap and stack allocation, understand garbage collection strategies, and reason about ownership and borrowing."
+  },
+  {
+    "title": "Design Patterns",
+    "description": "Apply creational, structural, and behavioural design patterns to build maintainable and extensible software systems."
+  },
+  {
+    "title": "API Design",
+    "description": "Design RESTful and GraphQL APIs; apply versioning, pagination, and error-handling conventions."
+  },
+  {
+    "title": "Distributed Systems",
+    "description": "Reason about consistency, availability, and partition tolerance; implement consensus protocols and distributed data stores."
+  },
+  { "title": "Duplicate: Data Structures" }
+]
