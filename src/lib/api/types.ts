@@ -1,3 +1,19 @@
+// Confidence types
+export type ConfidenceTier = 'HIGH' | 'MEDIUM' | 'LOW';
+
+export interface ConfidenceRating {
+  competencyId: string;
+  competencyTitle: string;
+  confidenceScore: number;
+  confidenceTier: ConfidenceTier;
+  totalVotes: number;
+  voteSignal: number;
+  consensusSignal: number;
+  resourceSignal: number;
+  metadataSignal: number;
+  computedAt: string | null;
+}
+
 // API Response Types
 export interface User {
   id: string;
@@ -13,6 +29,8 @@ export interface Competency {
   description: string | null;
   degree: number;
   createdAt: string;
+  confidenceScore?: number;
+  confidenceTier?: ConfidenceTier;
 }
 
 export interface ImportResult {
@@ -30,7 +48,7 @@ export interface LearningResource {
 
 export interface CompetencyRelationship {
   id: string;
-  relationshipType: 'ASSUMES' | 'EXTENDS' | 'MATCHES';
+  relationshipType: 'ASSUMES' | 'EXTENDS' | 'MATCHES' | 'UNRELATED';
   originId: string;
   destinationId: string;
   userId: string;
@@ -79,8 +97,16 @@ export interface UpdateLearningResourceRequest {
   url?: string;
 }
 
+export interface RelationshipImportRow {
+  originId?: string;
+  originTitle?: string;
+  destinationId?: string;
+  destinationTitle?: string;
+  relationshipType?: 'ASSUMES' | 'EXTENDS' | 'MATCHES' | 'UNRELATED';
+}
+
 export interface CreateCompetencyRelationshipRequest {
-  relationshipType: 'ASSUMES' | 'EXTENDS' | 'MATCHES';
+  relationshipType: 'ASSUMES' | 'EXTENDS' | 'MATCHES' | 'UNRELATED';
   originId: string;
   destinationId: string;
   userId: string;
@@ -91,4 +117,18 @@ export interface CreateCompetencyResourceLinkRequest {
   resourceId: string;
   userId: string;
   matchType: 'UNRELATED' | 'WEAK' | 'GOOD_FIT' | 'PERFECT_MATCH';
+}
+
+export type ExportFormat = 'json' | 'csv';
+
+export type ExportDataset =
+  | 'competencies'
+  | 'relationships'
+  | 'resources'
+  | 'links'
+  | 'votes';
+
+export interface ExportParams {
+  format: ExportFormat;
+  include: ExportDataset[];
 }

@@ -156,19 +156,21 @@ export function Navbar() {
 
             {isAuthenticated ? (
               <>
-                <Link
-                  to="/dashboard"
-                  className={cn(
-                    'group hidden h-9 items-center justify-center gap-2 rounded-full border px-4 shadow-sm transition hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0a4da2] focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900 sm:flex',
-                    pathname === '/dashboard'
-                      ? 'border-[#0a4da2]/50 bg-linear-to-br from-[#0a4da2]/10 to-[#7c6cff]/10 text-[#0a4da2] ring-1 ring-[#0a4da2]/20 dark:border-[#7c6cff]/50 dark:text-[#b3c8ff] dark:ring-[#7c6cff]/20'
-                      : 'border-slate-200/80 bg-white/70 text-slate-700 hover:bg-white dark:border-slate-800/70 dark:bg-slate-900/80 dark:text-slate-200 dark:hover:bg-slate-800/80'
-                  )}
-                  aria-label="Your Dashboard"
-                >
-                  <CircleUser className="h-4 w-4" />
-                  <span className="text-sm font-semibold">Dashboard</span>
-                </Link>
+                {role !== 'ADMIN' && (
+                  <Link
+                    to="/dashboard"
+                    className={cn(
+                      'group hidden h-9 items-center justify-center gap-2 rounded-full border px-4 shadow-sm transition hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0a4da2] focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900 sm:flex',
+                      pathname === '/dashboard'
+                        ? 'border-[#0a4da2]/50 bg-linear-to-br from-[#0a4da2]/10 to-[#7c6cff]/10 text-[#0a4da2] ring-1 ring-[#0a4da2]/20 dark:border-[#7c6cff]/50 dark:text-[#b3c8ff] dark:ring-[#7c6cff]/20'
+                        : 'border-slate-200/80 bg-white/70 text-slate-700 hover:bg-white dark:border-slate-800/70 dark:bg-slate-900/80 dark:text-slate-200 dark:hover:bg-slate-800/80'
+                    )}
+                    aria-label="Your Dashboard"
+                  >
+                    <CircleUser className="h-4 w-4" />
+                    <span className="text-sm font-semibold">Dashboard</span>
+                  </Link>
+                )}
                 {role === 'ADMIN' && (
                   <Link
                     to="/admin"

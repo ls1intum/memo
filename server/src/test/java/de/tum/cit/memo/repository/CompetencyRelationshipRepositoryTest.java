@@ -21,6 +21,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.within;
 
 @Sql(statements = {
     "DELETE FROM competency_relationships_votes",
@@ -530,6 +531,152 @@ class CompetencyRelationshipRepositoryTest extends AbstractRepositoryTest {
             entityManager.clear();
 
             assertThat(relationshipRepository.findById(savedId)).isEmpty();
+        }
+    }
+
+    @Nested
+    @DisplayName("sumTotalVotesByCompetencyId")
+    class SumTotalVotesByCompetencyId {
+
+        private CompetencyRelationship relWithVotes(String origin, String destination, int totalVotes) {
+            return CompetencyRelationship.builder()
+                .id(IdGenerator.generateCuid())
+                .originId(origin)
+                .destinationId(destination)
+                .voteAssumes(totalVotes)
+                .voteExtends(0)
+                .voteMatches(0)
+                .voteUnrelated(0)
+                .totalVotes(totalVotes)
+                .entropy(0.0)
+                .build();
+        }
+
+        @Test
+        @DisplayName("should return zero when competency has no relationships")
+        void shouldReturnZeroWhenNoRelationships() {
+            long sum = relationshipRepository.sumTotalVotesByCompetencyId(c1.getId());
+
+            assertThat(sum).isEqualTo(0L);
+        }
+
+        @Test
+        @DisplayName("should sum votes when competency is origin")
+        void shouldSumWhenCompetencyIsOrigin() {
+            relationshipRepository.saveAndFlush(relWithVotes(c1.getId(), c2.getId(), 5));
+            relationshipRepository.saveAndFlush(relWithVotes(c1.getId(), c3.getId(), 3));
+
+            long sum = relationshipRepository.sumTotalVotesByCompetencyId(c1.getId());
+
+            assertThat(sum).isEqualTo(8L);
+        }
+
+        @Test
+        @DisplayName("should sum votes when competency is destination")
+        void shouldSumWhenCompetencyIsDestination() {
+            relationshipRepository.saveAndFlush(relWithVotes(c1.getId(), c2.getId(), 4));
+            relationshipRepository.saveAndFlush(relWithVotes(c3.getId(), c2.getId(), 6));
+
+            long sum = relationshipRepository.sumTotalVotesByCompetencyId(c2.getId());
+
+            assertThat(sum).isEqualTo(10L);
+        }
+
+        @Test
+        @DisplayName("should sum votes across both origin and destination roles")
+        void shouldSumBothDirections() {
+            relationshipRepository.saveAndFlush(relWithVotes(c1.getId(), c2.getId(), 2));
+            relationshipRepository.saveAndFlush(relWithVotes(c3.getId(), c1.getId(), 7));
+
+            long sum = relationshipRepository.sumTotalVotesByCompetencyId(c1.getId());
+
+            assertThat(sum).isEqualTo(9L);
+        }
+
+        @Test
+        @DisplayName("should not include relationships unrelated to the competency")
+        void shouldExcludeUnrelatedRelationships() {
+            relationshipRepository.saveAndFlush(relWithVotes(c2.getId(), c3.getId(), 5));
+
+            long sum = relationshipRepository.sumTotalVotesByCompetencyId(c1.getId());
+
+            assertThat(sum).isEqualTo(0L);
+        }
+    }
+
+    @Nested
+    @DisplayName("findDominantVoteFractionsByCompetencyId")
+    class FindDominantVoteFractionsByCompetencyId {
+
+        private CompetencyRelationship relWithDistribution(
+            String origin, String destination,
+            int assumes, int extendsCount, int matches, int unrelated
+        ) {
+            int total = assumes + extendsCount + matches + unrelated;
+            return CompetencyRelationship.builder()
+                .id(IdGenerator.generateCuid())
+                .originId(origin)
+                .destinationId(destination)
+                .voteAssumes(assumes)
+                .voteExtends(extendsCount)
+                .voteMatches(matches)
+                .voteUnrelated(unrelated)
+                .totalVotes(total)
+                .entropy(0.0)
+                .build();
+        }
+
+        @Test
+        @DisplayName("should return empty list when competency has no relationships")
+        void shouldReturnEmptyWhenNoRelationships() {
+            List<Double> fractions = relationshipRepository.findDominantVoteFractionsByCompetencyId(c1.getId());
+
+            assertThat(fractions).isEmpty();
+        }
+
+        @Test
+        @DisplayName("should exclude relationships with zero total votes")
+        void shouldExcludeZeroVoteRelationships() {
+            relationshipRepository.saveAndFlush(relWithDistribution(c1.getId(), c2.getId(), 0, 0, 0, 0));
+
+            List<Double> fractions = relationshipRepository.findDominantVoteFractionsByCompetencyId(c1.getId());
+
+            assertThat(fractions).isEmpty();
+        }
+
+        @Test
+        @DisplayName("should return 1.0 for unanimous votes")
+        void shouldReturnOneForUnanimous() {
+            relationshipRepository.saveAndFlush(relWithDistribution(c1.getId(), c2.getId(), 5, 0, 0, 0));
+
+            List<Double> fractions = relationshipRepository.findDominantVoteFractionsByCompetencyId(c1.getId());
+
+            assertThat(fractions).hasSize(1);
+            assertThat(fractions.get(0)).isEqualTo(1.0, within(0.001));
+        }
+
+        @Test
+        @DisplayName("should return dominant fraction for split votes")
+        void shouldReturnDominantFraction() {
+            // 3 of 5 assumes = 0.6
+            relationshipRepository.saveAndFlush(relWithDistribution(c1.getId(), c2.getId(), 3, 1, 1, 0));
+
+            List<Double> fractions = relationshipRepository.findDominantVoteFractionsByCompetencyId(c1.getId());
+
+            assertThat(fractions).hasSize(1);
+            assertThat(fractions.get(0)).isEqualTo(0.6, within(0.001));
+        }
+
+        @Test
+        @DisplayName("should include both origin and destination relationships")
+        void shouldIncludeBothDirections() {
+            relationshipRepository.saveAndFlush(relWithDistribution(c1.getId(), c2.getId(), 4, 0, 0, 0));
+            relationshipRepository.saveAndFlush(relWithDistribution(c3.getId(), c1.getId(), 1, 1, 0, 0));
+
+            List<Double> fractions = relationshipRepository.findDominantVoteFractionsByCompetencyId(c1.getId());
+
+            assertThat(fractions).hasSize(2);
+            assertThat(fractions).containsExactlyInAnyOrder(1.0, 0.5);
         }
     }
 }

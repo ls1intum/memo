@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 
 @Sql(statements = {
     "DELETE FROM competency_relationships_votes",
@@ -213,6 +214,116 @@ class CompetencyResourceLinkRepositoryTest extends AbstractRepositoryTest {
 
             assertThat(updated.getMatchType()).isEqualTo(ResourceMatchType.PERFECT_MATCH);
             assertThat(updated.getId()).isEqualTo(saved.getId());
+        }
+    }
+
+    @Nested
+    @DisplayName("countByCompetencyId")
+    class CountByCompetencyId {
+
+        @Test
+        @DisplayName("should return zero when no links exist")
+        void shouldReturnZeroWhenNoLinks() {
+            assertThat(resourceLinkRepository.countByCompetencyId(competency.getId())).isEqualTo(0L);
+        }
+
+        @Test
+        @DisplayName("should count links for the given competency")
+        void shouldCountLinks() {
+            resourceLinkRepository.saveAndFlush(createLink(ResourceMatchType.UNRELATED));
+            resourceLinkRepository.saveAndFlush(createLink(ResourceMatchType.WEAK));
+            resourceLinkRepository.saveAndFlush(createLink(ResourceMatchType.GOOD_FIT));
+
+            assertThat(resourceLinkRepository.countByCompetencyId(competency.getId())).isEqualTo(3L);
+        }
+
+        @Test
+        @DisplayName("should not include links from other competencies")
+        void shouldFilterByCompetency() {
+            Competency other = competencyRepository.save(Competency.builder()
+                .id(IdGenerator.generateCuid())
+                .title("Other Competency")
+                .build());
+
+            resourceLinkRepository.saveAndFlush(createLink(ResourceMatchType.PERFECT_MATCH));
+            resourceLinkRepository.saveAndFlush(CompetencyResourceLink.builder()
+                .id(IdGenerator.generateCuid())
+                .competencyId(other.getId())
+                .resourceId(resource.getId())
+                .userId(userId)
+                .matchType(ResourceMatchType.UNRELATED)
+                .build());
+
+            assertThat(resourceLinkRepository.countByCompetencyId(competency.getId())).isEqualTo(1L);
+            assertThat(resourceLinkRepository.countByCompetencyId(other.getId())).isEqualTo(1L);
+        }
+    }
+
+    @Nested
+    @DisplayName("averageMatchQualityByCompetencyId")
+    class AverageMatchQualityByCompetencyId {
+
+        @Test
+        @DisplayName("should return 0.0 when no links exist")
+        void shouldReturnZeroWhenNoLinks() {
+            assertThat(resourceLinkRepository.averageMatchQualityByCompetencyId(competency.getId()))
+                .isEqualTo(0.0, within(0.001));
+        }
+
+        @Test
+        @DisplayName("should average match-type qualities across all match types")
+        void shouldAverageQualityAcrossAllTypes() {
+            resourceLinkRepository.saveAndFlush(createLink(ResourceMatchType.UNRELATED));
+            resourceLinkRepository.saveAndFlush(createLink(ResourceMatchType.WEAK));
+            resourceLinkRepository.saveAndFlush(createLink(ResourceMatchType.GOOD_FIT));
+            resourceLinkRepository.saveAndFlush(createLink(ResourceMatchType.PERFECT_MATCH));
+
+            // (0.0 + 0.33 + 0.67 + 1.0) / 4 = 0.5
+            assertThat(resourceLinkRepository.averageMatchQualityByCompetencyId(competency.getId()))
+                .isEqualTo(0.5, within(0.001));
+        }
+
+        @Test
+        @DisplayName("should return 1.0 for all PERFECT_MATCH")
+        void shouldReturnOneForPerfectMatch() {
+            resourceLinkRepository.saveAndFlush(createLink(ResourceMatchType.PERFECT_MATCH));
+            resourceLinkRepository.saveAndFlush(createLink(ResourceMatchType.PERFECT_MATCH));
+
+            assertThat(resourceLinkRepository.averageMatchQualityByCompetencyId(competency.getId()))
+                .isEqualTo(1.0, within(0.001));
+        }
+
+        @Test
+        @DisplayName("should return 0.0 for all UNRELATED")
+        void shouldReturnZeroForUnrelated() {
+            resourceLinkRepository.saveAndFlush(createLink(ResourceMatchType.UNRELATED));
+            resourceLinkRepository.saveAndFlush(createLink(ResourceMatchType.UNRELATED));
+
+            assertThat(resourceLinkRepository.averageMatchQualityByCompetencyId(competency.getId()))
+                .isEqualTo(0.0, within(0.001));
+        }
+
+        @Test
+        @DisplayName("should not include links from other competencies")
+        void shouldFilterByCompetency() {
+            Competency other = competencyRepository.save(Competency.builder()
+                .id(IdGenerator.generateCuid())
+                .title("Other Competency")
+                .build());
+
+            resourceLinkRepository.saveAndFlush(createLink(ResourceMatchType.PERFECT_MATCH));
+            resourceLinkRepository.saveAndFlush(CompetencyResourceLink.builder()
+                .id(IdGenerator.generateCuid())
+                .competencyId(other.getId())
+                .resourceId(resource.getId())
+                .userId(userId)
+                .matchType(ResourceMatchType.UNRELATED)
+                .build());
+
+            assertThat(resourceLinkRepository.averageMatchQualityByCompetencyId(competency.getId()))
+                .isEqualTo(1.0, within(0.001));
+            assertThat(resourceLinkRepository.averageMatchQualityByCompetencyId(other.getId()))
+                .isEqualTo(0.0, within(0.001));
         }
     }
 }
