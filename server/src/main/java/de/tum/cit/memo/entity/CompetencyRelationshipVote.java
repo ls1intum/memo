@@ -5,6 +5,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
@@ -47,12 +48,13 @@ public class CompetencyRelationshipVote {
     @NotNull
     private RelationshipType relationshipType;
 
-    // Relationships
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "relationship_id", insertable = false, updatable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private CompetencyRelationship relationship;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", insertable = false, updatable = false)
     private User user;

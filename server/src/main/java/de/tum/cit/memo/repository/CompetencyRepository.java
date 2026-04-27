@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface CompetencyRepository extends JpaRepository<Competency, String> {
@@ -29,4 +30,6 @@ public interface CompetencyRepository extends JpaRepository<Competency, String> 
     void decrementDegree(@Param("ids") List<String> ids);
 
     boolean existsByTitle(String title);
+
+    Optional<Competency> findByTitle(String title);
 }
