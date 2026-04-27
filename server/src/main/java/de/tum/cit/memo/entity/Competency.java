@@ -1,7 +1,10 @@
 package de.tum.cit.memo.entity;
 
+import de.tum.cit.memo.enums.ConfidenceTier;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
@@ -45,8 +48,9 @@ public class Competency {
     private BigDecimal confidenceScore = BigDecimal.ZERO;
 
     @Builder.Default
+    @Enumerated(EnumType.STRING)
     @Column(name = "confidence_tier", nullable = false, length = 10)
-    private String confidenceTier = "LOW";
+    private ConfidenceTier confidenceTier = ConfidenceTier.LOW;
 
     @Column(name = "confidence_computed_at")
     private Instant confidenceComputedAt;

@@ -5,7 +5,6 @@ import { ArrowLeft, Trash2, Search } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { ConfidenceBadge } from '@/components/ConfidenceBadge';
-import { ConfidenceBreakdownTooltip } from '@/components/ConfidenceBreakdownTooltip';
 import {
   Dialog,
   DialogContent,
@@ -407,17 +406,10 @@ function CompetencyTable({
               </td>
               <td className="py-3 pr-6">
                 {c.confidenceTier && c.confidenceScore !== undefined ? (
-                  <ConfidenceBreakdownTooltip
-                    voteSignal={0}
-                    consensusSignal={0}
-                    resourceSignal={0}
-                    metadataSignal={0}
-                  >
-                    <ConfidenceBadge
-                      score={c.confidenceScore}
-                      tier={c.confidenceTier}
-                    />
-                  </ConfidenceBreakdownTooltip>
+                  <ConfidenceBadge
+                    score={c.confidenceScore}
+                    tier={c.confidenceTier}
+                  />
                 ) : (
                   <span className="text-xs text-slate-300 dark:text-slate-600">
                     —

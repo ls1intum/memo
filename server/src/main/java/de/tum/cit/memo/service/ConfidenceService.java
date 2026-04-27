@@ -2,6 +2,7 @@ package de.tum.cit.memo.service;
 
 import de.tum.cit.memo.dto.ConfidenceRatingDTO;
 import de.tum.cit.memo.entity.Competency;
+import de.tum.cit.memo.enums.ConfidenceTier;
 import de.tum.cit.memo.exception.ResourceNotFoundException;
 import de.tum.cit.memo.repository.CompetencyRelationshipRepository;
 import de.tum.cit.memo.repository.CompetencyRepository;
@@ -63,7 +64,9 @@ public class ConfidenceService {
     }
 
     private ConfidenceRatingDTO compute(Competency c) {
-        double voteSignal      = computeVoteSignal(c.getId());
+        long totalVotes = relationshipRepository.sumTotalVotesByCompetencyId(c.getId());
+
+        double voteSignal      = computeVoteSignal(totalVotes);
         double consensusSignal = computeConsensusSignal(c.getId());
         double resourceSignal  = computeResourceSignal(c.getId());
         double metadataSignal  = computeMetadataSignal(c);
@@ -74,32 +77,32 @@ public class ConfidenceService {
                 + metadataSignal * WEIGHT_METADATA;
 
         score = Math.min(100.0, Math.max(0.0, score));
-        String tier;
+        ConfidenceTier tier;
         if (score >= 80) {
-            tier = "HIGH";
+            tier = ConfidenceTier.HIGH;
         } else {
-            tier = score >= 50 ? "MEDIUM" : "LOW";
+            tier = score >= 50 ? ConfidenceTier.MEDIUM : ConfidenceTier.LOW;
         }
 
-        long totalVotes = relationshipRepository.sumTotalVotesByCompetencyId(c.getId());
 
+    
         return new ConfidenceRatingDTO(
                 c.getId(), c.getTitle(),
                 BigDecimal.valueOf(score).setScale(2, RoundingMode.HALF_UP),
                 tier, totalVotes,
                 voteSignal, consensusSignal, resourceSignal, metadataSignal,
-                Instant.now());
+                c.getConfidenceComputedAt());
     }
 
     private void persist(Competency c, ConfidenceRatingDTO dto) {
+        Instant now = Instant.now();
         c.setConfidenceScore(dto.getConfidenceScore());
         c.setConfidenceTier(dto.getConfidenceTier());
-        c.setConfidenceComputedAt(dto.getComputedAt());
-        competencyRepository.save(c);
+        c.setConfidenceComputedAt(now);
+        dto.setComputedAt(now);
     }
 
-    private double computeVoteSignal(String id) {
-        long votes = relationshipRepository.sumTotalVotesByCompetencyId(id);
+    private double computeVoteSignal(long votes) {
         if (votes == 0) return 0.0;
         return Math.min(100.0, Math.log(votes + 1) / Math.log(51) * 100.0);
     }
@@ -112,21 +115,9 @@ public class ConfidenceService {
     }
 
     private double computeResourceSignal(String id) {
-        Object[] stats = resourceLinkRepository.findResourceStatsForCompetency(id);
-        if (stats == null || stats.length < 2) return 0.0;
-        long count;
-        if (stats[0] instanceof Number n) {
-            count = n.longValue();
-        } else {
-            count = 0L;
-        }
-        double avgQuality;
-        if (stats[1] instanceof Number n) {
-            avgQuality = n.doubleValue();
-        } else {
-            avgQuality = 0.0;
-        }
+        long count = resourceLinkRepository.countByCompetencyId(id);
         if (count == 0) return 0.0;
+        double avgQuality = resourceLinkRepository.averageMatchQualityByCompetencyId(id);
         return Math.min(100.0, (count / 5.0) * avgQuality * 100.0);
     }
 
